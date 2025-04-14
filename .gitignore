@@ -1,0 +1,7 @@
+.idea/*
+gameboard.iml
+
+node_modules
+
+src/assets/bundles
+.env

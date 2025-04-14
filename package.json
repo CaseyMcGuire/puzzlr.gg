@@ -1,0 +1,50 @@
+{
+  "name": "gameboard",
+  "version": "1.0.0",
+  "description": "A gaming app",
+  "main": "index.js",
+  "scripts": {
+    "webpack": "webpack --config webpack.production.ts",
+    "webpack-development": "webpack --config webpack.development.ts",
+    "relay-compiler": "babel-node -x .ts -- bin/generateSchemaAndRunRelayCompiler.ts"
+  },
+  "relay": {
+    "src": "src/client",
+    "language": "typescript",
+    "schema": "src/server/graphql/relay/schema.graphql",
+    "artifactDirectory": "./src/client/relay/__generated__"
+  },
+  "author": "Casey McGuire",
+  "license": "ISC",
+  "dependencies": {
+    "@stylexjs/stylex": "^0.10.1",
+    "graphql-tools": "^9.0.18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-relay": "^18.2.0",
+    "react-router": "^7.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/node": "^7.26.0",
+    "@babel/plugin-syntax-jsx": "^7.25.9",
+    "@babel/plugin-syntax-typescript": "^7.25.9",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
+    "@stylexjs/babel-plugin": "^0.12.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@types/react-relay": "^18.2.0",
+    "babel-loader": "^9.2.1",
+    "babel-plugin-relay": "^18.2.0",
+    "graphql": "^16.10.0",
+    "relay-compiler": "^18.2.0",
+    "source-map-loader": "^5.0.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-merge": "^6.0.1"
+  }
+}
