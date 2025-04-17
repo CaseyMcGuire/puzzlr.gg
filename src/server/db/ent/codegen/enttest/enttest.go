@@ -5,13 +5,12 @@ package enttest
 import (
 	"context"
 
-	"gameboard/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/db/ent/codegen"
 	// required by schema hooks.
-	_ "gameboard/src/server/db/ent/codegen/runtime"
-
-	"gameboard/src/server/db/ent/codegen/migrate"
+	_ "puzzlr.gg/src/server/db/ent/codegen/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
+	"puzzlr.gg/src/server/db/ent/codegen/migrate"
 )
 
 type (

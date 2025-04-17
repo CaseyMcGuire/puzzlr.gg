@@ -4,11 +4,11 @@ package codegen
 
 import (
 	"fmt"
-	"gameboard/src/server/db/ent/codegen/user"
 	"strings"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // User is the model entity for the User schema.

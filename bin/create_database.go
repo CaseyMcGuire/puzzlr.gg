@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"gameboard/src/server/util"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"os/exec"
+	"puzzlr.gg/src/server/util"
 )
 
 func main() {

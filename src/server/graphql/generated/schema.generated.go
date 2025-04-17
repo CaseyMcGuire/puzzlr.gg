@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gameboard/src/server/graphql/models"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -14,6 +13,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser/v2/ast"
+	"puzzlr.gg/src/server/graphql/models"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -45,7 +45,7 @@ func (ec *executionContext) field_Mutation_createTodo_argsInput(
 ) (models.NewTodo, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNNewTodo2gameboardᚋsrcᚋserverᚋgraphqlᚋmodelsᚐNewTodo(ctx, tmp)
+		return ec.unmarshalNNewTodo2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐNewTodo(ctx, tmp)
 	}
 
 	var zeroVal models.NewTodo
@@ -111,7 +111,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	}
 	res := resTmp.(*models.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚖgameboardᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -174,7 +174,7 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*models.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚕᚖgameboardᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodoᚄ(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚕᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_todos(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -681,16 +681,16 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNNewTodo2gameboardᚋsrcᚋserverᚋgraphqlᚋmodelsᚐNewTodo(ctx context.Context, v any) (models.NewTodo, error) {
+func (ec *executionContext) unmarshalNNewTodo2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐNewTodo(ctx context.Context, v any) (models.NewTodo, error) {
 	res, err := ec.unmarshalInputNewTodo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNTodo2gameboardᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodo(ctx context.Context, sel ast.SelectionSet, v models.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodo(ctx context.Context, sel ast.SelectionSet, v models.Todo) graphql.Marshaler {
 	return ec._Todo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTodo2ᚕᚖgameboardᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚕᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Todo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -714,7 +714,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgameboardᚋsrcᚋserverᚋgraphq
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTodo2ᚖgameboardᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodo(ctx, sel, v[i])
+			ret[i] = ec.marshalNTodo2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -734,7 +734,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgameboardᚋsrcᚋserverᚋgraphq
 	return ret
 }
 
-func (ec *executionContext) marshalNTodo2ᚖgameboardᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodo(ctx context.Context, sel ast.SelectionSet, v *models.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐTodo(ctx context.Context, sel ast.SelectionSet, v *models.Todo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

@@ -5,14 +5,14 @@ package codegen
 import (
 	"context"
 	"fmt"
-	"gameboard/src/server/db/ent/codegen/predicate"
-	"gameboard/src/server/db/ent/codegen/user"
 	"math"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"puzzlr.gg/src/server/db/ent/codegen/predicate"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // UserQuery is the builder for querying User entities.

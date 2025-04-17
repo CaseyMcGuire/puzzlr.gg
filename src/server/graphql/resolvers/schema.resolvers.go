@@ -8,9 +8,10 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	graphql1 "gameboard/src/server/graphql/generated"
-	"gameboard/src/server/graphql/models"
 	"math/big"
+
+	graphql1 "puzzlr.gg/src/server/graphql/generated"
+	"puzzlr.gg/src/server/graphql/models"
 )
 
 // CreateTodo is the resolver for the createTodo field.

@@ -3,8 +3,8 @@
 package codegen
 
 import (
-	"gameboard/src/server/db/ent/codegen/user"
-	"gameboard/src/server/db/ent/schema"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
+	"puzzlr.gg/src/server/db/ent/schema"
 )
 
 // The init function reads all schema descriptors with runtime code

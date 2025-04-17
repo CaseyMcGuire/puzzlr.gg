@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in gameboard/src/server/db/ent/codegen/runtime.go
+// The schema-stitching logic is generated in puzzlr.gg/src/server/db/ent/codegen/runtime.go
 
 const (
 	Version = "v0.14.4"                                         // Version of ent codegen.

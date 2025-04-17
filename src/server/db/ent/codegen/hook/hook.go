@@ -5,7 +5,8 @@ package hook
 import (
 	"context"
 	"fmt"
-	"gameboard/src/server/db/ent/codegen"
+
+	"puzzlr.gg/src/server/db/ent/codegen"
 )
 
 // The UserFunc type is an adapter to allow the use of ordinary

@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
-	"gameboard/src/server/build"
-	"gameboard/src/server/controllers"
-	"gameboard/src/server/db"
-	ent "gameboard/src/server/db/ent/codegen"
-	"gameboard/src/server/util"
-	"gameboard/src/server/views"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"puzzlr.gg/src/server/build"
+	"puzzlr.gg/src/server/controllers"
+	"puzzlr.gg/src/server/db"
+	ent "puzzlr.gg/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/util"
+	"puzzlr.gg/src/server/views"
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 	}(dbClient)
 
 	userController := controllers.NewUserController(
-		*dbClient,
+		dbClient,
 	)
 
 	// serve static assets from `/assets`
@@ -67,7 +67,7 @@ func main() {
 	fmt.Printf("Starting server...")
 	err = http.ListenAndServe(":3001", nil)
 	if err != nil {
-		log.Fatal("Failed starting server")
+		log.Fatal(fmt.Sprintf("Failed starting server %v", err))
 		return
 	}
 }

@@ -6,12 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gameboard/src/server/db/ent/codegen/predicate"
-	"gameboard/src/server/db/ent/codegen/user"
 	"sync"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"puzzlr.gg/src/server/db/ent/codegen/predicate"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 const (

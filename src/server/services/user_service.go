@@ -2,16 +2,16 @@ package services
 
 import (
 	"context"
-	ent "gameboard/src/server/db/ent/codegen"
-	"gameboard/src/server/db/ent/codegen/user"
 	"golang.org/x/crypto/bcrypt"
+	ent "puzzlr.gg/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 type UserService struct {
-	dbClient ent.Client
+	dbClient *ent.Client
 }
 
-func (u UserService) CreateUser(ctx context.Context, email string, password string) (*ent.User, error) {
+func (u *UserService) CreateUser(ctx context.Context, email string, password string) (*ent.User, error) {
 	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (u UserService) CreateUser(ctx context.Context, email string, password stri
 	return newUser, nil
 }
 
-func (u UserService) UserExists(ctx context.Context, email string) (bool, error) {
+func (u *UserService) UserExists(ctx context.Context, email string) (bool, error) {
 	exists, err := u.dbClient.User.
 		Query().
 		Where(user.Email(email)).
@@ -41,7 +41,7 @@ func (u UserService) UserExists(ctx context.Context, email string) (bool, error)
 	return exists, nil
 }
 
-func (u UserService) UserWithPasswordExists(ctx context.Context, email string, password string) (bool, error) {
+func (u *UserService) UserWithPasswordExists(ctx context.Context, email string, password string) (bool, error) {
 	storedUser, err := u.dbClient.User.
 		Query().
 		Where(user.Email(email)).
@@ -71,7 +71,7 @@ func checkPassword(hashedPassword, password string) bool {
 }
 
 func NewUserService(
-	dbClient ent.Client,
+	dbClient *ent.Client,
 ) *UserService {
 
 	return &UserService{

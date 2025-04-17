@@ -21,7 +21,7 @@ func main() {
 	}
 	if err := entc.Generate("./schema", &gen.Config{
 		Target:  "./codegen",
-		Package: "gameboard/src/server/db/ent/codegen",
+		Package: "puzzlr.gg/src/server/db/ent/codegen",
 	}, entc.Extensions(ex)); err != nil {
 		log.Fatalf("running ent codegen: %v", err)
 	}

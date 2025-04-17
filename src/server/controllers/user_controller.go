@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	ent "gameboard/src/server/db/ent/codegen"
-	"gameboard/src/server/services"
-	"gameboard/src/server/views"
 	"github.com/gorilla/sessions"
 	"net/http"
+	ent "puzzlr.gg/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/services"
+	"puzzlr.gg/src/server/views"
 )
 
 type UserController struct {
@@ -93,7 +93,7 @@ func (u *UserController) HandleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewUserController(
-	dbClient ent.Client,
+	dbClient *ent.Client,
 ) *UserController {
 	return &UserController{
 		userService: *services.NewUserService(

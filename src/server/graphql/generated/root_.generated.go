@@ -6,13 +6,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"gameboard/src/server/graphql/models"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"puzzlr.gg/src/server/graphql/models"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.

@@ -5,7 +5,6 @@ package codegen
 import (
 	"context"
 	"errors"
-	"gameboard/src/server/db/ent/codegen/user"
 
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
@@ -13,6 +12,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // Common entgql types.

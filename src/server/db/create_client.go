@@ -4,10 +4,10 @@ import (
 	"context"
 	"entgo.io/ent/dialect"
 	"fmt"
-	ent "gameboard/src/server/db/ent/codegen"
 	_ "github.com/lib/pq"
 	"log"
 	"os"
+	ent "puzzlr.gg/src/server/db/ent/codegen"
 )
 
 func CreateDatabaseClientAndRunMigrations() (*ent.Client, error) {

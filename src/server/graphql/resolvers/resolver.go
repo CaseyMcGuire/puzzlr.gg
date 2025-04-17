@@ -2,7 +2,7 @@ package resolvers
 
 //go:generate go run github.com/99designs/gqlgen generate
 
-import "gameboard/src/server/graphql/models"
+import "puzzlr.gg/src/server/graphql/models"
 
 // This file will not be regenerated automatically.
 //

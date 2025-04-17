@@ -4,12 +4,12 @@ package codegen
 
 import (
 	"context"
-	"gameboard/src/server/db/ent/codegen/predicate"
-	"gameboard/src/server/db/ent/codegen/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"puzzlr.gg/src/server/db/ent/codegen/predicate"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // UserDelete is the builder for deleting a User entity.

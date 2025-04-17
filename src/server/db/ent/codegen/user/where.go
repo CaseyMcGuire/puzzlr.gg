@@ -3,9 +3,8 @@
 package user
 
 import (
-	"gameboard/src/server/db/ent/codegen/predicate"
-
 	"entgo.io/ent/dialect/sql"
+	"puzzlr.gg/src/server/db/ent/codegen/predicate"
 )
 
 // ID filters vertices based on their ID field.

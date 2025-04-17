@@ -4,9 +4,9 @@ package codegen
 
 import (
 	"context"
-	"gameboard/src/server/db/ent/codegen/user"
 
 	"github.com/99designs/gqlgen/graphql"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.

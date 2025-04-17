@@ -9,13 +9,12 @@ import (
 	"log"
 	"reflect"
 
-	"gameboard/src/server/db/ent/codegen/migrate"
-
-	"gameboard/src/server/db/ent/codegen/user"
+	"puzzlr.gg/src/server/db/ent/codegen/migrate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // Client is the client that holds all ent builders.

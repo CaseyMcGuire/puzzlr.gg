@@ -6,13 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gameboard/src/server/db/ent/codegen/user"
 	"reflect"
 	"sync"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

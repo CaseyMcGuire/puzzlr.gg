@@ -5,7 +5,6 @@ package codegen
 import (
 	"context"
 	"fmt"
-	"gameboard/src/server/db/ent/codegen/user"
 	"sync"
 	"sync/atomic"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/semaphore"
+	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // Noder wraps the basic Node method.
