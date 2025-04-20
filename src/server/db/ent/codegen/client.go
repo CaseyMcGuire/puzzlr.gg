@@ -14,6 +14,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
@@ -22,6 +24,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Game is the client for interacting with the Game builders.
+	Game *GameClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// additional fields for node api
@@ -37,6 +41,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Game = NewGameClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -130,6 +135,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
+		Game:   NewGameClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
 }
@@ -150,6 +156,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
+		Game:   NewGameClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
 }
@@ -157,7 +164,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		User.
+//		Game.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -179,22 +186,223 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Game.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Game.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *GameMutation:
+		return c.Game.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("codegen: unknown mutation type %T", m)
+	}
+}
+
+// GameClient is a client for the Game schema.
+type GameClient struct {
+	config
+}
+
+// NewGameClient returns a client for the Game from the given config.
+func NewGameClient(c config) *GameClient {
+	return &GameClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `game.Hooks(f(g(h())))`.
+func (c *GameClient) Use(hooks ...Hook) {
+	c.hooks.Game = append(c.hooks.Game, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `game.Intercept(f(g(h())))`.
+func (c *GameClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Game = append(c.inters.Game, interceptors...)
+}
+
+// Create returns a builder for creating a Game entity.
+func (c *GameClient) Create() *GameCreate {
+	mutation := newGameMutation(c.config, OpCreate)
+	return &GameCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Game entities.
+func (c *GameClient) CreateBulk(builders ...*GameCreate) *GameCreateBulk {
+	return &GameCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GameClient) MapCreateBulk(slice any, setFunc func(*GameCreate, int)) *GameCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GameCreateBulk{err: fmt.Errorf("calling to GameClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GameCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GameCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Game.
+func (c *GameClient) Update() *GameUpdate {
+	mutation := newGameMutation(c.config, OpUpdate)
+	return &GameUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GameClient) UpdateOne(ga *Game) *GameUpdateOne {
+	mutation := newGameMutation(c.config, OpUpdateOne, withGame(ga))
+	return &GameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GameClient) UpdateOneID(id int) *GameUpdateOne {
+	mutation := newGameMutation(c.config, OpUpdateOne, withGameID(id))
+	return &GameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Game.
+func (c *GameClient) Delete() *GameDelete {
+	mutation := newGameMutation(c.config, OpDelete)
+	return &GameDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GameClient) DeleteOne(ga *Game) *GameDeleteOne {
+	return c.DeleteOneID(ga.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GameClient) DeleteOneID(id int) *GameDeleteOne {
+	builder := c.Delete().Where(game.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GameDeleteOne{builder}
+}
+
+// Query returns a query builder for Game.
+func (c *GameClient) Query() *GameQuery {
+	return &GameQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGame},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Game entity by its id.
+func (c *GameClient) Get(ctx context.Context, id int) (*Game, error) {
+	return c.Query().Where(game.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GameClient) GetX(ctx context.Context, id int) *Game {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayerOne queries the player_one edge of a Game.
+func (c *GameClient) QueryPlayerOne(ga *Game) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ga.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(game.Table, game.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, game.PlayerOneTable, game.PlayerOneColumn),
+		)
+		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPlayerTwo queries the player_two edge of a Game.
+func (c *GameClient) QueryPlayerTwo(ga *Game) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ga.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(game.Table, game.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, game.PlayerTwoTable, game.PlayerTwoColumn),
+		)
+		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWinner queries the winner edge of a Game.
+func (c *GameClient) QueryWinner(ga *Game) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ga.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(game.Table, game.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, game.WinnerTable, game.WinnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCurrentTurn queries the current_turn edge of a Game.
+func (c *GameClient) QueryCurrentTurn(ga *Game) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ga.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(game.Table, game.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, game.CurrentTurnTable, game.CurrentTurnColumn),
+		)
+		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GameClient) Hooks() []Hook {
+	return c.hooks.Game
+}
+
+// Interceptors returns the client interceptors.
+func (c *GameClient) Interceptors() []Interceptor {
+	return c.inters.Game
+}
+
+func (c *GameClient) mutate(ctx context.Context, m *GameMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GameCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GameUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GameDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("codegen: unknown Game mutation op: %q", m.Op())
 	}
 }
 
@@ -334,9 +542,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		User []ent.Hook
+		Game, User []ent.Hook
 	}
 	inters struct {
-		User []ent.Interceptor
+		Game, User []ent.Interceptor
 	}
 )

@@ -4,7 +4,7 @@ type Todo {
   done: Boolean!
 }
 
-type Query {
+extend type Query {
   todos: [Todo!]!
 }
 
@@ -15,4 +15,12 @@ input NewTodo {
 
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+}
+
+type GameBoard {
+  rows: [GameBoardRow!]!
+}
+
+type GameBoardRow {
+  elements: [String]!
 }

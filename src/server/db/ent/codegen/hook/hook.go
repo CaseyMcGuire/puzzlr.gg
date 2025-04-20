@@ -9,6 +9,18 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen"
 )
 
+// The GameFunc type is an adapter to allow the use of ordinary
+// function as Game mutator.
+type GameFunc func(context.Context, *codegen.GameMutation) (codegen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GameFunc) Mutate(ctx context.Context, m codegen.Mutation) (codegen.Value, error) {
+	if mv, ok := m.(*codegen.GameMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *codegen.GameMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *codegen.UserMutation) (codegen.Value, error)

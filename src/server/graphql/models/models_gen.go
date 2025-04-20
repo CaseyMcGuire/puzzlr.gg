@@ -2,12 +2,56 @@
 
 package models
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+	"time"
+
+	"puzzlr.gg/src/server/db/ent/codegen/game"
+)
+
+type Game struct {
+	ID          string     `json:"id"`
+	CreateTime  time.Time  `json:"createTime"`
+	UpdateTime  time.Time  `json:"updateTime"`
+	Type        game.Type  `json:"type"`
+	Board       *GameBoard `json:"board"`
+	PlayerOne   *User      `json:"playerOne,omitempty"`
+	PlayerTwo   *User      `json:"playerTwo,omitempty"`
+	Winner      *User      `json:"winner,omitempty"`
+	CurrentTurn *User      `json:"currentTurn,omitempty"`
+}
+
+func (Game) IsNode() {}
+
+type GameBoard struct {
+	Rows []*GameBoardRow `json:"rows"`
+}
+
+type GameBoardRow struct {
+	Elements []*string `json:"elements"`
+}
+
 type Mutation struct {
 }
 
 type NewTodo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`
+}
+
+// Information about pagination in a connection.
+// https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo
+type PageInfo struct {
+	// When paginating forwards, are there more items?
+	HasNextPage bool `json:"hasNextPage"`
+	// When paginating backwards, are there more items?
+	HasPreviousPage bool `json:"hasPreviousPage"`
+	// When paginating backwards, the cursor to continue.
+	StartCursor *string `json:"startCursor,omitempty"`
+	// When paginating forwards, the cursor to continue.
+	EndCursor *string `json:"endCursor,omitempty"`
 }
 
 type Query struct {
@@ -17,4 +61,55 @@ type Todo struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
 	Done bool   `json:"done"`
+}
+
+type User struct {
+	ID    string `json:"id"`
+	Email string `json:"email"`
+}
+
+func (User) IsNode() {}
+
+// Possible directions in which to order a list of items when provided an `orderBy` argument.
+type OrderDirection string
+
+const (
+	// Specifies an ascending order for a given `orderBy` argument.
+	OrderDirectionAsc OrderDirection = "ASC"
+	// Specifies a descending order for a given `orderBy` argument.
+	OrderDirectionDesc OrderDirection = "DESC"
+)
+
+var AllOrderDirection = []OrderDirection{
+	OrderDirectionAsc,
+	OrderDirectionDesc,
+}
+
+func (e OrderDirection) IsValid() bool {
+	switch e {
+	case OrderDirectionAsc, OrderDirectionDesc:
+		return true
+	}
+	return false
+}
+
+func (e OrderDirection) String() string {
+	return string(e)
+}
+
+func (e *OrderDirection) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OrderDirection(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OrderDirection", str)
+	}
+	return nil
+}
+
+func (e OrderDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -8,6 +8,50 @@ import (
 )
 
 var (
+	// GamesColumns holds the columns for the "games" table.
+	GamesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"TIC_TAC_TOE"}},
+		{Name: "board", Type: field.TypeJSON},
+		{Name: "game_player_one", Type: field.TypeInt, Nullable: true},
+		{Name: "game_player_two", Type: field.TypeInt, Nullable: true},
+		{Name: "game_winner", Type: field.TypeInt, Nullable: true},
+		{Name: "game_current_turn", Type: field.TypeInt, Nullable: true},
+	}
+	// GamesTable holds the schema information for the "games" table.
+	GamesTable = &schema.Table{
+		Name:       "games",
+		Columns:    GamesColumns,
+		PrimaryKey: []*schema.Column{GamesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "games_users_player_one",
+				Columns:    []*schema.Column{GamesColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "games_users_player_two",
+				Columns:    []*schema.Column{GamesColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "games_users_winner",
+				Columns:    []*schema.Column{GamesColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "games_users_current_turn",
+				Columns:    []*schema.Column{GamesColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -29,9 +73,14 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		GamesTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	GamesTable.ForeignKeys[0].RefTable = UsersTable
+	GamesTable.ForeignKeys[1].RefTable = UsersTable
+	GamesTable.ForeignKeys[2].RefTable = UsersTable
+	GamesTable.ForeignKeys[3].RefTable = UsersTable
 }

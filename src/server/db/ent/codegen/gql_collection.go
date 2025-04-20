@@ -6,8 +6,132 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
+	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (ga *GameQuery) CollectFields(ctx context.Context, satisfies ...string) (*GameQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return ga, nil
+	}
+	if err := ga.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return ga, nil
+}
+
+func (ga *GameQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(game.Columns))
+		selectedFields = []string{game.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+
+		case "playerOne":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&UserClient{config: ga.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+				return err
+			}
+			ga.withPlayerOne = query
+
+		case "playerTwo":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&UserClient{config: ga.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+				return err
+			}
+			ga.withPlayerTwo = query
+
+		case "winner":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&UserClient{config: ga.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+				return err
+			}
+			ga.withWinner = query
+
+		case "currentTurn":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&UserClient{config: ga.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+				return err
+			}
+			ga.withCurrentTurn = query
+		case "createTime":
+			if _, ok := fieldSeen[game.FieldCreateTime]; !ok {
+				selectedFields = append(selectedFields, game.FieldCreateTime)
+				fieldSeen[game.FieldCreateTime] = struct{}{}
+			}
+		case "updateTime":
+			if _, ok := fieldSeen[game.FieldUpdateTime]; !ok {
+				selectedFields = append(selectedFields, game.FieldUpdateTime)
+				fieldSeen[game.FieldUpdateTime] = struct{}{}
+			}
+		case "type":
+			if _, ok := fieldSeen[game.FieldType]; !ok {
+				selectedFields = append(selectedFields, game.FieldType)
+				fieldSeen[game.FieldType] = struct{}{}
+			}
+		case "board":
+			if _, ok := fieldSeen[game.FieldBoard]; !ok {
+				selectedFields = append(selectedFields, game.FieldBoard)
+				fieldSeen[game.FieldBoard] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		ga.Select(selectedFields...)
+	}
+	return nil
+}
+
+type gamePaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []GamePaginateOption
+}
+
+func newGamePaginateArgs(rv map[string]any) *gamePaginateArgs {
+	args := &gamePaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (u *UserQuery) CollectFields(ctx context.Context, satisfies ...string) (*UserQuery, error) {

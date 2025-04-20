@@ -33,8 +33,4 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
 // Mutation returns graphql1.MutationResolver implementation.
 func (r *Resolver) Mutation() graphql1.MutationResolver { return &mutationResolver{r} }
 
-// Query returns graphql1.QueryResolver implementation.
-func (r *Resolver) Query() graphql1.QueryResolver { return &queryResolver{r} }
-
 type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

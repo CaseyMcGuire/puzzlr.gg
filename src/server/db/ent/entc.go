@@ -13,8 +13,8 @@ import (
 
 func main() {
 	ex, err := entgql.NewExtension(
-	// entgql.WithSchemaGenerator(),
-	// entgql.WithSchemaPath("../../graphql/schema/ent.graphqls"),
+		entgql.WithSchemaGenerator(),
+		entgql.WithSchemaPath("../../graphql/schema/ent.graphqls"),
 	)
 	if err != nil {
 		log.Fatalf("creating entgql extension: %v", err)

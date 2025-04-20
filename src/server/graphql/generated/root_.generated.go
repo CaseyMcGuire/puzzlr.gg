@@ -41,11 +41,40 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Game struct {
+		Board       func(childComplexity int) int
+		CreateTime  func(childComplexity int) int
+		CurrentTurn func(childComplexity int) int
+		ID          func(childComplexity int) int
+		PlayerOne   func(childComplexity int) int
+		PlayerTwo   func(childComplexity int) int
+		Type        func(childComplexity int) int
+		UpdateTime  func(childComplexity int) int
+		Winner      func(childComplexity int) int
+	}
+
+	GameBoard struct {
+		Rows func(childComplexity int) int
+	}
+
+	GameBoardRow struct {
+		Elements func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateTodo func(childComplexity int, input models.NewTodo) int
 	}
 
+	PageInfo struct {
+		EndCursor       func(childComplexity int) int
+		HasNextPage     func(childComplexity int) int
+		HasPreviousPage func(childComplexity int) int
+		StartCursor     func(childComplexity int) int
+	}
+
 	Query struct {
+		Node  func(childComplexity int, id string) int
+		Nodes func(childComplexity int, ids []string) int
 		Todos func(childComplexity int) int
 	}
 
@@ -53,6 +82,11 @@ type ComplexityRoot struct {
 		Done func(childComplexity int) int
 		ID   func(childComplexity int) int
 		Text func(childComplexity int) int
+	}
+
+	User struct {
+		Email func(childComplexity int) int
+		ID    func(childComplexity int) int
 	}
 }
 
@@ -75,6 +109,83 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Game.board":
+		if e.complexity.Game.Board == nil {
+			break
+		}
+
+		return e.complexity.Game.Board(childComplexity), true
+
+	case "Game.createTime":
+		if e.complexity.Game.CreateTime == nil {
+			break
+		}
+
+		return e.complexity.Game.CreateTime(childComplexity), true
+
+	case "Game.currentTurn":
+		if e.complexity.Game.CurrentTurn == nil {
+			break
+		}
+
+		return e.complexity.Game.CurrentTurn(childComplexity), true
+
+	case "Game.id":
+		if e.complexity.Game.ID == nil {
+			break
+		}
+
+		return e.complexity.Game.ID(childComplexity), true
+
+	case "Game.playerOne":
+		if e.complexity.Game.PlayerOne == nil {
+			break
+		}
+
+		return e.complexity.Game.PlayerOne(childComplexity), true
+
+	case "Game.playerTwo":
+		if e.complexity.Game.PlayerTwo == nil {
+			break
+		}
+
+		return e.complexity.Game.PlayerTwo(childComplexity), true
+
+	case "Game.type":
+		if e.complexity.Game.Type == nil {
+			break
+		}
+
+		return e.complexity.Game.Type(childComplexity), true
+
+	case "Game.updateTime":
+		if e.complexity.Game.UpdateTime == nil {
+			break
+		}
+
+		return e.complexity.Game.UpdateTime(childComplexity), true
+
+	case "Game.winner":
+		if e.complexity.Game.Winner == nil {
+			break
+		}
+
+		return e.complexity.Game.Winner(childComplexity), true
+
+	case "GameBoard.rows":
+		if e.complexity.GameBoard.Rows == nil {
+			break
+		}
+
+		return e.complexity.GameBoard.Rows(childComplexity), true
+
+	case "GameBoardRow.elements":
+		if e.complexity.GameBoardRow.Elements == nil {
+			break
+		}
+
+		return e.complexity.GameBoardRow.Elements(childComplexity), true
+
 	case "Mutation.createTodo":
 		if e.complexity.Mutation.CreateTodo == nil {
 			break
@@ -86,6 +197,58 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(models.NewTodo)), true
+
+	case "PageInfo.endCursor":
+		if e.complexity.PageInfo.EndCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.EndCursor(childComplexity), true
+
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+
+	case "PageInfo.hasPreviousPage":
+		if e.complexity.PageInfo.HasPreviousPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
+
+	case "PageInfo.startCursor":
+		if e.complexity.PageInfo.StartCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.StartCursor(childComplexity), true
+
+	case "Query.node":
+		if e.complexity.Query.Node == nil {
+			break
+		}
+
+		args, err := ec.field_Query_node_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Node(childComplexity, args["id"].(string)), true
+
+	case "Query.nodes":
+		if e.complexity.Query.Nodes == nil {
+			break
+		}
+
+		args, err := ec.field_Query_nodes_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Nodes(childComplexity, args["ids"].([]string)), true
 
 	case "Query.todos":
 		if e.complexity.Query.Todos == nil {
@@ -114,6 +277,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.Text(childComplexity), true
+
+	case "User.email":
+		if e.complexity.User.Email == nil {
+			break
+		}
+
+		return e.complexity.User.Email(childComplexity), true
+
+	case "User.id":
+		if e.complexity.User.ID == nil {
+			break
+		}
+
+		return e.complexity.User.ID(childComplexity), true
 
 	}
 	return 0, false
@@ -221,13 +398,111 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/ent.graphqls", Input: `directive @goField(forceResolver: Boolean, name: String, omittable: Boolean) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+directive @goModel(model: String, models: [String!], forceGenerate: Boolean) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+"""
+Define a Relay Cursor type:
+https://relay.dev/graphql/connections.htm#sec-Cursor
+"""
+scalar Cursor
+type Game implements Node {
+  id: ID!
+  createTime: Time!
+  updateTime: Time!
+  type: GameType!
+  board: GameBoard!
+  playerOne: User
+  playerTwo: User
+  winner: User
+  currentTurn: User
+}
+"""
+GameType is enum for the field type
+"""
+enum GameType @goModel(model: "puzzlr.gg/src/server/db/ent/codegen/game.Type") {
+  TIC_TAC_TOE
+}
+"""
+An object with an ID.
+Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
+"""
+interface Node @goModel(model: "puzzlr.gg/src/server/db/ent/codegen.Noder") {
+  """
+  The id of the object.
+  """
+  id: ID!
+}
+"""
+Possible directions in which to order a list of items when provided an ` + "`" + `orderBy` + "`" + ` argument.
+"""
+enum OrderDirection {
+  """
+  Specifies an ascending order for a given ` + "`" + `orderBy` + "`" + ` argument.
+  """
+  ASC
+  """
+  Specifies a descending order for a given ` + "`" + `orderBy` + "`" + ` argument.
+  """
+  DESC
+}
+"""
+Information about pagination in a connection.
+https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo
+"""
+type PageInfo {
+  """
+  When paginating forwards, are there more items?
+  """
+  hasNextPage: Boolean!
+  """
+  When paginating backwards, are there more items?
+  """
+  hasPreviousPage: Boolean!
+  """
+  When paginating backwards, the cursor to continue.
+  """
+  startCursor: Cursor
+  """
+  When paginating forwards, the cursor to continue.
+  """
+  endCursor: Cursor
+}
+type Query {
+  """
+  Fetches an object given its ID.
+  """
+  node(
+    """
+    ID of the object.
+    """
+    id: ID!
+  ): Node
+  """
+  Lookup nodes by a list of IDs.
+  """
+  nodes(
+    """
+    The list of node IDs.
+    """
+    ids: [ID!]!
+  ): [Node]!
+}
+"""
+The builtin Time type
+"""
+scalar Time
+type User implements Node {
+  id: ID!
+  email: String!
+}
+`, BuiltIn: false},
 	{Name: "../schema/schema.graphqls", Input: `type Todo {
   id: ID!
   text: String!
   done: Boolean!
 }
 
-type Query {
+extend type Query {
   todos: [Todo!]!
 }
 
@@ -239,6 +514,13 @@ input NewTodo {
 type Mutation {
   createTodo(input: NewTodo!): Todo!
 }
-`, BuiltIn: false},
+
+type GameBoard {
+  rows: [GameBoardRow!]!
+}
+
+type GameBoardRow {
+  elements: [String]!
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
