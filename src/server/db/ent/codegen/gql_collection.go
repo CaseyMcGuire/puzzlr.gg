@@ -32,27 +32,18 @@ func (ga *GameQuery) collectField(ctx context.Context, oneNode bool, opCtx *grap
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 
-		case "playerOne":
+		case "user":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&UserClient{config: ga.config}).Query()
 			)
-			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
 				return err
 			}
-			ga.withPlayerOne = query
-
-		case "playerTwo":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = (&UserClient{config: ga.config}).Query()
-			)
-			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
-				return err
-			}
-			ga.withPlayerTwo = query
+			ga.WithNamedUser(alias, func(wq *UserQuery) {
+				*wq = *query
+			})
 
 		case "winner":
 			var (
@@ -154,6 +145,19 @@ func (u *UserQuery) collectField(ctx context.Context, oneNode bool, opCtx *graph
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
+		case "games":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&GameClient{config: u.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, gameImplementors)...); err != nil {
+				return err
+			}
+			u.WithNamedGames(alias, func(wq *GameQuery) {
+				*wq = *query
+			})
 		case "email":
 			if _, ok := fieldSeen[user.FieldEmail]; !ok {
 				selectedFields = append(selectedFields, user.FieldEmail)

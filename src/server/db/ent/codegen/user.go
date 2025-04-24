@@ -20,7 +20,68 @@ type User struct {
 	Email string `json:"email,omitempty"`
 	// HashedPassword holds the value of the "hashed_password" field.
 	HashedPassword string `json:"-"`
-	selectValues   sql.SelectValues
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges        UserEdges `json:"edges"`
+	selectValues sql.SelectValues
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Games holds the value of the games edge.
+	Games []*Game `json:"games,omitempty"`
+	// WonGames holds the value of the won_games edge.
+	WonGames []*Game `json:"won_games,omitempty"`
+	// TurnGames holds the value of the turn_games edge.
+	TurnGames []*Game `json:"turn_games,omitempty"`
+	// GamePlayer holds the value of the game_player edge.
+	GamePlayer []*GamePlayer `json:"game_player,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [4]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedGames      map[string][]*Game
+	namedWonGames   map[string][]*Game
+	namedTurnGames  map[string][]*Game
+	namedGamePlayer map[string][]*GamePlayer
+}
+
+// GamesOrErr returns the Games value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GamesOrErr() ([]*Game, error) {
+	if e.loadedTypes[0] {
+		return e.Games, nil
+	}
+	return nil, &NotLoadedError{edge: "games"}
+}
+
+// WonGamesOrErr returns the WonGames value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) WonGamesOrErr() ([]*Game, error) {
+	if e.loadedTypes[1] {
+		return e.WonGames, nil
+	}
+	return nil, &NotLoadedError{edge: "won_games"}
+}
+
+// TurnGamesOrErr returns the TurnGames value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) TurnGamesOrErr() ([]*Game, error) {
+	if e.loadedTypes[2] {
+		return e.TurnGames, nil
+	}
+	return nil, &NotLoadedError{edge: "turn_games"}
+}
+
+// GamePlayerOrErr returns the GamePlayer value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GamePlayerOrErr() ([]*GamePlayer, error) {
+	if e.loadedTypes[3] {
+		return e.GamePlayer, nil
+	}
+	return nil, &NotLoadedError{edge: "game_player"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -78,6 +139,26 @@ func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
 }
 
+// QueryGames queries the "games" edge of the User entity.
+func (u *User) QueryGames() *GameQuery {
+	return NewUserClient(u.config).QueryGames(u)
+}
+
+// QueryWonGames queries the "won_games" edge of the User entity.
+func (u *User) QueryWonGames() *GameQuery {
+	return NewUserClient(u.config).QueryWonGames(u)
+}
+
+// QueryTurnGames queries the "turn_games" edge of the User entity.
+func (u *User) QueryTurnGames() *GameQuery {
+	return NewUserClient(u.config).QueryTurnGames(u)
+}
+
+// QueryGamePlayer queries the "game_player" edge of the User entity.
+func (u *User) QueryGamePlayer() *GamePlayerQuery {
+	return NewUserClient(u.config).QueryGamePlayer(u)
+}
+
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -107,6 +188,102 @@ func (u *User) String() string {
 	builder.WriteString("hashed_password=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedGames returns the Games named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedGames(name string) ([]*Game, error) {
+	if u.Edges.namedGames == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedGames[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedGames(name string, edges ...*Game) {
+	if u.Edges.namedGames == nil {
+		u.Edges.namedGames = make(map[string][]*Game)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedGames[name] = []*Game{}
+	} else {
+		u.Edges.namedGames[name] = append(u.Edges.namedGames[name], edges...)
+	}
+}
+
+// NamedWonGames returns the WonGames named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedWonGames(name string) ([]*Game, error) {
+	if u.Edges.namedWonGames == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedWonGames[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedWonGames(name string, edges ...*Game) {
+	if u.Edges.namedWonGames == nil {
+		u.Edges.namedWonGames = make(map[string][]*Game)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedWonGames[name] = []*Game{}
+	} else {
+		u.Edges.namedWonGames[name] = append(u.Edges.namedWonGames[name], edges...)
+	}
+}
+
+// NamedTurnGames returns the TurnGames named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedTurnGames(name string) ([]*Game, error) {
+	if u.Edges.namedTurnGames == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedTurnGames[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedTurnGames(name string, edges ...*Game) {
+	if u.Edges.namedTurnGames == nil {
+		u.Edges.namedTurnGames = make(map[string][]*Game)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedTurnGames[name] = []*Game{}
+	} else {
+		u.Edges.namedTurnGames[name] = append(u.Edges.namedTurnGames[name], edges...)
+	}
+}
+
+// NamedGamePlayer returns the GamePlayer named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedGamePlayer(name string) ([]*GamePlayer, error) {
+	if u.Edges.namedGamePlayer == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedGamePlayer[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedGamePlayer(name string, edges ...*GamePlayer) {
+	if u.Edges.namedGamePlayer == nil {
+		u.Edges.namedGamePlayer = make(map[string][]*GamePlayer)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedGamePlayer[name] = []*GamePlayer{}
+	} else {
+		u.Edges.namedGamePlayer[name] = append(u.Edges.namedGamePlayer[name], edges...)
+	}
 }
 
 // Users is a parsable slice of User.

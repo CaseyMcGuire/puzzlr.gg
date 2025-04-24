@@ -29,51 +29,39 @@ type Game struct {
 	Board [][]string `json:"board,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GameQuery when eager-loading is set.
-	Edges             GameEdges `json:"edges"`
-	game_player_one   *int
-	game_player_two   *int
-	game_winner       *int
-	game_current_turn *int
-	selectValues      sql.SelectValues
+	Edges           GameEdges `json:"edges"`
+	user_won_games  *int
+	user_turn_games *int
+	selectValues    sql.SelectValues
 }
 
 // GameEdges holds the relations/edges for other nodes in the graph.
 type GameEdges struct {
-	// PlayerOne holds the value of the player_one edge.
-	PlayerOne *User `json:"player_one,omitempty"`
-	// PlayerTwo holds the value of the player_two edge.
-	PlayerTwo *User `json:"player_two,omitempty"`
+	// User holds the value of the user edge.
+	User []*User `json:"user,omitempty"`
 	// Winner holds the value of the winner edge.
 	Winner *User `json:"winner,omitempty"`
 	// CurrentTurn holds the value of the current_turn edge.
 	CurrentTurn *User `json:"current_turn,omitempty"`
+	// GamePlayer holds the value of the game_player edge.
+	GamePlayer []*GamePlayer `json:"game_player,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
 	// totalCount holds the count of the edges above.
-	totalCount [4]map[string]int
+	totalCount [3]map[string]int
+
+	namedUser       map[string][]*User
+	namedGamePlayer map[string][]*GamePlayer
 }
 
-// PlayerOneOrErr returns the PlayerOne value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e GameEdges) PlayerOneOrErr() (*User, error) {
-	if e.PlayerOne != nil {
-		return e.PlayerOne, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: user.Label}
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading.
+func (e GameEdges) UserOrErr() ([]*User, error) {
+	if e.loadedTypes[0] {
+		return e.User, nil
 	}
-	return nil, &NotLoadedError{edge: "player_one"}
-}
-
-// PlayerTwoOrErr returns the PlayerTwo value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e GameEdges) PlayerTwoOrErr() (*User, error) {
-	if e.PlayerTwo != nil {
-		return e.PlayerTwo, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: user.Label}
-	}
-	return nil, &NotLoadedError{edge: "player_two"}
+	return nil, &NotLoadedError{edge: "user"}
 }
 
 // WinnerOrErr returns the Winner value or an error if the edge
@@ -81,7 +69,7 @@ func (e GameEdges) PlayerTwoOrErr() (*User, error) {
 func (e GameEdges) WinnerOrErr() (*User, error) {
 	if e.Winner != nil {
 		return e.Winner, nil
-	} else if e.loadedTypes[2] {
+	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "winner"}
@@ -92,10 +80,19 @@ func (e GameEdges) WinnerOrErr() (*User, error) {
 func (e GameEdges) CurrentTurnOrErr() (*User, error) {
 	if e.CurrentTurn != nil {
 		return e.CurrentTurn, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "current_turn"}
+}
+
+// GamePlayerOrErr returns the GamePlayer value or an error if the edge
+// was not loaded in eager-loading.
+func (e GameEdges) GamePlayerOrErr() ([]*GamePlayer, error) {
+	if e.loadedTypes[3] {
+		return e.GamePlayer, nil
+	}
+	return nil, &NotLoadedError{edge: "game_player"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -111,13 +108,9 @@ func (*Game) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case game.FieldCreateTime, game.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
-		case game.ForeignKeys[0]: // game_player_one
+		case game.ForeignKeys[0]: // user_won_games
 			values[i] = new(sql.NullInt64)
-		case game.ForeignKeys[1]: // game_player_two
-			values[i] = new(sql.NullInt64)
-		case game.ForeignKeys[2]: // game_winner
-			values[i] = new(sql.NullInt64)
-		case game.ForeignKeys[3]: // game_current_turn
+		case game.ForeignKeys[1]: // user_turn_games
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -168,31 +161,17 @@ func (ga *Game) assignValues(columns []string, values []any) error {
 			}
 		case game.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field game_player_one", value)
+				return fmt.Errorf("unexpected type %T for edge-field user_won_games", value)
 			} else if value.Valid {
-				ga.game_player_one = new(int)
-				*ga.game_player_one = int(value.Int64)
+				ga.user_won_games = new(int)
+				*ga.user_won_games = int(value.Int64)
 			}
 		case game.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field game_player_two", value)
+				return fmt.Errorf("unexpected type %T for edge-field user_turn_games", value)
 			} else if value.Valid {
-				ga.game_player_two = new(int)
-				*ga.game_player_two = int(value.Int64)
-			}
-		case game.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field game_winner", value)
-			} else if value.Valid {
-				ga.game_winner = new(int)
-				*ga.game_winner = int(value.Int64)
-			}
-		case game.ForeignKeys[3]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field game_current_turn", value)
-			} else if value.Valid {
-				ga.game_current_turn = new(int)
-				*ga.game_current_turn = int(value.Int64)
+				ga.user_turn_games = new(int)
+				*ga.user_turn_games = int(value.Int64)
 			}
 		default:
 			ga.selectValues.Set(columns[i], values[i])
@@ -207,14 +186,9 @@ func (ga *Game) Value(name string) (ent.Value, error) {
 	return ga.selectValues.Get(name)
 }
 
-// QueryPlayerOne queries the "player_one" edge of the Game entity.
-func (ga *Game) QueryPlayerOne() *UserQuery {
-	return NewGameClient(ga.config).QueryPlayerOne(ga)
-}
-
-// QueryPlayerTwo queries the "player_two" edge of the Game entity.
-func (ga *Game) QueryPlayerTwo() *UserQuery {
-	return NewGameClient(ga.config).QueryPlayerTwo(ga)
+// QueryUser queries the "user" edge of the Game entity.
+func (ga *Game) QueryUser() *UserQuery {
+	return NewGameClient(ga.config).QueryUser(ga)
 }
 
 // QueryWinner queries the "winner" edge of the Game entity.
@@ -225,6 +199,11 @@ func (ga *Game) QueryWinner() *UserQuery {
 // QueryCurrentTurn queries the "current_turn" edge of the Game entity.
 func (ga *Game) QueryCurrentTurn() *UserQuery {
 	return NewGameClient(ga.config).QueryCurrentTurn(ga)
+}
+
+// QueryGamePlayer queries the "game_player" edge of the Game entity.
+func (ga *Game) QueryGamePlayer() *GamePlayerQuery {
+	return NewGameClient(ga.config).QueryGamePlayer(ga)
 }
 
 // Update returns a builder for updating this Game.
@@ -263,6 +242,54 @@ func (ga *Game) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ga.Board))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedUser returns the User named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (ga *Game) NamedUser(name string) ([]*User, error) {
+	if ga.Edges.namedUser == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := ga.Edges.namedUser[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (ga *Game) appendNamedUser(name string, edges ...*User) {
+	if ga.Edges.namedUser == nil {
+		ga.Edges.namedUser = make(map[string][]*User)
+	}
+	if len(edges) == 0 {
+		ga.Edges.namedUser[name] = []*User{}
+	} else {
+		ga.Edges.namedUser[name] = append(ga.Edges.namedUser[name], edges...)
+	}
+}
+
+// NamedGamePlayer returns the GamePlayer named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (ga *Game) NamedGamePlayer(name string) ([]*GamePlayer, error) {
+	if ga.Edges.namedGamePlayer == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := ga.Edges.namedGamePlayer[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (ga *Game) appendNamedGamePlayer(name string, edges ...*GamePlayer) {
+	if ga.Edges.namedGamePlayer == nil {
+		ga.Edges.namedGamePlayer = make(map[string][]*GamePlayer)
+	}
+	if len(edges) == 0 {
+		ga.Edges.namedGamePlayer[name] = []*GamePlayer{}
+	} else {
+		ga.Edges.namedGamePlayer[name] = append(ga.Edges.namedGamePlayer[name], edges...)
+	}
 }
 
 // Games is a parsable slice of Game.

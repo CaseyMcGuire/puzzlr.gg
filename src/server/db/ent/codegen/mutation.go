@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/predicate"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
@@ -25,8 +26,9 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeGame = "Game"
-	TypeUser = "User"
+	TypeGame       = "Game"
+	TypeGamePlayer = "GamePlayer"
+	TypeUser       = "User"
 )
 
 // GameMutation represents an operation that mutates the Game nodes in the graph.
@@ -41,14 +43,16 @@ type GameMutation struct {
 	board               *[][]string
 	appendboard         [][]string
 	clearedFields       map[string]struct{}
-	player_one          *int
-	clearedplayer_one   bool
-	player_two          *int
-	clearedplayer_two   bool
+	user                map[int]struct{}
+	removeduser         map[int]struct{}
+	cleareduser         bool
 	winner              *int
 	clearedwinner       bool
 	current_turn        *int
 	clearedcurrent_turn bool
+	game_player         map[int]struct{}
+	removedgame_player  map[int]struct{}
+	clearedgame_player  bool
 	done                bool
 	oldValue            func(context.Context) (*Game, error)
 	predicates          []predicate.Game
@@ -311,82 +315,58 @@ func (m *GameMutation) ResetBoard() {
 	m.appendboard = nil
 }
 
-// SetPlayerOneID sets the "player_one" edge to the User entity by id.
-func (m *GameMutation) SetPlayerOneID(id int) {
-	m.player_one = &id
+// AddUserIDs adds the "user" edge to the User entity by ids.
+func (m *GameMutation) AddUserIDs(ids ...int) {
+	if m.user == nil {
+		m.user = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.user[ids[i]] = struct{}{}
+	}
 }
 
-// ClearPlayerOne clears the "player_one" edge to the User entity.
-func (m *GameMutation) ClearPlayerOne() {
-	m.clearedplayer_one = true
+// ClearUser clears the "user" edge to the User entity.
+func (m *GameMutation) ClearUser() {
+	m.cleareduser = true
 }
 
-// PlayerOneCleared reports if the "player_one" edge to the User entity was cleared.
-func (m *GameMutation) PlayerOneCleared() bool {
-	return m.clearedplayer_one
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *GameMutation) UserCleared() bool {
+	return m.cleareduser
 }
 
-// PlayerOneID returns the "player_one" edge ID in the mutation.
-func (m *GameMutation) PlayerOneID() (id int, exists bool) {
-	if m.player_one != nil {
-		return *m.player_one, true
+// RemoveUserIDs removes the "user" edge to the User entity by IDs.
+func (m *GameMutation) RemoveUserIDs(ids ...int) {
+	if m.removeduser == nil {
+		m.removeduser = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.user, ids[i])
+		m.removeduser[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUser returns the removed IDs of the "user" edge to the User entity.
+func (m *GameMutation) RemovedUserIDs() (ids []int) {
+	for id := range m.removeduser {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// PlayerOneIDs returns the "player_one" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerOneID instead. It exists only for internal usage by the builders.
-func (m *GameMutation) PlayerOneIDs() (ids []int) {
-	if id := m.player_one; id != nil {
-		ids = append(ids, *id)
+// UserIDs returns the "user" edge IDs in the mutation.
+func (m *GameMutation) UserIDs() (ids []int) {
+	for id := range m.user {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPlayerOne resets all changes to the "player_one" edge.
-func (m *GameMutation) ResetPlayerOne() {
-	m.player_one = nil
-	m.clearedplayer_one = false
-}
-
-// SetPlayerTwoID sets the "player_two" edge to the User entity by id.
-func (m *GameMutation) SetPlayerTwoID(id int) {
-	m.player_two = &id
-}
-
-// ClearPlayerTwo clears the "player_two" edge to the User entity.
-func (m *GameMutation) ClearPlayerTwo() {
-	m.clearedplayer_two = true
-}
-
-// PlayerTwoCleared reports if the "player_two" edge to the User entity was cleared.
-func (m *GameMutation) PlayerTwoCleared() bool {
-	return m.clearedplayer_two
-}
-
-// PlayerTwoID returns the "player_two" edge ID in the mutation.
-func (m *GameMutation) PlayerTwoID() (id int, exists bool) {
-	if m.player_two != nil {
-		return *m.player_two, true
-	}
-	return
-}
-
-// PlayerTwoIDs returns the "player_two" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerTwoID instead. It exists only for internal usage by the builders.
-func (m *GameMutation) PlayerTwoIDs() (ids []int) {
-	if id := m.player_two; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetPlayerTwo resets all changes to the "player_two" edge.
-func (m *GameMutation) ResetPlayerTwo() {
-	m.player_two = nil
-	m.clearedplayer_two = false
+// ResetUser resets all changes to the "user" edge.
+func (m *GameMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+	m.removeduser = nil
 }
 
 // SetWinnerID sets the "winner" edge to the User entity by id.
@@ -465,6 +445,60 @@ func (m *GameMutation) CurrentTurnIDs() (ids []int) {
 func (m *GameMutation) ResetCurrentTurn() {
 	m.current_turn = nil
 	m.clearedcurrent_turn = false
+}
+
+// AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by ids.
+func (m *GameMutation) AddGamePlayerIDs(ids ...int) {
+	if m.game_player == nil {
+		m.game_player = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.game_player[ids[i]] = struct{}{}
+	}
+}
+
+// ClearGamePlayer clears the "game_player" edge to the GamePlayer entity.
+func (m *GameMutation) ClearGamePlayer() {
+	m.clearedgame_player = true
+}
+
+// GamePlayerCleared reports if the "game_player" edge to the GamePlayer entity was cleared.
+func (m *GameMutation) GamePlayerCleared() bool {
+	return m.clearedgame_player
+}
+
+// RemoveGamePlayerIDs removes the "game_player" edge to the GamePlayer entity by IDs.
+func (m *GameMutation) RemoveGamePlayerIDs(ids ...int) {
+	if m.removedgame_player == nil {
+		m.removedgame_player = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.game_player, ids[i])
+		m.removedgame_player[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGamePlayer returns the removed IDs of the "game_player" edge to the GamePlayer entity.
+func (m *GameMutation) RemovedGamePlayerIDs() (ids []int) {
+	for id := range m.removedgame_player {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GamePlayerIDs returns the "game_player" edge IDs in the mutation.
+func (m *GameMutation) GamePlayerIDs() (ids []int) {
+	for id := range m.game_player {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGamePlayer resets all changes to the "game_player" edge.
+func (m *GameMutation) ResetGamePlayer() {
+	m.game_player = nil
+	m.clearedgame_player = false
+	m.removedgame_player = nil
 }
 
 // Where appends a list predicates to the GameMutation builder.
@@ -652,17 +686,17 @@ func (m *GameMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameMutation) AddedEdges() []string {
 	edges := make([]string, 0, 4)
-	if m.player_one != nil {
-		edges = append(edges, game.EdgePlayerOne)
-	}
-	if m.player_two != nil {
-		edges = append(edges, game.EdgePlayerTwo)
+	if m.user != nil {
+		edges = append(edges, game.EdgeUser)
 	}
 	if m.winner != nil {
 		edges = append(edges, game.EdgeWinner)
 	}
 	if m.current_turn != nil {
 		edges = append(edges, game.EdgeCurrentTurn)
+	}
+	if m.game_player != nil {
+		edges = append(edges, game.EdgeGamePlayer)
 	}
 	return edges
 }
@@ -671,14 +705,12 @@ func (m *GameMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *GameMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case game.EdgePlayerOne:
-		if id := m.player_one; id != nil {
-			return []ent.Value{*id}
+	case game.EdgeUser:
+		ids := make([]ent.Value, 0, len(m.user))
+		for id := range m.user {
+			ids = append(ids, id)
 		}
-	case game.EdgePlayerTwo:
-		if id := m.player_two; id != nil {
-			return []ent.Value{*id}
-		}
+		return ids
 	case game.EdgeWinner:
 		if id := m.winner; id != nil {
 			return []ent.Value{*id}
@@ -687,6 +719,12 @@ func (m *GameMutation) AddedIDs(name string) []ent.Value {
 		if id := m.current_turn; id != nil {
 			return []ent.Value{*id}
 		}
+	case game.EdgeGamePlayer:
+		ids := make([]ent.Value, 0, len(m.game_player))
+		for id := range m.game_player {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -694,29 +732,49 @@ func (m *GameMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 4)
+	if m.removeduser != nil {
+		edges = append(edges, game.EdgeUser)
+	}
+	if m.removedgame_player != nil {
+		edges = append(edges, game.EdgeGamePlayer)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *GameMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case game.EdgeUser:
+		ids := make([]ent.Value, 0, len(m.removeduser))
+		for id := range m.removeduser {
+			ids = append(ids, id)
+		}
+		return ids
+	case game.EdgeGamePlayer:
+		ids := make([]ent.Value, 0, len(m.removedgame_player))
+		for id := range m.removedgame_player {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 4)
-	if m.clearedplayer_one {
-		edges = append(edges, game.EdgePlayerOne)
-	}
-	if m.clearedplayer_two {
-		edges = append(edges, game.EdgePlayerTwo)
+	if m.cleareduser {
+		edges = append(edges, game.EdgeUser)
 	}
 	if m.clearedwinner {
 		edges = append(edges, game.EdgeWinner)
 	}
 	if m.clearedcurrent_turn {
 		edges = append(edges, game.EdgeCurrentTurn)
+	}
+	if m.clearedgame_player {
+		edges = append(edges, game.EdgeGamePlayer)
 	}
 	return edges
 }
@@ -725,14 +783,14 @@ func (m *GameMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *GameMutation) EdgeCleared(name string) bool {
 	switch name {
-	case game.EdgePlayerOne:
-		return m.clearedplayer_one
-	case game.EdgePlayerTwo:
-		return m.clearedplayer_two
+	case game.EdgeUser:
+		return m.cleareduser
 	case game.EdgeWinner:
 		return m.clearedwinner
 	case game.EdgeCurrentTurn:
 		return m.clearedcurrent_turn
+	case game.EdgeGamePlayer:
+		return m.clearedgame_player
 	}
 	return false
 }
@@ -741,12 +799,6 @@ func (m *GameMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *GameMutation) ClearEdge(name string) error {
 	switch name {
-	case game.EdgePlayerOne:
-		m.ClearPlayerOne()
-		return nil
-	case game.EdgePlayerTwo:
-		m.ClearPlayerTwo()
-		return nil
 	case game.EdgeWinner:
 		m.ClearWinner()
 		return nil
@@ -761,11 +813,8 @@ func (m *GameMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *GameMutation) ResetEdge(name string) error {
 	switch name {
-	case game.EdgePlayerOne:
-		m.ResetPlayerOne()
-		return nil
-	case game.EdgePlayerTwo:
-		m.ResetPlayerTwo()
+	case game.EdgeUser:
+		m.ResetUser()
 		return nil
 	case game.EdgeWinner:
 		m.ResetWinner()
@@ -773,22 +822,520 @@ func (m *GameMutation) ResetEdge(name string) error {
 	case game.EdgeCurrentTurn:
 		m.ResetCurrentTurn()
 		return nil
+	case game.EdgeGamePlayer:
+		m.ResetGamePlayer()
+		return nil
 	}
 	return fmt.Errorf("unknown Game edge %s", name)
+}
+
+// GamePlayerMutation represents an operation that mutates the GamePlayer nodes in the graph.
+type GamePlayerMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	clearedFields map[string]struct{}
+	user          *int
+	cleareduser   bool
+	game          *int
+	clearedgame   bool
+	done          bool
+	oldValue      func(context.Context) (*GamePlayer, error)
+	predicates    []predicate.GamePlayer
+}
+
+var _ ent.Mutation = (*GamePlayerMutation)(nil)
+
+// gameplayerOption allows management of the mutation configuration using functional options.
+type gameplayerOption func(*GamePlayerMutation)
+
+// newGamePlayerMutation creates new mutation for the GamePlayer entity.
+func newGamePlayerMutation(c config, op Op, opts ...gameplayerOption) *GamePlayerMutation {
+	m := &GamePlayerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeGamePlayer,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withGamePlayerID sets the ID field of the mutation.
+func withGamePlayerID(id int) gameplayerOption {
+	return func(m *GamePlayerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *GamePlayer
+		)
+		m.oldValue = func(ctx context.Context) (*GamePlayer, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().GamePlayer.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withGamePlayer sets the old GamePlayer of the mutation.
+func withGamePlayer(node *GamePlayer) gameplayerOption {
+	return func(m *GamePlayerMutation) {
+		m.oldValue = func(context.Context) (*GamePlayer, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GamePlayerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GamePlayerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("codegen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *GamePlayerMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *GamePlayerMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().GamePlayer.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *GamePlayerMutation) SetUserID(i int) {
+	m.user = &i
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *GamePlayerMutation) UserID() (r int, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the GamePlayer entity.
+// If the GamePlayer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GamePlayerMutation) OldUserID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *GamePlayerMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetGameID sets the "game_id" field.
+func (m *GamePlayerMutation) SetGameID(i int) {
+	m.game = &i
+}
+
+// GameID returns the value of the "game_id" field in the mutation.
+func (m *GamePlayerMutation) GameID() (r int, exists bool) {
+	v := m.game
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGameID returns the old "game_id" field's value of the GamePlayer entity.
+// If the GamePlayer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GamePlayerMutation) OldGameID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGameID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGameID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGameID: %w", err)
+	}
+	return oldValue.GameID, nil
+}
+
+// ResetGameID resets all changes to the "game_id" field.
+func (m *GamePlayerMutation) ResetGameID() {
+	m.game = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *GamePlayerMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[gameplayer.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *GamePlayerMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *GamePlayerMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *GamePlayerMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// ClearGame clears the "game" edge to the Game entity.
+func (m *GamePlayerMutation) ClearGame() {
+	m.clearedgame = true
+	m.clearedFields[gameplayer.FieldGameID] = struct{}{}
+}
+
+// GameCleared reports if the "game" edge to the Game entity was cleared.
+func (m *GamePlayerMutation) GameCleared() bool {
+	return m.clearedgame
+}
+
+// GameIDs returns the "game" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GameID instead. It exists only for internal usage by the builders.
+func (m *GamePlayerMutation) GameIDs() (ids []int) {
+	if id := m.game; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGame resets all changes to the "game" edge.
+func (m *GamePlayerMutation) ResetGame() {
+	m.game = nil
+	m.clearedgame = false
+}
+
+// Where appends a list predicates to the GamePlayerMutation builder.
+func (m *GamePlayerMutation) Where(ps ...predicate.GamePlayer) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the GamePlayerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GamePlayerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GamePlayer, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *GamePlayerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GamePlayerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (GamePlayer).
+func (m *GamePlayerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *GamePlayerMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.user != nil {
+		fields = append(fields, gameplayer.FieldUserID)
+	}
+	if m.game != nil {
+		fields = append(fields, gameplayer.FieldGameID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *GamePlayerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case gameplayer.FieldUserID:
+		return m.UserID()
+	case gameplayer.FieldGameID:
+		return m.GameID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *GamePlayerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case gameplayer.FieldUserID:
+		return m.OldUserID(ctx)
+	case gameplayer.FieldGameID:
+		return m.OldGameID(ctx)
+	}
+	return nil, fmt.Errorf("unknown GamePlayer field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GamePlayerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case gameplayer.FieldUserID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case gameplayer.FieldGameID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGameID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown GamePlayer field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *GamePlayerMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *GamePlayerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GamePlayerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown GamePlayer numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *GamePlayerMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *GamePlayerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *GamePlayerMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown GamePlayer nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *GamePlayerMutation) ResetField(name string) error {
+	switch name {
+	case gameplayer.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case gameplayer.FieldGameID:
+		m.ResetGameID()
+		return nil
+	}
+	return fmt.Errorf("unknown GamePlayer field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *GamePlayerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.user != nil {
+		edges = append(edges, gameplayer.EdgeUser)
+	}
+	if m.game != nil {
+		edges = append(edges, gameplayer.EdgeGame)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *GamePlayerMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case gameplayer.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case gameplayer.EdgeGame:
+		if id := m.game; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *GamePlayerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *GamePlayerMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *GamePlayerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleareduser {
+		edges = append(edges, gameplayer.EdgeUser)
+	}
+	if m.clearedgame {
+		edges = append(edges, gameplayer.EdgeGame)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *GamePlayerMutation) EdgeCleared(name string) bool {
+	switch name {
+	case gameplayer.EdgeUser:
+		return m.cleareduser
+	case gameplayer.EdgeGame:
+		return m.clearedgame
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *GamePlayerMutation) ClearEdge(name string) error {
+	switch name {
+	case gameplayer.EdgeUser:
+		m.ClearUser()
+		return nil
+	case gameplayer.EdgeGame:
+		m.ClearGame()
+		return nil
+	}
+	return fmt.Errorf("unknown GamePlayer unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *GamePlayerMutation) ResetEdge(name string) error {
+	switch name {
+	case gameplayer.EdgeUser:
+		m.ResetUser()
+		return nil
+	case gameplayer.EdgeGame:
+		m.ResetGame()
+		return nil
+	}
+	return fmt.Errorf("unknown GamePlayer edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	email           *string
-	hashed_password *string
-	clearedFields   map[string]struct{}
-	done            bool
-	oldValue        func(context.Context) (*User, error)
-	predicates      []predicate.User
+	op                 Op
+	typ                string
+	id                 *int
+	email              *string
+	hashed_password    *string
+	clearedFields      map[string]struct{}
+	games              map[int]struct{}
+	removedgames       map[int]struct{}
+	clearedgames       bool
+	won_games          map[int]struct{}
+	removedwon_games   map[int]struct{}
+	clearedwon_games   bool
+	turn_games         map[int]struct{}
+	removedturn_games  map[int]struct{}
+	clearedturn_games  bool
+	game_player        map[int]struct{}
+	removedgame_player map[int]struct{}
+	clearedgame_player bool
+	done               bool
+	oldValue           func(context.Context) (*User, error)
+	predicates         []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -961,6 +1508,222 @@ func (m *UserMutation) ResetHashedPassword() {
 	m.hashed_password = nil
 }
 
+// AddGameIDs adds the "games" edge to the Game entity by ids.
+func (m *UserMutation) AddGameIDs(ids ...int) {
+	if m.games == nil {
+		m.games = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.games[ids[i]] = struct{}{}
+	}
+}
+
+// ClearGames clears the "games" edge to the Game entity.
+func (m *UserMutation) ClearGames() {
+	m.clearedgames = true
+}
+
+// GamesCleared reports if the "games" edge to the Game entity was cleared.
+func (m *UserMutation) GamesCleared() bool {
+	return m.clearedgames
+}
+
+// RemoveGameIDs removes the "games" edge to the Game entity by IDs.
+func (m *UserMutation) RemoveGameIDs(ids ...int) {
+	if m.removedgames == nil {
+		m.removedgames = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.games, ids[i])
+		m.removedgames[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGames returns the removed IDs of the "games" edge to the Game entity.
+func (m *UserMutation) RemovedGamesIDs() (ids []int) {
+	for id := range m.removedgames {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GamesIDs returns the "games" edge IDs in the mutation.
+func (m *UserMutation) GamesIDs() (ids []int) {
+	for id := range m.games {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGames resets all changes to the "games" edge.
+func (m *UserMutation) ResetGames() {
+	m.games = nil
+	m.clearedgames = false
+	m.removedgames = nil
+}
+
+// AddWonGameIDs adds the "won_games" edge to the Game entity by ids.
+func (m *UserMutation) AddWonGameIDs(ids ...int) {
+	if m.won_games == nil {
+		m.won_games = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.won_games[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWonGames clears the "won_games" edge to the Game entity.
+func (m *UserMutation) ClearWonGames() {
+	m.clearedwon_games = true
+}
+
+// WonGamesCleared reports if the "won_games" edge to the Game entity was cleared.
+func (m *UserMutation) WonGamesCleared() bool {
+	return m.clearedwon_games
+}
+
+// RemoveWonGameIDs removes the "won_games" edge to the Game entity by IDs.
+func (m *UserMutation) RemoveWonGameIDs(ids ...int) {
+	if m.removedwon_games == nil {
+		m.removedwon_games = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.won_games, ids[i])
+		m.removedwon_games[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWonGames returns the removed IDs of the "won_games" edge to the Game entity.
+func (m *UserMutation) RemovedWonGamesIDs() (ids []int) {
+	for id := range m.removedwon_games {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WonGamesIDs returns the "won_games" edge IDs in the mutation.
+func (m *UserMutation) WonGamesIDs() (ids []int) {
+	for id := range m.won_games {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWonGames resets all changes to the "won_games" edge.
+func (m *UserMutation) ResetWonGames() {
+	m.won_games = nil
+	m.clearedwon_games = false
+	m.removedwon_games = nil
+}
+
+// AddTurnGameIDs adds the "turn_games" edge to the Game entity by ids.
+func (m *UserMutation) AddTurnGameIDs(ids ...int) {
+	if m.turn_games == nil {
+		m.turn_games = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.turn_games[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTurnGames clears the "turn_games" edge to the Game entity.
+func (m *UserMutation) ClearTurnGames() {
+	m.clearedturn_games = true
+}
+
+// TurnGamesCleared reports if the "turn_games" edge to the Game entity was cleared.
+func (m *UserMutation) TurnGamesCleared() bool {
+	return m.clearedturn_games
+}
+
+// RemoveTurnGameIDs removes the "turn_games" edge to the Game entity by IDs.
+func (m *UserMutation) RemoveTurnGameIDs(ids ...int) {
+	if m.removedturn_games == nil {
+		m.removedturn_games = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.turn_games, ids[i])
+		m.removedturn_games[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTurnGames returns the removed IDs of the "turn_games" edge to the Game entity.
+func (m *UserMutation) RemovedTurnGamesIDs() (ids []int) {
+	for id := range m.removedturn_games {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TurnGamesIDs returns the "turn_games" edge IDs in the mutation.
+func (m *UserMutation) TurnGamesIDs() (ids []int) {
+	for id := range m.turn_games {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTurnGames resets all changes to the "turn_games" edge.
+func (m *UserMutation) ResetTurnGames() {
+	m.turn_games = nil
+	m.clearedturn_games = false
+	m.removedturn_games = nil
+}
+
+// AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by ids.
+func (m *UserMutation) AddGamePlayerIDs(ids ...int) {
+	if m.game_player == nil {
+		m.game_player = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.game_player[ids[i]] = struct{}{}
+	}
+}
+
+// ClearGamePlayer clears the "game_player" edge to the GamePlayer entity.
+func (m *UserMutation) ClearGamePlayer() {
+	m.clearedgame_player = true
+}
+
+// GamePlayerCleared reports if the "game_player" edge to the GamePlayer entity was cleared.
+func (m *UserMutation) GamePlayerCleared() bool {
+	return m.clearedgame_player
+}
+
+// RemoveGamePlayerIDs removes the "game_player" edge to the GamePlayer entity by IDs.
+func (m *UserMutation) RemoveGamePlayerIDs(ids ...int) {
+	if m.removedgame_player == nil {
+		m.removedgame_player = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.game_player, ids[i])
+		m.removedgame_player[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGamePlayer returns the removed IDs of the "game_player" edge to the GamePlayer entity.
+func (m *UserMutation) RemovedGamePlayerIDs() (ids []int) {
+	for id := range m.removedgame_player {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GamePlayerIDs returns the "game_player" edge IDs in the mutation.
+func (m *UserMutation) GamePlayerIDs() (ids []int) {
+	for id := range m.game_player {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGamePlayer resets all changes to the "game_player" edge.
+func (m *UserMutation) ResetGamePlayer() {
+	m.game_player = nil
+	m.clearedgame_player = false
+	m.removedgame_player = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -1111,48 +1874,162 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 4)
+	if m.games != nil {
+		edges = append(edges, user.EdgeGames)
+	}
+	if m.won_games != nil {
+		edges = append(edges, user.EdgeWonGames)
+	}
+	if m.turn_games != nil {
+		edges = append(edges, user.EdgeTurnGames)
+	}
+	if m.game_player != nil {
+		edges = append(edges, user.EdgeGamePlayer)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case user.EdgeGames:
+		ids := make([]ent.Value, 0, len(m.games))
+		for id := range m.games {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeWonGames:
+		ids := make([]ent.Value, 0, len(m.won_games))
+		for id := range m.won_games {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeTurnGames:
+		ids := make([]ent.Value, 0, len(m.turn_games))
+		for id := range m.turn_games {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeGamePlayer:
+		ids := make([]ent.Value, 0, len(m.game_player))
+		for id := range m.game_player {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 4)
+	if m.removedgames != nil {
+		edges = append(edges, user.EdgeGames)
+	}
+	if m.removedwon_games != nil {
+		edges = append(edges, user.EdgeWonGames)
+	}
+	if m.removedturn_games != nil {
+		edges = append(edges, user.EdgeTurnGames)
+	}
+	if m.removedgame_player != nil {
+		edges = append(edges, user.EdgeGamePlayer)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case user.EdgeGames:
+		ids := make([]ent.Value, 0, len(m.removedgames))
+		for id := range m.removedgames {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeWonGames:
+		ids := make([]ent.Value, 0, len(m.removedwon_games))
+		for id := range m.removedwon_games {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeTurnGames:
+		ids := make([]ent.Value, 0, len(m.removedturn_games))
+		for id := range m.removedturn_games {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeGamePlayer:
+		ids := make([]ent.Value, 0, len(m.removedgame_player))
+		for id := range m.removedgame_player {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 4)
+	if m.clearedgames {
+		edges = append(edges, user.EdgeGames)
+	}
+	if m.clearedwon_games {
+		edges = append(edges, user.EdgeWonGames)
+	}
+	if m.clearedturn_games {
+		edges = append(edges, user.EdgeTurnGames)
+	}
+	if m.clearedgame_player {
+		edges = append(edges, user.EdgeGamePlayer)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
+	switch name {
+	case user.EdgeGames:
+		return m.clearedgames
+	case user.EdgeWonGames:
+		return m.clearedwon_games
+	case user.EdgeTurnGames:
+		return m.clearedturn_games
+	case user.EdgeGamePlayer:
+		return m.clearedgame_player
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
+	switch name {
+	case user.EdgeGames:
+		m.ResetGames()
+		return nil
+	case user.EdgeWonGames:
+		m.ResetWonGames()
+		return nil
+	case user.EdgeTurnGames:
+		m.ResetTurnGames()
+		return nil
+	case user.EdgeGamePlayer:
+		m.ResetGamePlayer()
+		return nil
+	}
 	return fmt.Errorf("unknown User edge %s", name)
 }

@@ -76,6 +76,7 @@ type ComplexityRoot struct {
 		Node  func(childComplexity int, id string) int
 		Nodes func(childComplexity int, ids []string) int
 		Todos func(childComplexity int) int
+		User  func(childComplexity int, id *string) int
 	}
 
 	Todo struct {
@@ -85,8 +86,9 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email func(childComplexity int) int
-		ID    func(childComplexity int) int
+		Email       func(childComplexity int) int
+		ID          func(childComplexity int) int
+		PlayedGames func(childComplexity int) int
 	}
 }
 
@@ -257,6 +259,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Todos(childComplexity), true
 
+	case "Query.user":
+		if e.complexity.Query.User == nil {
+			break
+		}
+
+		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.User(childComplexity, args["id"].(*string)), true
+
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
 			break
@@ -291,6 +305,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.ID(childComplexity), true
+
+	case "User.playedGames":
+		if e.complexity.User.PlayedGames == nil {
+			break
+		}
+
+		return e.complexity.User.PlayedGames(childComplexity), true
 
 	}
 	return 0, false
@@ -521,6 +542,13 @@ type GameBoard {
 
 type GameBoardRow {
   elements: [String]!
+}`, BuiltIn: false},
+	{Name: "../schema/user.graphqls", Input: `extend type Query {
+    user(id: ID): User!
+}
+
+extend type User {
+    playedGames: [Game!]!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

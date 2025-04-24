@@ -1,7 +1,9 @@
 package schema
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -25,7 +27,14 @@ func (User) Fields() []ent.Field {
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("games", Game.Type).
+			Through("game_player", GamePlayer.Type),
+		edge.To("won_games", Game.Type).
+			Annotations(entgql.Skip()),
+		edge.To("turn_games", Game.Type).
+			Annotations(entgql.Skip()),
+	}
 }
 
 func (User) Indexes() []ent.Index {

@@ -21,6 +21,18 @@ func (f GameFunc) Mutate(ctx context.Context, m codegen.Mutation) (codegen.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *codegen.GameMutation", m)
 }
 
+// The GamePlayerFunc type is an adapter to allow the use of ordinary
+// function as GamePlayer mutator.
+type GamePlayerFunc func(context.Context, *codegen.GamePlayerMutation) (codegen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GamePlayerFunc) Mutate(ctx context.Context, m codegen.Mutation) (codegen.Value, error) {
+	if mv, ok := m.(*codegen.GamePlayerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *codegen.GamePlayerMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *codegen.UserMutation) (codegen.Value, error)

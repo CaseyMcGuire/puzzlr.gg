@@ -4,6 +4,7 @@ package user
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -15,8 +16,42 @@ const (
 	FieldEmail = "email"
 	// FieldHashedPassword holds the string denoting the hashed_password field in the database.
 	FieldHashedPassword = "hashed_password"
+	// EdgeGames holds the string denoting the games edge name in mutations.
+	EdgeGames = "games"
+	// EdgeWonGames holds the string denoting the won_games edge name in mutations.
+	EdgeWonGames = "won_games"
+	// EdgeTurnGames holds the string denoting the turn_games edge name in mutations.
+	EdgeTurnGames = "turn_games"
+	// EdgeGamePlayer holds the string denoting the game_player edge name in mutations.
+	EdgeGamePlayer = "game_player"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// GamesTable is the table that holds the games relation/edge. The primary key declared below.
+	GamesTable = "game_players"
+	// GamesInverseTable is the table name for the Game entity.
+	// It exists in this package in order to avoid circular dependency with the "game" package.
+	GamesInverseTable = "games"
+	// WonGamesTable is the table that holds the won_games relation/edge.
+	WonGamesTable = "games"
+	// WonGamesInverseTable is the table name for the Game entity.
+	// It exists in this package in order to avoid circular dependency with the "game" package.
+	WonGamesInverseTable = "games"
+	// WonGamesColumn is the table column denoting the won_games relation/edge.
+	WonGamesColumn = "user_won_games"
+	// TurnGamesTable is the table that holds the turn_games relation/edge.
+	TurnGamesTable = "games"
+	// TurnGamesInverseTable is the table name for the Game entity.
+	// It exists in this package in order to avoid circular dependency with the "game" package.
+	TurnGamesInverseTable = "games"
+	// TurnGamesColumn is the table column denoting the turn_games relation/edge.
+	TurnGamesColumn = "user_turn_games"
+	// GamePlayerTable is the table that holds the game_player relation/edge.
+	GamePlayerTable = "game_players"
+	// GamePlayerInverseTable is the table name for the GamePlayer entity.
+	// It exists in this package in order to avoid circular dependency with the "gameplayer" package.
+	GamePlayerInverseTable = "game_players"
+	// GamePlayerColumn is the table column denoting the game_player relation/edge.
+	GamePlayerColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -25,6 +60,12 @@ var Columns = []string{
 	FieldEmail,
 	FieldHashedPassword,
 }
+
+var (
+	// GamesPrimaryKey and GamesColumn2 are the table columns denoting the
+	// primary key for the games relation (M2M).
+	GamesPrimaryKey = []string{"user_id", "game_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -59,4 +100,88 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 // ByHashedPassword orders the results by the hashed_password field.
 func ByHashedPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHashedPassword, opts...).ToFunc()
+}
+
+// ByGamesCount orders the results by games count.
+func ByGamesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGamesStep(), opts...)
+	}
+}
+
+// ByGames orders the results by games terms.
+func ByGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByWonGamesCount orders the results by won_games count.
+func ByWonGamesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWonGamesStep(), opts...)
+	}
+}
+
+// ByWonGames orders the results by won_games terms.
+func ByWonGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWonGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTurnGamesCount orders the results by turn_games count.
+func ByTurnGamesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTurnGamesStep(), opts...)
+	}
+}
+
+// ByTurnGames orders the results by turn_games terms.
+func ByTurnGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTurnGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByGamePlayerCount orders the results by game_player count.
+func ByGamePlayerCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGamePlayerStep(), opts...)
+	}
+}
+
+// ByGamePlayer orders the results by game_player terms.
+func ByGamePlayer(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGamePlayerStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newGamesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GamesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, GamesTable, GamesPrimaryKey...),
+	)
+}
+func newWonGamesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WonGamesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WonGamesTable, WonGamesColumn),
+	)
+}
+func newTurnGamesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TurnGamesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TurnGamesTable, TurnGamesColumn),
+	)
+}
+func newGamePlayerStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GamePlayerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, GamePlayerTable, GamePlayerColumn),
+	)
 }

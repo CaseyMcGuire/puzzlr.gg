@@ -31,13 +31,14 @@ func (Game) Fields() []ent.Field {
 // Edges of the Game.
 func (Game) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("player_one", User.Type).
+		edge.From("user", User.Type).
+			Ref("games").
+			Through("game_player", GamePlayer.Type),
+		edge.From("winner", User.Type).
+			Ref("won_games").
 			Unique(),
-		edge.To("player_two", User.Type).
-			Unique(),
-		edge.To("winner", User.Type).
-			Unique(),
-		edge.To("current_turn", User.Type).
+		edge.From("current_turn", User.Type).
+			Ref("turn_games").
 			Unique(),
 	}
 }

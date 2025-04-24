@@ -6,28 +6,19 @@ package resolvers
 
 import (
 	"context"
-	"crypto/rand"
-	"fmt"
-	"math/big"
-
 	graphql1 "puzzlr.gg/src/server/graphql/generated"
 	"puzzlr.gg/src/server/graphql/models"
 )
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input models.NewTodo) (*models.Todo, error) {
-	randNumber, _ := rand.Int(rand.Reader, big.NewInt(100))
-	todo := &models.Todo{
-		Text: input.Text,
-		ID:   fmt.Sprintf("T%d", randNumber),
-	}
-	r.todos = append(r.todos, todo)
-	return todo, nil
+
+	return nil, nil
 }
 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
-	return r.todos, nil
+	return nil, nil
 }
 
 // Mutation returns graphql1.MutationResolver implementation.

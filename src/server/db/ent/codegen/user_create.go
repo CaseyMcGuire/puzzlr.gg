@@ -9,6 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
@@ -29,6 +31,66 @@ func (uc *UserCreate) SetEmail(s string) *UserCreate {
 func (uc *UserCreate) SetHashedPassword(s string) *UserCreate {
 	uc.mutation.SetHashedPassword(s)
 	return uc
+}
+
+// AddGameIDs adds the "games" edge to the Game entity by IDs.
+func (uc *UserCreate) AddGameIDs(ids ...int) *UserCreate {
+	uc.mutation.AddGameIDs(ids...)
+	return uc
+}
+
+// AddGames adds the "games" edges to the Game entity.
+func (uc *UserCreate) AddGames(g ...*Game) *UserCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uc.AddGameIDs(ids...)
+}
+
+// AddWonGameIDs adds the "won_games" edge to the Game entity by IDs.
+func (uc *UserCreate) AddWonGameIDs(ids ...int) *UserCreate {
+	uc.mutation.AddWonGameIDs(ids...)
+	return uc
+}
+
+// AddWonGames adds the "won_games" edges to the Game entity.
+func (uc *UserCreate) AddWonGames(g ...*Game) *UserCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uc.AddWonGameIDs(ids...)
+}
+
+// AddTurnGameIDs adds the "turn_games" edge to the Game entity by IDs.
+func (uc *UserCreate) AddTurnGameIDs(ids ...int) *UserCreate {
+	uc.mutation.AddTurnGameIDs(ids...)
+	return uc
+}
+
+// AddTurnGames adds the "turn_games" edges to the Game entity.
+func (uc *UserCreate) AddTurnGames(g ...*Game) *UserCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uc.AddTurnGameIDs(ids...)
+}
+
+// AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
+func (uc *UserCreate) AddGamePlayerIDs(ids ...int) *UserCreate {
+	uc.mutation.AddGamePlayerIDs(ids...)
+	return uc
+}
+
+// AddGamePlayer adds the "game_player" edges to the GamePlayer entity.
+func (uc *UserCreate) AddGamePlayer(g ...*GamePlayer) *UserCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uc.AddGamePlayerIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -114,6 +176,70 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.HashedPassword(); ok {
 		_spec.SetField(user.FieldHashedPassword, field.TypeString, value)
 		_node.HashedPassword = value
+	}
+	if nodes := uc.mutation.GamesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GamesTable,
+			Columns: user.GamesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.WonGamesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WonGamesTable,
+			Columns: []string{user.WonGamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.TurnGamesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TurnGamesTable,
+			Columns: []string{user.TurnGamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.GamePlayerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.GamePlayerTable,
+			Columns: []string{user.GamePlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

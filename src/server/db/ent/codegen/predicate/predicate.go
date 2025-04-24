@@ -9,5 +9,8 @@ import (
 // Game is the predicate function for game builders.
 type Game func(*sql.Selector)
 
+// GamePlayer is the predicate function for gameplayer builders.
+type GamePlayer func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

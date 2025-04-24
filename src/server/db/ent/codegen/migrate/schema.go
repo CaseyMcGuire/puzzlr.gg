@@ -15,10 +15,8 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"TIC_TAC_TOE"}},
 		{Name: "board", Type: field.TypeJSON},
-		{Name: "game_player_one", Type: field.TypeInt, Nullable: true},
-		{Name: "game_player_two", Type: field.TypeInt, Nullable: true},
-		{Name: "game_winner", Type: field.TypeInt, Nullable: true},
-		{Name: "game_current_turn", Type: field.TypeInt, Nullable: true},
+		{Name: "user_won_games", Type: field.TypeInt, Nullable: true},
+		{Name: "user_turn_games", Type: field.TypeInt, Nullable: true},
 	}
 	// GamesTable holds the schema information for the "games" table.
 	GamesTable = &schema.Table{
@@ -27,28 +25,49 @@ var (
 		PrimaryKey: []*schema.Column{GamesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "games_users_player_one",
+				Symbol:     "games_users_won_games",
 				Columns:    []*schema.Column{GamesColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "games_users_player_two",
+				Symbol:     "games_users_turn_games",
 				Columns:    []*schema.Column{GamesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
+		},
+	}
+	// GamePlayersColumns holds the columns for the "game_players" table.
+	GamePlayersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "game_id", Type: field.TypeInt},
+	}
+	// GamePlayersTable holds the schema information for the "game_players" table.
+	GamePlayersTable = &schema.Table{
+		Name:       "game_players",
+		Columns:    GamePlayersColumns,
+		PrimaryKey: []*schema.Column{GamePlayersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "games_users_winner",
-				Columns:    []*schema.Column{GamesColumns[7]},
+				Symbol:     "game_players_users_user",
+				Columns:    []*schema.Column{GamePlayersColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "games_users_current_turn",
-				Columns:    []*schema.Column{GamesColumns[8]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				Symbol:     "game_players_games_game",
+				Columns:    []*schema.Column{GamePlayersColumns[2]},
+				RefColumns: []*schema.Column{GamesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "gameplayer_user_id_game_id",
+				Unique:  true,
+				Columns: []*schema.Column{GamePlayersColumns[1], GamePlayersColumns[2]},
 			},
 		},
 	}
@@ -74,6 +93,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		GamesTable,
+		GamePlayersTable,
 		UsersTable,
 	}
 )
@@ -81,6 +101,6 @@ var (
 func init() {
 	GamesTable.ForeignKeys[0].RefTable = UsersTable
 	GamesTable.ForeignKeys[1].RefTable = UsersTable
-	GamesTable.ForeignKeys[2].RefTable = UsersTable
-	GamesTable.ForeignKeys[3].RefTable = UsersTable
+	GamePlayersTable.ForeignKeys[0].RefTable = UsersTable
+	GamePlayersTable.ForeignKeys[1].RefTable = GamesTable
 }

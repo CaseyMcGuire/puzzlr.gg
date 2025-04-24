@@ -4,6 +4,7 @@ package codegen
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/predicate"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
@@ -19,17 +21,19 @@ import (
 // GameQuery is the builder for querying Game entities.
 type GameQuery struct {
 	config
-	ctx             *QueryContext
-	order           []game.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Game
-	withPlayerOne   *UserQuery
-	withPlayerTwo   *UserQuery
-	withWinner      *UserQuery
-	withCurrentTurn *UserQuery
-	withFKs         bool
-	modifiers       []func(*sql.Selector)
-	loadTotal       []func(context.Context, []*Game) error
+	ctx                 *QueryContext
+	order               []game.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.Game
+	withUser            *UserQuery
+	withWinner          *UserQuery
+	withCurrentTurn     *UserQuery
+	withGamePlayer      *GamePlayerQuery
+	withFKs             bool
+	modifiers           []func(*sql.Selector)
+	loadTotal           []func(context.Context, []*Game) error
+	withNamedUser       map[string]*UserQuery
+	withNamedGamePlayer map[string]*GamePlayerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -66,8 +70,8 @@ func (gq *GameQuery) Order(o ...game.OrderOption) *GameQuery {
 	return gq
 }
 
-// QueryPlayerOne chains the current query on the "player_one" edge.
-func (gq *GameQuery) QueryPlayerOne() *UserQuery {
+// QueryUser chains the current query on the "user" edge.
+func (gq *GameQuery) QueryUser() *UserQuery {
 	query := (&UserClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
@@ -80,29 +84,7 @@ func (gq *GameQuery) QueryPlayerOne() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(game.Table, game.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, game.PlayerOneTable, game.PlayerOneColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPlayerTwo chains the current query on the "player_two" edge.
-func (gq *GameQuery) QueryPlayerTwo() *UserQuery {
-	query := (&UserClient{config: gq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := gq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := gq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(game.Table, game.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, game.PlayerTwoTable, game.PlayerTwoColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, game.UserTable, game.UserPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -124,7 +106,7 @@ func (gq *GameQuery) QueryWinner() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(game.Table, game.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, game.WinnerTable, game.WinnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, game.WinnerTable, game.WinnerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -146,7 +128,29 @@ func (gq *GameQuery) QueryCurrentTurn() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(game.Table, game.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, game.CurrentTurnTable, game.CurrentTurnColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, game.CurrentTurnTable, game.CurrentTurnColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGamePlayer chains the current query on the "game_player" edge.
+func (gq *GameQuery) QueryGamePlayer() *GamePlayerQuery {
+	query := (&GamePlayerClient{config: gq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(game.Table, game.FieldID, selector),
+			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, game.GamePlayerTable, game.GamePlayerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -346,35 +350,24 @@ func (gq *GameQuery) Clone() *GameQuery {
 		order:           append([]game.OrderOption{}, gq.order...),
 		inters:          append([]Interceptor{}, gq.inters...),
 		predicates:      append([]predicate.Game{}, gq.predicates...),
-		withPlayerOne:   gq.withPlayerOne.Clone(),
-		withPlayerTwo:   gq.withPlayerTwo.Clone(),
+		withUser:        gq.withUser.Clone(),
 		withWinner:      gq.withWinner.Clone(),
 		withCurrentTurn: gq.withCurrentTurn.Clone(),
+		withGamePlayer:  gq.withGamePlayer.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
 		path: gq.path,
 	}
 }
 
-// WithPlayerOne tells the query-builder to eager-load the nodes that are connected to
-// the "player_one" edge. The optional arguments are used to configure the query builder of the edge.
-func (gq *GameQuery) WithPlayerOne(opts ...func(*UserQuery)) *GameQuery {
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GameQuery) WithUser(opts ...func(*UserQuery)) *GameQuery {
 	query := (&UserClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	gq.withPlayerOne = query
-	return gq
-}
-
-// WithPlayerTwo tells the query-builder to eager-load the nodes that are connected to
-// the "player_two" edge. The optional arguments are used to configure the query builder of the edge.
-func (gq *GameQuery) WithPlayerTwo(opts ...func(*UserQuery)) *GameQuery {
-	query := (&UserClient{config: gq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	gq.withPlayerTwo = query
+	gq.withUser = query
 	return gq
 }
 
@@ -397,6 +390,17 @@ func (gq *GameQuery) WithCurrentTurn(opts ...func(*UserQuery)) *GameQuery {
 		opt(query)
 	}
 	gq.withCurrentTurn = query
+	return gq
+}
+
+// WithGamePlayer tells the query-builder to eager-load the nodes that are connected to
+// the "game_player" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GameQuery) WithGamePlayer(opts ...func(*GamePlayerQuery)) *GameQuery {
+	query := (&GamePlayerClient{config: gq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withGamePlayer = query
 	return gq
 }
 
@@ -480,13 +484,13 @@ func (gq *GameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Game, e
 		withFKs     = gq.withFKs
 		_spec       = gq.querySpec()
 		loadedTypes = [4]bool{
-			gq.withPlayerOne != nil,
-			gq.withPlayerTwo != nil,
+			gq.withUser != nil,
 			gq.withWinner != nil,
 			gq.withCurrentTurn != nil,
+			gq.withGamePlayer != nil,
 		}
 	)
-	if gq.withPlayerOne != nil || gq.withPlayerTwo != nil || gq.withWinner != nil || gq.withCurrentTurn != nil {
+	if gq.withWinner != nil || gq.withCurrentTurn != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -513,15 +517,10 @@ func (gq *GameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Game, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := gq.withPlayerOne; query != nil {
-		if err := gq.loadPlayerOne(ctx, query, nodes, nil,
-			func(n *Game, e *User) { n.Edges.PlayerOne = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := gq.withPlayerTwo; query != nil {
-		if err := gq.loadPlayerTwo(ctx, query, nodes, nil,
-			func(n *Game, e *User) { n.Edges.PlayerTwo = e }); err != nil {
+	if query := gq.withUser; query != nil {
+		if err := gq.loadUser(ctx, query, nodes,
+			func(n *Game) { n.Edges.User = []*User{} },
+			func(n *Game, e *User) { n.Edges.User = append(n.Edges.User, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -537,6 +536,27 @@ func (gq *GameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Game, e
 			return nil, err
 		}
 	}
+	if query := gq.withGamePlayer; query != nil {
+		if err := gq.loadGamePlayer(ctx, query, nodes,
+			func(n *Game) { n.Edges.GamePlayer = []*GamePlayer{} },
+			func(n *Game, e *GamePlayer) { n.Edges.GamePlayer = append(n.Edges.GamePlayer, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range gq.withNamedUser {
+		if err := gq.loadUser(ctx, query, nodes,
+			func(n *Game) { n.appendNamedUser(name) },
+			func(n *Game, e *User) { n.appendNamedUser(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range gq.withNamedGamePlayer {
+		if err := gq.loadGamePlayer(ctx, query, nodes,
+			func(n *Game) { n.appendNamedGamePlayer(name) },
+			func(n *Game, e *GamePlayer) { n.appendNamedGamePlayer(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for i := range gq.loadTotal {
 		if err := gq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
@@ -545,66 +565,63 @@ func (gq *GameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Game, e
 	return nodes, nil
 }
 
-func (gq *GameQuery) loadPlayerOne(ctx context.Context, query *UserQuery, nodes []*Game, init func(*Game), assign func(*Game, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Game)
-	for i := range nodes {
-		if nodes[i].game_player_one == nil {
-			continue
+func (gq *GameQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Game, init func(*Game), assign func(*Game, *User)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Game)
+	nids := make(map[int]map[*Game]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
-		fk := *nodes[i].game_player_one
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(game.UserTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(game.UserPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(game.UserPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(game.UserPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
 	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Game]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "game_player_one" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "user" node returned %v`, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (gq *GameQuery) loadPlayerTwo(ctx context.Context, query *UserQuery, nodes []*Game, init func(*Game), assign func(*Game, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Game)
-	for i := range nodes {
-		if nodes[i].game_player_two == nil {
-			continue
-		}
-		fk := *nodes[i].game_player_two
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "game_player_two" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil
@@ -613,10 +630,10 @@ func (gq *GameQuery) loadWinner(ctx context.Context, query *UserQuery, nodes []*
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Game)
 	for i := range nodes {
-		if nodes[i].game_winner == nil {
+		if nodes[i].user_won_games == nil {
 			continue
 		}
-		fk := *nodes[i].game_winner
+		fk := *nodes[i].user_won_games
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -633,7 +650,7 @@ func (gq *GameQuery) loadWinner(ctx context.Context, query *UserQuery, nodes []*
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "game_winner" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_won_games" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -645,10 +662,10 @@ func (gq *GameQuery) loadCurrentTurn(ctx context.Context, query *UserQuery, node
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Game)
 	for i := range nodes {
-		if nodes[i].game_current_turn == nil {
+		if nodes[i].user_turn_games == nil {
 			continue
 		}
-		fk := *nodes[i].game_current_turn
+		fk := *nodes[i].user_turn_games
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -665,11 +682,41 @@ func (gq *GameQuery) loadCurrentTurn(ctx context.Context, query *UserQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "game_current_turn" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_turn_games" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (gq *GameQuery) loadGamePlayer(ctx context.Context, query *GamePlayerQuery, nodes []*Game, init func(*Game), assign func(*Game, *GamePlayer)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Game)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(gameplayer.FieldGameID)
+	}
+	query.Where(predicate.GamePlayer(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(game.GamePlayerColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GameID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "game_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }
@@ -756,6 +803,34 @@ func (gq *GameQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedUser tells the query-builder to eager-load the nodes that are connected to the "user"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (gq *GameQuery) WithNamedUser(name string, opts ...func(*UserQuery)) *GameQuery {
+	query := (&UserClient{config: gq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if gq.withNamedUser == nil {
+		gq.withNamedUser = make(map[string]*UserQuery)
+	}
+	gq.withNamedUser[name] = query
+	return gq
+}
+
+// WithNamedGamePlayer tells the query-builder to eager-load the nodes that are connected to the "game_player"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (gq *GameQuery) WithNamedGamePlayer(name string, opts ...func(*GamePlayerQuery)) *GameQuery {
+	query := (&GamePlayerClient{config: gq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if gq.withNamedGamePlayer == nil {
+		gq.withNamedGamePlayer = make(map[string]*GamePlayerQuery)
+	}
+	gq.withNamedGamePlayer[name] = query
+	return gq
 }
 
 // GameGroupBy is the group-by builder for Game entities.

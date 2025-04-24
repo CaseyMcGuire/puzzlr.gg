@@ -64,8 +64,9 @@ type Todo struct {
 }
 
 type User struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
+	ID          string  `json:"id"`
+	Email       string  `json:"email"`
+	PlayedGames []*Game `json:"playedGames"`
 }
 
 func (User) IsNode() {}

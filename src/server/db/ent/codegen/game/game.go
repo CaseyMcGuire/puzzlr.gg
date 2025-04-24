@@ -25,44 +25,42 @@ const (
 	FieldType = "type"
 	// FieldBoard holds the string denoting the board field in the database.
 	FieldBoard = "board"
-	// EdgePlayerOne holds the string denoting the player_one edge name in mutations.
-	EdgePlayerOne = "player_one"
-	// EdgePlayerTwo holds the string denoting the player_two edge name in mutations.
-	EdgePlayerTwo = "player_two"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// EdgeWinner holds the string denoting the winner edge name in mutations.
 	EdgeWinner = "winner"
 	// EdgeCurrentTurn holds the string denoting the current_turn edge name in mutations.
 	EdgeCurrentTurn = "current_turn"
+	// EdgeGamePlayer holds the string denoting the game_player edge name in mutations.
+	EdgeGamePlayer = "game_player"
 	// Table holds the table name of the game in the database.
 	Table = "games"
-	// PlayerOneTable is the table that holds the player_one relation/edge.
-	PlayerOneTable = "games"
-	// PlayerOneInverseTable is the table name for the User entity.
+	// UserTable is the table that holds the user relation/edge. The primary key declared below.
+	UserTable = "game_players"
+	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	PlayerOneInverseTable = "users"
-	// PlayerOneColumn is the table column denoting the player_one relation/edge.
-	PlayerOneColumn = "game_player_one"
-	// PlayerTwoTable is the table that holds the player_two relation/edge.
-	PlayerTwoTable = "games"
-	// PlayerTwoInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	PlayerTwoInverseTable = "users"
-	// PlayerTwoColumn is the table column denoting the player_two relation/edge.
-	PlayerTwoColumn = "game_player_two"
+	UserInverseTable = "users"
 	// WinnerTable is the table that holds the winner relation/edge.
 	WinnerTable = "games"
 	// WinnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	WinnerInverseTable = "users"
 	// WinnerColumn is the table column denoting the winner relation/edge.
-	WinnerColumn = "game_winner"
+	WinnerColumn = "user_won_games"
 	// CurrentTurnTable is the table that holds the current_turn relation/edge.
 	CurrentTurnTable = "games"
 	// CurrentTurnInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	CurrentTurnInverseTable = "users"
 	// CurrentTurnColumn is the table column denoting the current_turn relation/edge.
-	CurrentTurnColumn = "game_current_turn"
+	CurrentTurnColumn = "user_turn_games"
+	// GamePlayerTable is the table that holds the game_player relation/edge.
+	GamePlayerTable = "game_players"
+	// GamePlayerInverseTable is the table name for the GamePlayer entity.
+	// It exists in this package in order to avoid circular dependency with the "gameplayer" package.
+	GamePlayerInverseTable = "game_players"
+	// GamePlayerColumn is the table column denoting the game_player relation/edge.
+	GamePlayerColumn = "game_id"
 )
 
 // Columns holds all SQL columns for game fields.
@@ -77,11 +75,15 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "games"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"game_player_one",
-	"game_player_two",
-	"game_winner",
-	"game_current_turn",
+	"user_won_games",
+	"user_turn_games",
 }
+
+var (
+	// UserPrimaryKey and UserColumn2 are the table columns denoting the
+	// primary key for the user relation (M2M).
+	UserPrimaryKey = []string{"user_id", "game_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -152,17 +154,17 @@ func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
-// ByPlayerOneField orders the results by player_one field.
-func ByPlayerOneField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByUserCount orders the results by user count.
+func ByUserCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerOneStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newUserStep(), opts...)
 	}
 }
 
-// ByPlayerTwoField orders the results by player_two field.
-func ByPlayerTwoField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByUser orders the results by user terms.
+func ByUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerTwoStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -179,32 +181,46 @@ func ByCurrentTurnField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newCurrentTurnStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newPlayerOneStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlayerOneInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, PlayerOneTable, PlayerOneColumn),
-	)
+
+// ByGamePlayerCount orders the results by game_player count.
+func ByGamePlayerCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGamePlayerStep(), opts...)
+	}
 }
-func newPlayerTwoStep() *sqlgraph.Step {
+
+// ByGamePlayer orders the results by game_player terms.
+func ByGamePlayer(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGamePlayerStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlayerTwoInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, PlayerTwoTable, PlayerTwoColumn),
+		sqlgraph.To(UserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
 	)
 }
 func newWinnerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(WinnerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, WinnerTable, WinnerColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, WinnerTable, WinnerColumn),
 	)
 }
 func newCurrentTurnStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CurrentTurnInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, CurrentTurnTable, CurrentTurnColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, CurrentTurnTable, CurrentTurnColumn),
+	)
+}
+func newGamePlayerStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GamePlayerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, GamePlayerTable, GamePlayerColumn),
 	)
 }
 

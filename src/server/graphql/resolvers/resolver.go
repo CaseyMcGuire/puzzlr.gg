@@ -2,12 +2,14 @@ package resolvers
 
 //go:generate go run github.com/99designs/gqlgen generate
 
-import "puzzlr.gg/src/server/graphql/models"
+import (
+	ent "puzzlr.gg/src/server/db/ent/codegen"
+)
 
 // This file will not be regenerated automatically.
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	todos []*models.Todo
+	ent *ent.Client
 }

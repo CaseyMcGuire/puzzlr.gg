@@ -4,22 +4,20 @@ package codegen
 
 import (
 	"context"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
-func (ga *Game) PlayerOne(ctx context.Context) (*User, error) {
-	result, err := ga.Edges.PlayerOneOrErr()
-	if IsNotLoaded(err) {
-		result, err = ga.QueryPlayerOne().Only(ctx)
+func (ga *Game) User(ctx context.Context) (result []*User, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = ga.NamedUser(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = ga.Edges.UserOrErr()
 	}
-	return result, MaskNotFound(err)
-}
-
-func (ga *Game) PlayerTwo(ctx context.Context) (*User, error) {
-	result, err := ga.Edges.PlayerTwoOrErr()
 	if IsNotLoaded(err) {
-		result, err = ga.QueryPlayerTwo().Only(ctx)
+		result, err = ga.QueryUser().All(ctx)
 	}
-	return result, MaskNotFound(err)
+	return result, err
 }
 
 func (ga *Game) Winner(ctx context.Context) (*User, error) {
@@ -36,4 +34,16 @@ func (ga *Game) CurrentTurn(ctx context.Context) (*User, error) {
 		result, err = ga.QueryCurrentTurn().Only(ctx)
 	}
 	return result, MaskNotFound(err)
+}
+
+func (u *User) Games(ctx context.Context) (result []*Game, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = u.NamedGames(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = u.Edges.GamesOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = u.QueryGames().All(ctx)
+	}
+	return result, err
 }

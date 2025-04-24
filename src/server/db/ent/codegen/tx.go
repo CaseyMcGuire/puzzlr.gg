@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Game is the client for interacting with the Game builders.
 	Game *GameClient
+	// GamePlayer is the client for interacting with the GamePlayer builders.
+	GamePlayer *GamePlayerClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -148,6 +150,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Game = NewGameClient(tx.config)
+	tx.GamePlayer = NewGamePlayerClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

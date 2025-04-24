@@ -165,44 +165,21 @@ func TypeNotIn(vs ...Type) predicate.Game {
 	return predicate.Game(sql.FieldNotIn(FieldType, vs...))
 }
 
-// HasPlayerOne applies the HasEdge predicate on the "player_one" edge.
-func HasPlayerOne() predicate.Game {
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, PlayerOneTable, PlayerOneColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPlayerOneWith applies the HasEdge predicate on the "player_one" edge with a given conditions (other predicates).
-func HasPlayerOneWith(preds ...predicate.User) predicate.Game {
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
-		step := newPlayerOneStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPlayerTwo applies the HasEdge predicate on the "player_two" edge.
-func HasPlayerTwo() predicate.Game {
-	return predicate.Game(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, PlayerTwoTable, PlayerTwoColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPlayerTwoWith applies the HasEdge predicate on the "player_two" edge with a given conditions (other predicates).
-func HasPlayerTwoWith(preds ...predicate.User) predicate.Game {
-	return predicate.Game(func(s *sql.Selector) {
-		step := newPlayerTwoStep()
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -216,7 +193,7 @@ func HasWinner() predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, WinnerTable, WinnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, WinnerTable, WinnerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -239,7 +216,7 @@ func HasCurrentTurn() predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, CurrentTurnTable, CurrentTurnColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, CurrentTurnTable, CurrentTurnColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -249,6 +226,29 @@ func HasCurrentTurn() predicate.Game {
 func HasCurrentTurnWith(preds ...predicate.User) predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
 		step := newCurrentTurnStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasGamePlayer applies the HasEdge predicate on the "game_player" edge.
+func HasGamePlayer() predicate.Game {
+	return predicate.Game(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, GamePlayerTable, GamePlayerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGamePlayerWith applies the HasEdge predicate on the "game_player" edge with a given conditions (other predicates).
+func HasGamePlayerWith(preds ...predicate.GamePlayer) predicate.Game {
+	return predicate.Game(func(s *sql.Selector) {
+		step := newGamePlayerStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
