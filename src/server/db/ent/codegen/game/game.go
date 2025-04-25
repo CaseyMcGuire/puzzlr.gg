@@ -53,7 +53,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	CurrentTurnInverseTable = "users"
 	// CurrentTurnColumn is the table column denoting the current_turn relation/edge.
-	CurrentTurnColumn = "user_turn_games"
+	CurrentTurnColumn = "user_current_turn_games"
 	// GamePlayerTable is the table that holds the game_player relation/edge.
 	GamePlayerTable = "game_players"
 	// GamePlayerInverseTable is the table name for the GamePlayer entity.
@@ -76,7 +76,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_won_games",
-	"user_turn_games",
+	"user_current_turn_games",
 }
 
 var (

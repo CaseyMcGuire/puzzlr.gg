@@ -283,7 +283,7 @@ func (gc *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_turn_games = &nodes[0]
+		_node.user_current_turn_games = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.mutation.GamePlayerIDs(); len(nodes) > 0 {

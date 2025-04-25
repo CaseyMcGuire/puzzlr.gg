@@ -46,10 +46,9 @@ type ComplexityRoot struct {
 		CreateTime  func(childComplexity int) int
 		CurrentTurn func(childComplexity int) int
 		ID          func(childComplexity int) int
-		PlayerOne   func(childComplexity int) int
-		PlayerTwo   func(childComplexity int) int
 		Type        func(childComplexity int) int
 		UpdateTime  func(childComplexity int) int
+		User        func(childComplexity int) int
 		Winner      func(childComplexity int) int
 	}
 
@@ -87,6 +86,7 @@ type ComplexityRoot struct {
 
 	User struct {
 		Email       func(childComplexity int) int
+		Games       func(childComplexity int) int
 		ID          func(childComplexity int) int
 		PlayedGames func(childComplexity int) int
 	}
@@ -139,20 +139,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Game.ID(childComplexity), true
 
-	case "Game.playerOne":
-		if e.complexity.Game.PlayerOne == nil {
-			break
-		}
-
-		return e.complexity.Game.PlayerOne(childComplexity), true
-
-	case "Game.playerTwo":
-		if e.complexity.Game.PlayerTwo == nil {
-			break
-		}
-
-		return e.complexity.Game.PlayerTwo(childComplexity), true
-
 	case "Game.type":
 		if e.complexity.Game.Type == nil {
 			break
@@ -166,6 +152,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Game.UpdateTime(childComplexity), true
+
+	case "Game.user":
+		if e.complexity.Game.User == nil {
+			break
+		}
+
+		return e.complexity.Game.User(childComplexity), true
 
 	case "Game.winner":
 		if e.complexity.Game.Winner == nil {
@@ -298,6 +291,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Email(childComplexity), true
+
+	case "User.games":
+		if e.complexity.User.Games == nil {
+			break
+		}
+
+		return e.complexity.User.Games(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -432,8 +432,7 @@ type Game implements Node {
   updateTime: Time!
   type: GameType!
   board: GameBoard!
-  playerOne: User
-  playerTwo: User
+  user: [User!]
   winner: User
   currentTurn: User
 }
@@ -515,6 +514,7 @@ scalar Time
 type User implements Node {
   id: ID!
   email: String!
+  games: [Game!]
 }
 `, BuiltIn: false},
 	{Name: "../schema/schema.graphqls", Input: `type Todo {

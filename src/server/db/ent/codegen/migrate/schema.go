@@ -16,7 +16,7 @@ var (
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"TIC_TAC_TOE"}},
 		{Name: "board", Type: field.TypeJSON},
 		{Name: "user_won_games", Type: field.TypeInt, Nullable: true},
-		{Name: "user_turn_games", Type: field.TypeInt, Nullable: true},
+		{Name: "user_current_turn_games", Type: field.TypeInt, Nullable: true},
 	}
 	// GamesTable holds the schema information for the "games" table.
 	GamesTable = &schema.Table{
@@ -31,7 +31,7 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "games_users_turn_games",
+				Symbol:     "games_users_current_turn_games",
 				Columns:    []*schema.Column{GamesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,

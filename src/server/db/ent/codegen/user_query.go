@@ -21,20 +21,20 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []user.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.User
-	withGames           *GameQuery
-	withWonGames        *GameQuery
-	withTurnGames       *GameQuery
-	withGamePlayer      *GamePlayerQuery
-	modifiers           []func(*sql.Selector)
-	loadTotal           []func(context.Context, []*User) error
-	withNamedGames      map[string]*GameQuery
-	withNamedWonGames   map[string]*GameQuery
-	withNamedTurnGames  map[string]*GameQuery
-	withNamedGamePlayer map[string]*GamePlayerQuery
+	ctx                       *QueryContext
+	order                     []user.OrderOption
+	inters                    []Interceptor
+	predicates                []predicate.User
+	withGames                 *GameQuery
+	withWonGames              *GameQuery
+	withCurrentTurnGames      *GameQuery
+	withGamePlayer            *GamePlayerQuery
+	modifiers                 []func(*sql.Selector)
+	loadTotal                 []func(context.Context, []*User) error
+	withNamedGames            map[string]*GameQuery
+	withNamedWonGames         map[string]*GameQuery
+	withNamedCurrentTurnGames map[string]*GameQuery
+	withNamedGamePlayer       map[string]*GamePlayerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -115,8 +115,8 @@ func (uq *UserQuery) QueryWonGames() *GameQuery {
 	return query
 }
 
-// QueryTurnGames chains the current query on the "turn_games" edge.
-func (uq *UserQuery) QueryTurnGames() *GameQuery {
+// QueryCurrentTurnGames chains the current query on the "current_turn_games" edge.
+func (uq *UserQuery) QueryCurrentTurnGames() *GameQuery {
 	query := (&GameClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -129,7 +129,7 @@ func (uq *UserQuery) QueryTurnGames() *GameQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(game.Table, game.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.TurnGamesTable, user.TurnGamesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CurrentTurnGamesTable, user.CurrentTurnGamesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -346,15 +346,15 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:         uq.config,
-		ctx:            uq.ctx.Clone(),
-		order:          append([]user.OrderOption{}, uq.order...),
-		inters:         append([]Interceptor{}, uq.inters...),
-		predicates:     append([]predicate.User{}, uq.predicates...),
-		withGames:      uq.withGames.Clone(),
-		withWonGames:   uq.withWonGames.Clone(),
-		withTurnGames:  uq.withTurnGames.Clone(),
-		withGamePlayer: uq.withGamePlayer.Clone(),
+		config:               uq.config,
+		ctx:                  uq.ctx.Clone(),
+		order:                append([]user.OrderOption{}, uq.order...),
+		inters:               append([]Interceptor{}, uq.inters...),
+		predicates:           append([]predicate.User{}, uq.predicates...),
+		withGames:            uq.withGames.Clone(),
+		withWonGames:         uq.withWonGames.Clone(),
+		withCurrentTurnGames: uq.withCurrentTurnGames.Clone(),
+		withGamePlayer:       uq.withGamePlayer.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -383,14 +383,14 @@ func (uq *UserQuery) WithWonGames(opts ...func(*GameQuery)) *UserQuery {
 	return uq
 }
 
-// WithTurnGames tells the query-builder to eager-load the nodes that are connected to
-// the "turn_games" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithTurnGames(opts ...func(*GameQuery)) *UserQuery {
+// WithCurrentTurnGames tells the query-builder to eager-load the nodes that are connected to
+// the "current_turn_games" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCurrentTurnGames(opts ...func(*GameQuery)) *UserQuery {
 	query := (&GameClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withTurnGames = query
+	uq.withCurrentTurnGames = query
 	return uq
 }
 
@@ -486,7 +486,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		loadedTypes = [4]bool{
 			uq.withGames != nil,
 			uq.withWonGames != nil,
-			uq.withTurnGames != nil,
+			uq.withCurrentTurnGames != nil,
 			uq.withGamePlayer != nil,
 		}
 	)
@@ -525,10 +525,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := uq.withTurnGames; query != nil {
-		if err := uq.loadTurnGames(ctx, query, nodes,
-			func(n *User) { n.Edges.TurnGames = []*Game{} },
-			func(n *User, e *Game) { n.Edges.TurnGames = append(n.Edges.TurnGames, e) }); err != nil {
+	if query := uq.withCurrentTurnGames; query != nil {
+		if err := uq.loadCurrentTurnGames(ctx, query, nodes,
+			func(n *User) { n.Edges.CurrentTurnGames = []*Game{} },
+			func(n *User, e *Game) { n.Edges.CurrentTurnGames = append(n.Edges.CurrentTurnGames, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -553,10 +553,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	for name, query := range uq.withNamedTurnGames {
-		if err := uq.loadTurnGames(ctx, query, nodes,
-			func(n *User) { n.appendNamedTurnGames(name) },
-			func(n *User, e *Game) { n.appendNamedTurnGames(name, e) }); err != nil {
+	for name, query := range uq.withNamedCurrentTurnGames {
+		if err := uq.loadCurrentTurnGames(ctx, query, nodes,
+			func(n *User) { n.appendNamedCurrentTurnGames(name) },
+			func(n *User, e *Game) { n.appendNamedCurrentTurnGames(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -667,7 +667,7 @@ func (uq *UserQuery) loadWonGames(ctx context.Context, query *GameQuery, nodes [
 	}
 	return nil
 }
-func (uq *UserQuery) loadTurnGames(ctx context.Context, query *GameQuery, nodes []*User, init func(*User), assign func(*User, *Game)) error {
+func (uq *UserQuery) loadCurrentTurnGames(ctx context.Context, query *GameQuery, nodes []*User, init func(*User), assign func(*User, *Game)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)
 	for i := range nodes {
@@ -679,20 +679,20 @@ func (uq *UserQuery) loadTurnGames(ctx context.Context, query *GameQuery, nodes 
 	}
 	query.withFKs = true
 	query.Where(predicate.Game(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.TurnGamesColumn), fks...))
+		s.Where(sql.InValues(s.C(user.CurrentTurnGamesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_turn_games
+		fk := n.user_current_turn_games
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_turn_games" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "user_current_turn_games" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_turn_games" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_current_turn_games" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -841,17 +841,17 @@ func (uq *UserQuery) WithNamedWonGames(name string, opts ...func(*GameQuery)) *U
 	return uq
 }
 
-// WithNamedTurnGames tells the query-builder to eager-load the nodes that are connected to the "turn_games"
+// WithNamedCurrentTurnGames tells the query-builder to eager-load the nodes that are connected to the "current_turn_games"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithNamedTurnGames(name string, opts ...func(*GameQuery)) *UserQuery {
+func (uq *UserQuery) WithNamedCurrentTurnGames(name string, opts ...func(*GameQuery)) *UserQuery {
 	query := (&GameClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if uq.withNamedTurnGames == nil {
-		uq.withNamedTurnGames = make(map[string]*GameQuery)
+	if uq.withNamedCurrentTurnGames == nil {
+		uq.withNamedCurrentTurnGames = make(map[string]*GameQuery)
 	}
-	uq.withNamedTurnGames[name] = query
+	uq.withNamedCurrentTurnGames[name] = query
 	return uq
 }
 

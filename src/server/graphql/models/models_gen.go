@@ -17,8 +17,7 @@ type Game struct {
 	UpdateTime  time.Time  `json:"updateTime"`
 	Type        game.Type  `json:"type"`
 	Board       *GameBoard `json:"board"`
-	PlayerOne   *User      `json:"playerOne,omitempty"`
-	PlayerTwo   *User      `json:"playerTwo,omitempty"`
+	User        []*User    `json:"user,omitempty"`
 	Winner      *User      `json:"winner,omitempty"`
 	CurrentTurn *User      `json:"currentTurn,omitempty"`
 }
@@ -66,6 +65,7 @@ type Todo struct {
 type User struct {
 	ID          string  `json:"id"`
 	Email       string  `json:"email"`
+	Games       []*Game `json:"games,omitempty"`
 	PlayedGames []*Game `json:"playedGames"`
 }
 

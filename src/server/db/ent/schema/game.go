@@ -38,7 +38,7 @@ func (Game) Edges() []ent.Edge {
 			Ref("won_games").
 			Unique(),
 		edge.From("current_turn", User.Type).
-			Ref("turn_games").
+			Ref("current_turn_games").
 			Unique(),
 	}
 }

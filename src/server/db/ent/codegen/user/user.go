@@ -20,8 +20,8 @@ const (
 	EdgeGames = "games"
 	// EdgeWonGames holds the string denoting the won_games edge name in mutations.
 	EdgeWonGames = "won_games"
-	// EdgeTurnGames holds the string denoting the turn_games edge name in mutations.
-	EdgeTurnGames = "turn_games"
+	// EdgeCurrentTurnGames holds the string denoting the current_turn_games edge name in mutations.
+	EdgeCurrentTurnGames = "current_turn_games"
 	// EdgeGamePlayer holds the string denoting the game_player edge name in mutations.
 	EdgeGamePlayer = "game_player"
 	// Table holds the table name of the user in the database.
@@ -38,13 +38,13 @@ const (
 	WonGamesInverseTable = "games"
 	// WonGamesColumn is the table column denoting the won_games relation/edge.
 	WonGamesColumn = "user_won_games"
-	// TurnGamesTable is the table that holds the turn_games relation/edge.
-	TurnGamesTable = "games"
-	// TurnGamesInverseTable is the table name for the Game entity.
+	// CurrentTurnGamesTable is the table that holds the current_turn_games relation/edge.
+	CurrentTurnGamesTable = "games"
+	// CurrentTurnGamesInverseTable is the table name for the Game entity.
 	// It exists in this package in order to avoid circular dependency with the "game" package.
-	TurnGamesInverseTable = "games"
-	// TurnGamesColumn is the table column denoting the turn_games relation/edge.
-	TurnGamesColumn = "user_turn_games"
+	CurrentTurnGamesInverseTable = "games"
+	// CurrentTurnGamesColumn is the table column denoting the current_turn_games relation/edge.
+	CurrentTurnGamesColumn = "user_current_turn_games"
 	// GamePlayerTable is the table that holds the game_player relation/edge.
 	GamePlayerTable = "game_players"
 	// GamePlayerInverseTable is the table name for the GamePlayer entity.
@@ -130,17 +130,17 @@ func ByWonGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByTurnGamesCount orders the results by turn_games count.
-func ByTurnGamesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByCurrentTurnGamesCount orders the results by current_turn_games count.
+func ByCurrentTurnGamesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTurnGamesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newCurrentTurnGamesStep(), opts...)
 	}
 }
 
-// ByTurnGames orders the results by turn_games terms.
-func ByTurnGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByCurrentTurnGames orders the results by current_turn_games terms.
+func ByCurrentTurnGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTurnGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newCurrentTurnGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -171,11 +171,11 @@ func newWonGamesStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, WonGamesTable, WonGamesColumn),
 	)
 }
-func newTurnGamesStep() *sqlgraph.Step {
+func newCurrentTurnGamesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TurnGamesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TurnGamesTable, TurnGamesColumn),
+		sqlgraph.To(CurrentTurnGamesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CurrentTurnGamesTable, CurrentTurnGamesColumn),
 	)
 }
 func newGamePlayerStep() *sqlgraph.Step {

@@ -29,10 +29,10 @@ type Game struct {
 	Board [][]string `json:"board,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GameQuery when eager-loading is set.
-	Edges           GameEdges `json:"edges"`
-	user_won_games  *int
-	user_turn_games *int
-	selectValues    sql.SelectValues
+	Edges                   GameEdges `json:"edges"`
+	user_won_games          *int
+	user_current_turn_games *int
+	selectValues            sql.SelectValues
 }
 
 // GameEdges holds the relations/edges for other nodes in the graph.
@@ -110,7 +110,7 @@ func (*Game) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case game.ForeignKeys[0]: // user_won_games
 			values[i] = new(sql.NullInt64)
-		case game.ForeignKeys[1]: // user_turn_games
+		case game.ForeignKeys[1]: // user_current_turn_games
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -168,10 +168,10 @@ func (ga *Game) assignValues(columns []string, values []any) error {
 			}
 		case game.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_turn_games", value)
+				return fmt.Errorf("unexpected type %T for edge-field user_current_turn_games", value)
 			} else if value.Valid {
-				ga.user_turn_games = new(int)
-				*ga.user_turn_games = int(value.Int64)
+				ga.user_current_turn_games = new(int)
+				*ga.user_current_turn_games = int(value.Int64)
 			}
 		default:
 			ga.selectValues.Set(columns[i], values[i])

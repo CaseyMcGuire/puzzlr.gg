@@ -87,19 +87,19 @@ func (uu *UserUpdate) AddWonGames(g ...*Game) *UserUpdate {
 	return uu.AddWonGameIDs(ids...)
 }
 
-// AddTurnGameIDs adds the "turn_games" edge to the Game entity by IDs.
-func (uu *UserUpdate) AddTurnGameIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddTurnGameIDs(ids...)
+// AddCurrentTurnGameIDs adds the "current_turn_games" edge to the Game entity by IDs.
+func (uu *UserUpdate) AddCurrentTurnGameIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddCurrentTurnGameIDs(ids...)
 	return uu
 }
 
-// AddTurnGames adds the "turn_games" edges to the Game entity.
-func (uu *UserUpdate) AddTurnGames(g ...*Game) *UserUpdate {
+// AddCurrentTurnGames adds the "current_turn_games" edges to the Game entity.
+func (uu *UserUpdate) AddCurrentTurnGames(g ...*Game) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uu.AddTurnGameIDs(ids...)
+	return uu.AddCurrentTurnGameIDs(ids...)
 }
 
 // AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
@@ -164,25 +164,25 @@ func (uu *UserUpdate) RemoveWonGames(g ...*Game) *UserUpdate {
 	return uu.RemoveWonGameIDs(ids...)
 }
 
-// ClearTurnGames clears all "turn_games" edges to the Game entity.
-func (uu *UserUpdate) ClearTurnGames() *UserUpdate {
-	uu.mutation.ClearTurnGames()
+// ClearCurrentTurnGames clears all "current_turn_games" edges to the Game entity.
+func (uu *UserUpdate) ClearCurrentTurnGames() *UserUpdate {
+	uu.mutation.ClearCurrentTurnGames()
 	return uu
 }
 
-// RemoveTurnGameIDs removes the "turn_games" edge to Game entities by IDs.
-func (uu *UserUpdate) RemoveTurnGameIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveTurnGameIDs(ids...)
+// RemoveCurrentTurnGameIDs removes the "current_turn_games" edge to Game entities by IDs.
+func (uu *UserUpdate) RemoveCurrentTurnGameIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveCurrentTurnGameIDs(ids...)
 	return uu
 }
 
-// RemoveTurnGames removes "turn_games" edges to Game entities.
-func (uu *UserUpdate) RemoveTurnGames(g ...*Game) *UserUpdate {
+// RemoveCurrentTurnGames removes "current_turn_games" edges to Game entities.
+func (uu *UserUpdate) RemoveCurrentTurnGames(g ...*Game) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uu.RemoveTurnGameIDs(ids...)
+	return uu.RemoveCurrentTurnGameIDs(ids...)
 }
 
 // ClearGamePlayer clears all "game_player" edges to the GamePlayer entity.
@@ -356,12 +356,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.TurnGamesCleared() {
+	if uu.mutation.CurrentTurnGamesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.TurnGamesTable,
-			Columns: []string{user.TurnGamesColumn},
+			Table:   user.CurrentTurnGamesTable,
+			Columns: []string{user.CurrentTurnGamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
@@ -369,12 +369,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedTurnGamesIDs(); len(nodes) > 0 && !uu.mutation.TurnGamesCleared() {
+	if nodes := uu.mutation.RemovedCurrentTurnGamesIDs(); len(nodes) > 0 && !uu.mutation.CurrentTurnGamesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.TurnGamesTable,
-			Columns: []string{user.TurnGamesColumn},
+			Table:   user.CurrentTurnGamesTable,
+			Columns: []string{user.CurrentTurnGamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
@@ -385,12 +385,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.TurnGamesIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.CurrentTurnGamesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.TurnGamesTable,
-			Columns: []string{user.TurnGamesColumn},
+			Table:   user.CurrentTurnGamesTable,
+			Columns: []string{user.CurrentTurnGamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
@@ -524,19 +524,19 @@ func (uuo *UserUpdateOne) AddWonGames(g ...*Game) *UserUpdateOne {
 	return uuo.AddWonGameIDs(ids...)
 }
 
-// AddTurnGameIDs adds the "turn_games" edge to the Game entity by IDs.
-func (uuo *UserUpdateOne) AddTurnGameIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddTurnGameIDs(ids...)
+// AddCurrentTurnGameIDs adds the "current_turn_games" edge to the Game entity by IDs.
+func (uuo *UserUpdateOne) AddCurrentTurnGameIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddCurrentTurnGameIDs(ids...)
 	return uuo
 }
 
-// AddTurnGames adds the "turn_games" edges to the Game entity.
-func (uuo *UserUpdateOne) AddTurnGames(g ...*Game) *UserUpdateOne {
+// AddCurrentTurnGames adds the "current_turn_games" edges to the Game entity.
+func (uuo *UserUpdateOne) AddCurrentTurnGames(g ...*Game) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uuo.AddTurnGameIDs(ids...)
+	return uuo.AddCurrentTurnGameIDs(ids...)
 }
 
 // AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
@@ -601,25 +601,25 @@ func (uuo *UserUpdateOne) RemoveWonGames(g ...*Game) *UserUpdateOne {
 	return uuo.RemoveWonGameIDs(ids...)
 }
 
-// ClearTurnGames clears all "turn_games" edges to the Game entity.
-func (uuo *UserUpdateOne) ClearTurnGames() *UserUpdateOne {
-	uuo.mutation.ClearTurnGames()
+// ClearCurrentTurnGames clears all "current_turn_games" edges to the Game entity.
+func (uuo *UserUpdateOne) ClearCurrentTurnGames() *UserUpdateOne {
+	uuo.mutation.ClearCurrentTurnGames()
 	return uuo
 }
 
-// RemoveTurnGameIDs removes the "turn_games" edge to Game entities by IDs.
-func (uuo *UserUpdateOne) RemoveTurnGameIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveTurnGameIDs(ids...)
+// RemoveCurrentTurnGameIDs removes the "current_turn_games" edge to Game entities by IDs.
+func (uuo *UserUpdateOne) RemoveCurrentTurnGameIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveCurrentTurnGameIDs(ids...)
 	return uuo
 }
 
-// RemoveTurnGames removes "turn_games" edges to Game entities.
-func (uuo *UserUpdateOne) RemoveTurnGames(g ...*Game) *UserUpdateOne {
+// RemoveCurrentTurnGames removes "current_turn_games" edges to Game entities.
+func (uuo *UserUpdateOne) RemoveCurrentTurnGames(g ...*Game) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uuo.RemoveTurnGameIDs(ids...)
+	return uuo.RemoveCurrentTurnGameIDs(ids...)
 }
 
 // ClearGamePlayer clears all "game_player" edges to the GamePlayer entity.
@@ -823,12 +823,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.TurnGamesCleared() {
+	if uuo.mutation.CurrentTurnGamesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.TurnGamesTable,
-			Columns: []string{user.TurnGamesColumn},
+			Table:   user.CurrentTurnGamesTable,
+			Columns: []string{user.CurrentTurnGamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
@@ -836,12 +836,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedTurnGamesIDs(); len(nodes) > 0 && !uuo.mutation.TurnGamesCleared() {
+	if nodes := uuo.mutation.RemovedCurrentTurnGamesIDs(); len(nodes) > 0 && !uuo.mutation.CurrentTurnGamesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.TurnGamesTable,
-			Columns: []string{user.TurnGamesColumn},
+			Table:   user.CurrentTurnGamesTable,
+			Columns: []string{user.CurrentTurnGamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
@@ -852,12 +852,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.TurnGamesIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.CurrentTurnGamesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.TurnGamesTable,
-			Columns: []string{user.TurnGamesColumn},
+			Table:   user.CurrentTurnGamesTable,
+			Columns: []string{user.CurrentTurnGamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),

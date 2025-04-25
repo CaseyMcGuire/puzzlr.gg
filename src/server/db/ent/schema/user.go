@@ -32,7 +32,7 @@ func (User) Edges() []ent.Edge {
 			Through("game_player", GamePlayer.Type),
 		edge.To("won_games", Game.Type).
 			Annotations(entgql.Skip()),
-		edge.To("turn_games", Game.Type).
+		edge.To("current_turn_games", Game.Type).
 			Annotations(entgql.Skip()),
 	}
 }

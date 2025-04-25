@@ -1315,27 +1315,27 @@ func (m *GamePlayerMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	email              *string
-	hashed_password    *string
-	clearedFields      map[string]struct{}
-	games              map[int]struct{}
-	removedgames       map[int]struct{}
-	clearedgames       bool
-	won_games          map[int]struct{}
-	removedwon_games   map[int]struct{}
-	clearedwon_games   bool
-	turn_games         map[int]struct{}
-	removedturn_games  map[int]struct{}
-	clearedturn_games  bool
-	game_player        map[int]struct{}
-	removedgame_player map[int]struct{}
-	clearedgame_player bool
-	done               bool
-	oldValue           func(context.Context) (*User, error)
-	predicates         []predicate.User
+	op                        Op
+	typ                       string
+	id                        *int
+	email                     *string
+	hashed_password           *string
+	clearedFields             map[string]struct{}
+	games                     map[int]struct{}
+	removedgames              map[int]struct{}
+	clearedgames              bool
+	won_games                 map[int]struct{}
+	removedwon_games          map[int]struct{}
+	clearedwon_games          bool
+	current_turn_games        map[int]struct{}
+	removedcurrent_turn_games map[int]struct{}
+	clearedcurrent_turn_games bool
+	game_player               map[int]struct{}
+	removedgame_player        map[int]struct{}
+	clearedgame_player        bool
+	done                      bool
+	oldValue                  func(context.Context) (*User, error)
+	predicates                []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -1616,58 +1616,58 @@ func (m *UserMutation) ResetWonGames() {
 	m.removedwon_games = nil
 }
 
-// AddTurnGameIDs adds the "turn_games" edge to the Game entity by ids.
-func (m *UserMutation) AddTurnGameIDs(ids ...int) {
-	if m.turn_games == nil {
-		m.turn_games = make(map[int]struct{})
+// AddCurrentTurnGameIDs adds the "current_turn_games" edge to the Game entity by ids.
+func (m *UserMutation) AddCurrentTurnGameIDs(ids ...int) {
+	if m.current_turn_games == nil {
+		m.current_turn_games = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.turn_games[ids[i]] = struct{}{}
+		m.current_turn_games[ids[i]] = struct{}{}
 	}
 }
 
-// ClearTurnGames clears the "turn_games" edge to the Game entity.
-func (m *UserMutation) ClearTurnGames() {
-	m.clearedturn_games = true
+// ClearCurrentTurnGames clears the "current_turn_games" edge to the Game entity.
+func (m *UserMutation) ClearCurrentTurnGames() {
+	m.clearedcurrent_turn_games = true
 }
 
-// TurnGamesCleared reports if the "turn_games" edge to the Game entity was cleared.
-func (m *UserMutation) TurnGamesCleared() bool {
-	return m.clearedturn_games
+// CurrentTurnGamesCleared reports if the "current_turn_games" edge to the Game entity was cleared.
+func (m *UserMutation) CurrentTurnGamesCleared() bool {
+	return m.clearedcurrent_turn_games
 }
 
-// RemoveTurnGameIDs removes the "turn_games" edge to the Game entity by IDs.
-func (m *UserMutation) RemoveTurnGameIDs(ids ...int) {
-	if m.removedturn_games == nil {
-		m.removedturn_games = make(map[int]struct{})
+// RemoveCurrentTurnGameIDs removes the "current_turn_games" edge to the Game entity by IDs.
+func (m *UserMutation) RemoveCurrentTurnGameIDs(ids ...int) {
+	if m.removedcurrent_turn_games == nil {
+		m.removedcurrent_turn_games = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.turn_games, ids[i])
-		m.removedturn_games[ids[i]] = struct{}{}
+		delete(m.current_turn_games, ids[i])
+		m.removedcurrent_turn_games[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedTurnGames returns the removed IDs of the "turn_games" edge to the Game entity.
-func (m *UserMutation) RemovedTurnGamesIDs() (ids []int) {
-	for id := range m.removedturn_games {
+// RemovedCurrentTurnGames returns the removed IDs of the "current_turn_games" edge to the Game entity.
+func (m *UserMutation) RemovedCurrentTurnGamesIDs() (ids []int) {
+	for id := range m.removedcurrent_turn_games {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// TurnGamesIDs returns the "turn_games" edge IDs in the mutation.
-func (m *UserMutation) TurnGamesIDs() (ids []int) {
-	for id := range m.turn_games {
+// CurrentTurnGamesIDs returns the "current_turn_games" edge IDs in the mutation.
+func (m *UserMutation) CurrentTurnGamesIDs() (ids []int) {
+	for id := range m.current_turn_games {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetTurnGames resets all changes to the "turn_games" edge.
-func (m *UserMutation) ResetTurnGames() {
-	m.turn_games = nil
-	m.clearedturn_games = false
-	m.removedturn_games = nil
+// ResetCurrentTurnGames resets all changes to the "current_turn_games" edge.
+func (m *UserMutation) ResetCurrentTurnGames() {
+	m.current_turn_games = nil
+	m.clearedcurrent_turn_games = false
+	m.removedcurrent_turn_games = nil
 }
 
 // AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by ids.
@@ -1881,8 +1881,8 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.won_games != nil {
 		edges = append(edges, user.EdgeWonGames)
 	}
-	if m.turn_games != nil {
-		edges = append(edges, user.EdgeTurnGames)
+	if m.current_turn_games != nil {
+		edges = append(edges, user.EdgeCurrentTurnGames)
 	}
 	if m.game_player != nil {
 		edges = append(edges, user.EdgeGamePlayer)
@@ -1906,9 +1906,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeTurnGames:
-		ids := make([]ent.Value, 0, len(m.turn_games))
-		for id := range m.turn_games {
+	case user.EdgeCurrentTurnGames:
+		ids := make([]ent.Value, 0, len(m.current_turn_games))
+		for id := range m.current_turn_games {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1931,8 +1931,8 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedwon_games != nil {
 		edges = append(edges, user.EdgeWonGames)
 	}
-	if m.removedturn_games != nil {
-		edges = append(edges, user.EdgeTurnGames)
+	if m.removedcurrent_turn_games != nil {
+		edges = append(edges, user.EdgeCurrentTurnGames)
 	}
 	if m.removedgame_player != nil {
 		edges = append(edges, user.EdgeGamePlayer)
@@ -1956,9 +1956,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeTurnGames:
-		ids := make([]ent.Value, 0, len(m.removedturn_games))
-		for id := range m.removedturn_games {
+	case user.EdgeCurrentTurnGames:
+		ids := make([]ent.Value, 0, len(m.removedcurrent_turn_games))
+		for id := range m.removedcurrent_turn_games {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1981,8 +1981,8 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedwon_games {
 		edges = append(edges, user.EdgeWonGames)
 	}
-	if m.clearedturn_games {
-		edges = append(edges, user.EdgeTurnGames)
+	if m.clearedcurrent_turn_games {
+		edges = append(edges, user.EdgeCurrentTurnGames)
 	}
 	if m.clearedgame_player {
 		edges = append(edges, user.EdgeGamePlayer)
@@ -1998,8 +1998,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedgames
 	case user.EdgeWonGames:
 		return m.clearedwon_games
-	case user.EdgeTurnGames:
-		return m.clearedturn_games
+	case user.EdgeCurrentTurnGames:
+		return m.clearedcurrent_turn_games
 	case user.EdgeGamePlayer:
 		return m.clearedgame_player
 	}
@@ -2024,8 +2024,8 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeWonGames:
 		m.ResetWonGames()
 		return nil
-	case user.EdgeTurnGames:
-		m.ResetTurnGames()
+	case user.EdgeCurrentTurnGames:
+		m.ResetCurrentTurnGames()
 		return nil
 	case user.EdgeGamePlayer:
 		m.ResetGamePlayer()

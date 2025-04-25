@@ -63,19 +63,19 @@ func (uc *UserCreate) AddWonGames(g ...*Game) *UserCreate {
 	return uc.AddWonGameIDs(ids...)
 }
 
-// AddTurnGameIDs adds the "turn_games" edge to the Game entity by IDs.
-func (uc *UserCreate) AddTurnGameIDs(ids ...int) *UserCreate {
-	uc.mutation.AddTurnGameIDs(ids...)
+// AddCurrentTurnGameIDs adds the "current_turn_games" edge to the Game entity by IDs.
+func (uc *UserCreate) AddCurrentTurnGameIDs(ids ...int) *UserCreate {
+	uc.mutation.AddCurrentTurnGameIDs(ids...)
 	return uc
 }
 
-// AddTurnGames adds the "turn_games" edges to the Game entity.
-func (uc *UserCreate) AddTurnGames(g ...*Game) *UserCreate {
+// AddCurrentTurnGames adds the "current_turn_games" edges to the Game entity.
+func (uc *UserCreate) AddCurrentTurnGames(g ...*Game) *UserCreate {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uc.AddTurnGameIDs(ids...)
+	return uc.AddCurrentTurnGameIDs(ids...)
 }
 
 // AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
@@ -209,12 +209,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.TurnGamesIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.CurrentTurnGamesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.TurnGamesTable,
-			Columns: []string{user.TurnGamesColumn},
+			Table:   user.CurrentTurnGamesTable,
+			Columns: []string{user.CurrentTurnGamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),

@@ -32,8 +32,8 @@ type UserEdges struct {
 	Games []*Game `json:"games,omitempty"`
 	// WonGames holds the value of the won_games edge.
 	WonGames []*Game `json:"won_games,omitempty"`
-	// TurnGames holds the value of the turn_games edge.
-	TurnGames []*Game `json:"turn_games,omitempty"`
+	// CurrentTurnGames holds the value of the current_turn_games edge.
+	CurrentTurnGames []*Game `json:"current_turn_games,omitempty"`
 	// GamePlayer holds the value of the game_player edge.
 	GamePlayer []*GamePlayer `json:"game_player,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -42,10 +42,10 @@ type UserEdges struct {
 	// totalCount holds the count of the edges above.
 	totalCount [1]map[string]int
 
-	namedGames      map[string][]*Game
-	namedWonGames   map[string][]*Game
-	namedTurnGames  map[string][]*Game
-	namedGamePlayer map[string][]*GamePlayer
+	namedGames            map[string][]*Game
+	namedWonGames         map[string][]*Game
+	namedCurrentTurnGames map[string][]*Game
+	namedGamePlayer       map[string][]*GamePlayer
 }
 
 // GamesOrErr returns the Games value or an error if the edge
@@ -66,13 +66,13 @@ func (e UserEdges) WonGamesOrErr() ([]*Game, error) {
 	return nil, &NotLoadedError{edge: "won_games"}
 }
 
-// TurnGamesOrErr returns the TurnGames value or an error if the edge
+// CurrentTurnGamesOrErr returns the CurrentTurnGames value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) TurnGamesOrErr() ([]*Game, error) {
+func (e UserEdges) CurrentTurnGamesOrErr() ([]*Game, error) {
 	if e.loadedTypes[2] {
-		return e.TurnGames, nil
+		return e.CurrentTurnGames, nil
 	}
-	return nil, &NotLoadedError{edge: "turn_games"}
+	return nil, &NotLoadedError{edge: "current_turn_games"}
 }
 
 // GamePlayerOrErr returns the GamePlayer value or an error if the edge
@@ -149,9 +149,9 @@ func (u *User) QueryWonGames() *GameQuery {
 	return NewUserClient(u.config).QueryWonGames(u)
 }
 
-// QueryTurnGames queries the "turn_games" edge of the User entity.
-func (u *User) QueryTurnGames() *GameQuery {
-	return NewUserClient(u.config).QueryTurnGames(u)
+// QueryCurrentTurnGames queries the "current_turn_games" edge of the User entity.
+func (u *User) QueryCurrentTurnGames() *GameQuery {
+	return NewUserClient(u.config).QueryCurrentTurnGames(u)
 }
 
 // QueryGamePlayer queries the "game_player" edge of the User entity.
@@ -238,27 +238,27 @@ func (u *User) appendNamedWonGames(name string, edges ...*Game) {
 	}
 }
 
-// NamedTurnGames returns the TurnGames named value or an error if the edge was not
+// NamedCurrentTurnGames returns the CurrentTurnGames named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedTurnGames(name string) ([]*Game, error) {
-	if u.Edges.namedTurnGames == nil {
+func (u *User) NamedCurrentTurnGames(name string) ([]*Game, error) {
+	if u.Edges.namedCurrentTurnGames == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedTurnGames[name]
+	nodes, ok := u.Edges.namedCurrentTurnGames[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedTurnGames(name string, edges ...*Game) {
-	if u.Edges.namedTurnGames == nil {
-		u.Edges.namedTurnGames = make(map[string][]*Game)
+func (u *User) appendNamedCurrentTurnGames(name string, edges ...*Game) {
+	if u.Edges.namedCurrentTurnGames == nil {
+		u.Edges.namedCurrentTurnGames = make(map[string][]*Game)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedTurnGames[name] = []*Game{}
+		u.Edges.namedCurrentTurnGames[name] = []*Game{}
 	} else {
-		u.Edges.namedTurnGames[name] = append(u.Edges.namedTurnGames[name], edges...)
+		u.Edges.namedCurrentTurnGames[name] = append(u.Edges.namedCurrentTurnGames[name], edges...)
 	}
 }
 

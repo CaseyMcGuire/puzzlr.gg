@@ -721,15 +721,15 @@ func (c *UserClient) QueryWonGames(u *User) *GameQuery {
 	return query
 }
 
-// QueryTurnGames queries the turn_games edge of a User.
-func (c *UserClient) QueryTurnGames(u *User) *GameQuery {
+// QueryCurrentTurnGames queries the current_turn_games edge of a User.
+func (c *UserClient) QueryCurrentTurnGames(u *User) *GameQuery {
 	query := (&GameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(game.Table, game.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.TurnGamesTable, user.TurnGamesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CurrentTurnGamesTable, user.CurrentTurnGamesColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

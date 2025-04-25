@@ -6,13 +6,13 @@ package resolvers
 
 import (
 	"context"
+
 	graphql1 "puzzlr.gg/src/server/graphql/generated"
 	"puzzlr.gg/src/server/graphql/models"
 )
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input models.NewTodo) (*models.Todo, error) {
-
 	return nil, nil
 }
 

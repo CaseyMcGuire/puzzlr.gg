@@ -239,21 +239,21 @@ func HasWonGamesWith(preds ...predicate.Game) predicate.User {
 	})
 }
 
-// HasTurnGames applies the HasEdge predicate on the "turn_games" edge.
-func HasTurnGames() predicate.User {
+// HasCurrentTurnGames applies the HasEdge predicate on the "current_turn_games" edge.
+func HasCurrentTurnGames() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TurnGamesTable, TurnGamesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, CurrentTurnGamesTable, CurrentTurnGamesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTurnGamesWith applies the HasEdge predicate on the "turn_games" edge with a given conditions (other predicates).
-func HasTurnGamesWith(preds ...predicate.Game) predicate.User {
+// HasCurrentTurnGamesWith applies the HasEdge predicate on the "current_turn_games" edge with a given conditions (other predicates).
+func HasCurrentTurnGamesWith(preds ...predicate.Game) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newTurnGamesStep()
+		step := newCurrentTurnGamesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
