@@ -55,7 +55,7 @@ func main() {
 		}
 	})
 
-	srv := build.CreateGraphqlServer()
+	srv := build.CreateGraphqlServer(dbClient)
 
 	http.Handle("/graphql_playground", playground.Handler("GraphQL playground", "/graphql"))
 	http.Handle("/graphql", srv)

@@ -10,7 +10,26 @@ import (
 
 	"puzzlr.gg/src/server/db/ent/codegen"
 	graphql1 "puzzlr.gg/src/server/graphql/generated"
+	"puzzlr.gg/src/server/graphql/models"
 )
+
+// Board is the resolver for the board field.
+func (r *gameResolver) Board(ctx context.Context, obj *codegen.Game) (*models.GameBoard, error) {
+	rows := make([]*models.GameBoardRow, 0)
+	for _, row := range obj.Board {
+		elemPtrs := make([]*string, len(row))
+		for i, elem := range row {
+			elemPtrs[i] = &elem
+		}
+		rows = append(rows, &models.GameBoardRow{
+			Elements: elemPtrs,
+		})
+	}
+
+	return &models.GameBoard{
+		Rows: rows,
+	}, nil
+}
 
 // Node is the resolver for the node field.
 func (r *queryResolver) Node(ctx context.Context, id string) (codegen.Noder, error) {
@@ -22,7 +41,16 @@ func (r *queryResolver) Nodes(ctx context.Context, ids []string) ([]codegen.Node
 	panic(fmt.Errorf("not implemented: Nodes - nodes"))
 }
 
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*codegen.User, error) {
+	return r.Ent.User.Query().All(ctx)
+}
+
+// Game returns graphql1.GameResolver implementation.
+func (r *Resolver) Game() graphql1.GameResolver { return &gameResolver{r} }
+
 // Query returns graphql1.QueryResolver implementation.
 func (r *Resolver) Query() graphql1.QueryResolver { return &queryResolver{r} }
 
+type gameResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

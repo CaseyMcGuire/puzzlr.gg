@@ -569,6 +569,10 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNGameBoard2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐGameBoard(ctx context.Context, sel ast.SelectionSet, v models.GameBoard) graphql.Marshaler {
+	return ec._GameBoard(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNGameBoard2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐGameBoard(ctx context.Context, sel ast.SelectionSet, v *models.GameBoard) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

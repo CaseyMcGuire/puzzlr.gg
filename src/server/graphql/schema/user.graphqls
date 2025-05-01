@@ -1,7 +1,0 @@
-extend type Query {
-    user(id: ID): User!
-}
-
-extend type User {
-    playedGames: [Game!]!
-}
