@@ -5,8 +5,10 @@ import {IndexPageQuery} from "relay/__generated__/IndexPageQuery.graphql";
 export default function IndexPage() {
   const query = useLazyLoadQuery<IndexPageQuery>(graphql`
     query IndexPageQuery {
-        todos {
-            id
+        users {
+            games {
+                id
+            }
         }
     }
   `, {});

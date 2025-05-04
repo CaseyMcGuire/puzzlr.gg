@@ -32,12 +32,12 @@ func (r *gameResolver) Board(ctx context.Context, obj *codegen.Game) (*models.Ga
 }
 
 // Node is the resolver for the node field.
-func (r *queryResolver) Node(ctx context.Context, id string) (codegen.Noder, error) {
+func (r *queryResolver) Node(ctx context.Context, id int) (codegen.Noder, error) {
 	panic(fmt.Errorf("not implemented: Node - node"))
 }
 
 // Nodes is the resolver for the nodes field.
-func (r *queryResolver) Nodes(ctx context.Context, ids []string) ([]codegen.Noder, error) {
+func (r *queryResolver) Nodes(ctx context.Context, ids []int) ([]codegen.Noder, error) {
 	panic(fmt.Errorf("not implemented: Nodes - nodes"))
 }
 
