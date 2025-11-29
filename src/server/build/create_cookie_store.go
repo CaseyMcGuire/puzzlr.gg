@@ -1,11 +1,12 @@
 package build
 
 import (
-	"github.com/gorilla/securecookie"
-	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/securecookie"
+	"github.com/gorilla/sessions"
 )
 
 func CreateCookieStore() *sessions.CookieStore {
