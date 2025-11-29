@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/joho/godotenv"
 	"puzzlr.gg/src/server/build"
 	"puzzlr.gg/src/server/controllers"
 	"puzzlr.gg/src/server/db"
 	ent "puzzlr.gg/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/middleware"
 	"puzzlr.gg/src/server/util"
 	"puzzlr.gg/src/server/views"
 )
@@ -56,8 +58,9 @@ func main() {
 	})
 
 	srv := build.CreateGraphqlServer(dbClient)
+	var mainHandler http.Handler = http.DefaultServeMux
 
-	http.Handle("/graphql_playground", playground.Handler("GraphQL playground", "/graphql"))
+	http.Handle("/graphql_playground", middleware.AuthMiddleware(playground.Handler("GraphQL playground", "/graphql")))
 	http.Handle("/graphql", srv)
 
 	http.HandleFunc("/login", userController.HandleLogin)
@@ -65,7 +68,7 @@ func main() {
 	http.HandleFunc("/logout", userController.HandleLogout)
 
 	fmt.Printf("Starting server...")
-	err = http.ListenAndServe(":3001", nil)
+	err = http.ListenAndServe(":3001", mainHandler)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Failed starting server %v", err))
 		return

@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"github.com/gorilla/sessions"
 	"net/http"
+	"puzzlr.gg/src/server/build"
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/services"
 	"puzzlr.gg/src/server/views"
@@ -13,13 +13,14 @@ type UserController struct {
 }
 
 var (
-	store         = sessions.NewCookieStore([]byte("secret-key"))
-	authenticated = "authenticated"
+	Store         = build.CreateCookieStore()
+	Authenticated = "authenticated"
+	UserID        = "UserID"
 )
 
 func (u *UserController) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "user_session")
-	if auth, ok := session.Values[authenticated].(bool); ok && auth {
+	session, _ := Store.Get(r, "user_session")
+	if auth, ok := session.Values[Authenticated].(bool); ok && auth {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -30,14 +31,15 @@ func (u *UserController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodPost {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
-		exists, err := u.userService.UserWithPasswordExists(r.Context(), email, password)
+		user, err := u.userService.GetUserWithPassword(r.Context(), email, password)
 		if err != nil {
 			http.Redirect(w, r, "/500", http.StatusInternalServerError)
 			return
 		}
 
-		if exists {
-			session.Values[authenticated] = true
+		if user != nil {
+			session.Values[Authenticated] = true
+			session.Values[UserID] = user.ID
 			sessionErr := session.Save(r, w)
 			if sessionErr == nil {
 				http.Redirect(w, r, "/", http.StatusOK)
@@ -53,8 +55,8 @@ func (u *UserController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserController) HandleRegister(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "user_session")
-	if auth, ok := session.Values[authenticated].(bool); ok && auth {
+	session, _ := Store.Get(r, "user_session")
+	if auth, ok := session.Values[Authenticated].(bool); ok && auth {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -84,9 +86,11 @@ func (u *UserController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 }
 
 func (u *UserController) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "user_session")
+	session, _ := Store.Get(r, "user_session")
 
 	// Set MaxAge to -1 to delete the cookie
+	session.Values[Authenticated] = false
+	session.Values[UserID] = -1
 	session.Options.MaxAge = -1
 	_ = session.Save(r, w)
 	http.Redirect(w, r, "/", http.StatusFound)

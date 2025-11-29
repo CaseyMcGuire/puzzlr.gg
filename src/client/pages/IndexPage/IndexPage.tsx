@@ -16,10 +16,10 @@ export default function IndexPage() {
   return (
     <div>
       {
-        query.todos.map(todo => {
+        query.users.map(users => {
           return (
             <div>
-              {todo.id}
+              {users.games?.map(game => game.id ?? "asdf")}
             </div>
           )
         })

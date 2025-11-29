@@ -41,7 +41,7 @@ func (u *UserService) UserExists(ctx context.Context, email string) (bool, error
 	return exists, nil
 }
 
-func (u *UserService) UserWithPasswordExists(ctx context.Context, email string, password string) (bool, error) {
+func (u *UserService) GetUserWithPassword(ctx context.Context, email string, password string) (*ent.User, error) {
 	storedUser, err := u.dbClient.User.
 		Query().
 		Where(user.Email(email)).
@@ -49,12 +49,15 @@ func (u *UserService) UserWithPasswordExists(ctx context.Context, email string, 
 
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return false, nil
+			return nil, nil
 		}
-		return false, err
+		return nil, err
 	}
 
-	return checkPassword(storedUser.HashedPassword, password), nil
+	if !checkPassword(storedUser.HashedPassword, password) {
+		return nil, nil
+	}
+	return storedUser, nil
 }
 
 func HashPassword(password string) (string, error) {
