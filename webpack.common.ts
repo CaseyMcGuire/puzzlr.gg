@@ -1,12 +1,6 @@
 import path from "path";
 import { Configuration } from "webpack";
 
-
-// @ts-ignore
-import StylexPlugin from "./packages/stylex-webpack-plugin/index";
-
-
-
 const config : Configuration = {
   entry: {
     index: './src/client/App'
@@ -47,9 +41,6 @@ const config : Configuration = {
       }
     ]
   },
-  plugins: [
-    new StylexPlugin(),
-  ],
   externalsType: "module",
   externals: [
     'react',

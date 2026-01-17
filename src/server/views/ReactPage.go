@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/components"
 	"maragu.dev/gomponents/html"
@@ -26,8 +27,8 @@ func ReactPage(title string, bundleName string) Node {
 					Attr("type", "importmap"),
 					Raw(`{
               "imports": {
-                "react": "https://esm.sh/react@18.3.1",
-                "react-dom": "https://esm.sh/react-dom@18.3.1"
+                "react": "https://esm.sh/react@19.2.3",
+                "react-dom": "https://esm.sh/react-dom@19.2.3"
               }
             }`),
 				),
