@@ -1,6 +1,12 @@
 import {graphql, useLazyLoadQuery} from "react-relay";
 import {IndexPageQuery} from "relay/__generated__/IndexPageQuery.graphql";
+import * as stylex from "@stylexjs/stylex";
 
+const styles = stylex.create({
+  body: {
+    backgroundColor: 'green'
+  }
+});
 
 export default function IndexPage() {
   const query = useLazyLoadQuery<IndexPageQuery>(graphql`
@@ -24,7 +30,7 @@ export default function IndexPage() {
           )
         })
       }
-      <div>hello</div>
+      <div {...stylex.props(styles.body)}>hello</div>
     </div>
   )
 }

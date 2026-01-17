@@ -1,5 +1,7 @@
 import path from "path";
 import { Configuration } from "webpack";
+import stylexPlugin from "@stylexjs/unplugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 const config : Configuration = {
   entry: {
@@ -38,7 +40,14 @@ const config : Configuration = {
         enforce: "pre",
         test: /\.js$/,
         loader: "source-map-loader"
-      }
+      },
+      {
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader'
+        ]
+      },
     ]
   },
   externalsType: "module",
@@ -49,6 +58,14 @@ const config : Configuration = {
   experiments: {
     outputModule: true, // Tells webpack it can output ES modules
   },
+  plugins: [
+    stylexPlugin.webpack({
+      useCSSLayers: true
+    }),
+    new MiniCssExtractPlugin({
+      filename: '[name].stylex.css'
+    })
+  ],
 };
 
 export default config;

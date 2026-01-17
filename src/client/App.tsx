@@ -7,6 +7,7 @@ import {RelayEnvironmentProvider} from "react-relay";
 import {RelayConfig} from "relay/RelayConfig";
 import { Suspense } from "react";
 import IndexPage from "pages/IndexPage/IndexPage";
+import 'stylex.css';
 
 const styles = stylex.create({
   body: {

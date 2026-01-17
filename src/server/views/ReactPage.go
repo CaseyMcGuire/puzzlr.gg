@@ -32,18 +32,6 @@ func ReactPage(title string, bundleName string) Node {
               }
             }`),
 				),
-				html.Style(
-					`
-              * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-              }
- 
-              html, body, #root {
-                height: 100%;
-              }
-        `),
 			},
 			Body: []Node{
 				html.Div(Attr("id", "root")),
