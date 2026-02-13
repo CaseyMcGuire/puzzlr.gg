@@ -1,8 +1,6 @@
 package views
 
 import (
-	"fmt"
-
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/components"
 	"maragu.dev/gomponents/html"
@@ -21,7 +19,7 @@ func ReactPage(title string, bundleName string) Node {
 				),
 				html.Link(
 					Attr("rel", "stylesheet"),
-					Attr("href", fmt.Sprintf("/assets/bundles/%s.stylex.css", bundleName)),
+					Attr("href", "/assets/bundles/stylex.stylex.css"),
 				),
 				html.Script(
 					Attr("type", "importmap"),
@@ -36,7 +34,7 @@ func ReactPage(title string, bundleName string) Node {
 			Body: []Node{
 				html.Div(Attr("id", "root")),
 				html.Script(
-					Attr("src", fmt.Sprintf("/assets/bundles/%s.bundle.js", bundleName)),
+					Attr("src", "/assets/bundles/bundle.js"),
 					Attr("type", "module"),
 				),
 			},

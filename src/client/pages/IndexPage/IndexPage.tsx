@@ -4,7 +4,7 @@ import * as stylex from "@stylexjs/stylex";
 
 const styles = stylex.create({
   body: {
-    backgroundColor: 'green'
+    backgroundColor: 'blue'
   }
 });
 

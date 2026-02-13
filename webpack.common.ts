@@ -5,7 +5,8 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 const config : Configuration = {
   entry: {
-    index: './src/client/App'
+    stylex: './src/client/stylex',
+    index: './src/client/App',
   },
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
@@ -60,7 +61,8 @@ const config : Configuration = {
   },
   plugins: [
     stylexPlugin.webpack({
-      useCSSLayers: true
+      useCSSLayers: true,
+      cssInjectionTarget: (fileName: string) => fileName.includes('stylex'),
     }),
     new MiniCssExtractPlugin({
       filename: '[name].stylex.css'
