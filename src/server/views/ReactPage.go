@@ -26,7 +26,10 @@ func ReactPage(title string, bundleName string) Node {
 					Raw(`{
               "imports": {
                 "react": "https://esm.sh/react@19.2.3",
-                "react-dom": "https://esm.sh/react-dom@19.2.3"
+                "react-dom": "https://esm.sh/react-dom@19.2.3",
+                "react-dom/client": "https://esm.sh/react-dom@19.2.3/client",
+                "react/jsx-runtime": "https://esm.sh/react@19.2.3/jsx-runtime",
+                "react/jsx-dev-runtime": "https://esm.sh/react@19.2.3/jsx-dev-runtime"
               }
             }`),
 				),

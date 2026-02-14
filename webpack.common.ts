@@ -55,6 +55,9 @@ const config : Configuration = {
   externals: [
     'react',
     'react-dom',
+    'react-dom/client',
+    'react/jsx-runtime',
+    'react/jsx-dev-runtime',
   ],
   experiments: {
     outputModule: true, // Tells webpack it can output ES modules
