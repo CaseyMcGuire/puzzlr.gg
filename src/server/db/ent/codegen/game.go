@@ -121,7 +121,7 @@ func (*Game) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Game fields.
-func (ga *Game) assignValues(columns []string, values []any) error {
+func (_m *Game) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -132,30 +132,30 @@ func (ga *Game) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ga.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case game.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				ga.CreateTime = value.Time
+				_m.CreateTime = value.Time
 			}
 		case game.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				ga.UpdateTime = value.Time
+				_m.UpdateTime = value.Time
 			}
 		case game.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				ga.Type = game.Type(value.String)
+				_m.Type = game.Type(value.String)
 			}
 		case game.FieldBoard:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field board", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &ga.Board); err != nil {
+				if err := json.Unmarshal(*value, &_m.Board); err != nil {
 					return fmt.Errorf("unmarshal field board: %w", err)
 				}
 			}
@@ -163,18 +163,18 @@ func (ga *Game) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_won_games", value)
 			} else if value.Valid {
-				ga.user_won_games = new(int)
-				*ga.user_won_games = int(value.Int64)
+				_m.user_won_games = new(int)
+				*_m.user_won_games = int(value.Int64)
 			}
 		case game.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_current_turn_games", value)
 			} else if value.Valid {
-				ga.user_current_turn_games = new(int)
-				*ga.user_current_turn_games = int(value.Int64)
+				_m.user_current_turn_games = new(int)
+				*_m.user_current_turn_games = int(value.Int64)
 			}
 		default:
-			ga.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -182,113 +182,113 @@ func (ga *Game) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Game.
 // This includes values selected through modifiers, order, etc.
-func (ga *Game) Value(name string) (ent.Value, error) {
-	return ga.selectValues.Get(name)
+func (_m *Game) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Game entity.
-func (ga *Game) QueryUser() *UserQuery {
-	return NewGameClient(ga.config).QueryUser(ga)
+func (_m *Game) QueryUser() *UserQuery {
+	return NewGameClient(_m.config).QueryUser(_m)
 }
 
 // QueryWinner queries the "winner" edge of the Game entity.
-func (ga *Game) QueryWinner() *UserQuery {
-	return NewGameClient(ga.config).QueryWinner(ga)
+func (_m *Game) QueryWinner() *UserQuery {
+	return NewGameClient(_m.config).QueryWinner(_m)
 }
 
 // QueryCurrentTurn queries the "current_turn" edge of the Game entity.
-func (ga *Game) QueryCurrentTurn() *UserQuery {
-	return NewGameClient(ga.config).QueryCurrentTurn(ga)
+func (_m *Game) QueryCurrentTurn() *UserQuery {
+	return NewGameClient(_m.config).QueryCurrentTurn(_m)
 }
 
 // QueryGamePlayer queries the "game_player" edge of the Game entity.
-func (ga *Game) QueryGamePlayer() *GamePlayerQuery {
-	return NewGameClient(ga.config).QueryGamePlayer(ga)
+func (_m *Game) QueryGamePlayer() *GamePlayerQuery {
+	return NewGameClient(_m.config).QueryGamePlayer(_m)
 }
 
 // Update returns a builder for updating this Game.
 // Note that you need to call Game.Unwrap() before calling this method if this Game
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ga *Game) Update() *GameUpdateOne {
-	return NewGameClient(ga.config).UpdateOne(ga)
+func (_m *Game) Update() *GameUpdateOne {
+	return NewGameClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Game entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ga *Game) Unwrap() *Game {
-	_tx, ok := ga.config.driver.(*txDriver)
+func (_m *Game) Unwrap() *Game {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("codegen: Game is not a transactional entity")
 	}
-	ga.config.driver = _tx.drv
-	return ga
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ga *Game) String() string {
+func (_m *Game) String() string {
 	var builder strings.Builder
 	builder.WriteString("Game(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ga.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("create_time=")
-	builder.WriteString(ga.CreateTime.Format(time.ANSIC))
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
-	builder.WriteString(ga.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", ga.Type))
+	builder.WriteString(fmt.Sprintf("%v", _m.Type))
 	builder.WriteString(", ")
 	builder.WriteString("board=")
-	builder.WriteString(fmt.Sprintf("%v", ga.Board))
+	builder.WriteString(fmt.Sprintf("%v", _m.Board))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedUser returns the User named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (ga *Game) NamedUser(name string) ([]*User, error) {
-	if ga.Edges.namedUser == nil {
+func (_m *Game) NamedUser(name string) ([]*User, error) {
+	if _m.Edges.namedUser == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := ga.Edges.namedUser[name]
+	nodes, ok := _m.Edges.namedUser[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (ga *Game) appendNamedUser(name string, edges ...*User) {
-	if ga.Edges.namedUser == nil {
-		ga.Edges.namedUser = make(map[string][]*User)
+func (_m *Game) appendNamedUser(name string, edges ...*User) {
+	if _m.Edges.namedUser == nil {
+		_m.Edges.namedUser = make(map[string][]*User)
 	}
 	if len(edges) == 0 {
-		ga.Edges.namedUser[name] = []*User{}
+		_m.Edges.namedUser[name] = []*User{}
 	} else {
-		ga.Edges.namedUser[name] = append(ga.Edges.namedUser[name], edges...)
+		_m.Edges.namedUser[name] = append(_m.Edges.namedUser[name], edges...)
 	}
 }
 
 // NamedGamePlayer returns the GamePlayer named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (ga *Game) NamedGamePlayer(name string) ([]*GamePlayer, error) {
-	if ga.Edges.namedGamePlayer == nil {
+func (_m *Game) NamedGamePlayer(name string) ([]*GamePlayer, error) {
+	if _m.Edges.namedGamePlayer == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := ga.Edges.namedGamePlayer[name]
+	nodes, ok := _m.Edges.namedGamePlayer[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (ga *Game) appendNamedGamePlayer(name string, edges ...*GamePlayer) {
-	if ga.Edges.namedGamePlayer == nil {
-		ga.Edges.namedGamePlayer = make(map[string][]*GamePlayer)
+func (_m *Game) appendNamedGamePlayer(name string, edges ...*GamePlayer) {
+	if _m.Edges.namedGamePlayer == nil {
+		_m.Edges.namedGamePlayer = make(map[string][]*GamePlayer)
 	}
 	if len(edges) == 0 {
-		ga.Edges.namedGamePlayer[name] = []*GamePlayer{}
+		_m.Edges.namedGamePlayer[name] = []*GamePlayer{}
 	} else {
-		ga.Edges.namedGamePlayer[name] = append(ga.Edges.namedGamePlayer[name], edges...)
+		_m.Edges.namedGamePlayer[name] = append(_m.Edges.namedGamePlayer[name], edges...)
 	}
 }
 

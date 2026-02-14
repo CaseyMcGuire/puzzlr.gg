@@ -102,7 +102,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []any) error {
+func (_m *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -113,21 +113,21 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			u.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case user.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email", values[i])
 			} else if value.Valid {
-				u.Email = value.String
+				_m.Email = value.String
 			}
 		case user.FieldHashedPassword:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hashed_password", values[i])
 			} else if value.Valid {
-				u.HashedPassword = value.String
+				_m.HashedPassword = value.String
 			}
 		default:
-			u.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -135,55 +135,55 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the User.
 // This includes values selected through modifiers, order, etc.
-func (u *User) Value(name string) (ent.Value, error) {
-	return u.selectValues.Get(name)
+func (_m *User) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryGames queries the "games" edge of the User entity.
-func (u *User) QueryGames() *GameQuery {
-	return NewUserClient(u.config).QueryGames(u)
+func (_m *User) QueryGames() *GameQuery {
+	return NewUserClient(_m.config).QueryGames(_m)
 }
 
 // QueryWonGames queries the "won_games" edge of the User entity.
-func (u *User) QueryWonGames() *GameQuery {
-	return NewUserClient(u.config).QueryWonGames(u)
+func (_m *User) QueryWonGames() *GameQuery {
+	return NewUserClient(_m.config).QueryWonGames(_m)
 }
 
 // QueryCurrentTurnGames queries the "current_turn_games" edge of the User entity.
-func (u *User) QueryCurrentTurnGames() *GameQuery {
-	return NewUserClient(u.config).QueryCurrentTurnGames(u)
+func (_m *User) QueryCurrentTurnGames() *GameQuery {
+	return NewUserClient(_m.config).QueryCurrentTurnGames(_m)
 }
 
 // QueryGamePlayer queries the "game_player" edge of the User entity.
-func (u *User) QueryGamePlayer() *GamePlayerQuery {
-	return NewUserClient(u.config).QueryGamePlayer(u)
+func (_m *User) QueryGamePlayer() *GamePlayerQuery {
+	return NewUserClient(_m.config).QueryGamePlayer(_m)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return NewUserClient(u.config).UpdateOne(u)
+func (_m *User) Update() *UserUpdateOne {
+	return NewUserClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	_tx, ok := u.config.driver.(*txDriver)
+func (_m *User) Unwrap() *User {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("codegen: User is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("email=")
-	builder.WriteString(u.Email)
+	builder.WriteString(_m.Email)
 	builder.WriteString(", ")
 	builder.WriteString("hashed_password=<sensitive>")
 	builder.WriteByte(')')
@@ -192,97 +192,97 @@ func (u *User) String() string {
 
 // NamedGames returns the Games named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedGames(name string) ([]*Game, error) {
-	if u.Edges.namedGames == nil {
+func (_m *User) NamedGames(name string) ([]*Game, error) {
+	if _m.Edges.namedGames == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedGames[name]
+	nodes, ok := _m.Edges.namedGames[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedGames(name string, edges ...*Game) {
-	if u.Edges.namedGames == nil {
-		u.Edges.namedGames = make(map[string][]*Game)
+func (_m *User) appendNamedGames(name string, edges ...*Game) {
+	if _m.Edges.namedGames == nil {
+		_m.Edges.namedGames = make(map[string][]*Game)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedGames[name] = []*Game{}
+		_m.Edges.namedGames[name] = []*Game{}
 	} else {
-		u.Edges.namedGames[name] = append(u.Edges.namedGames[name], edges...)
+		_m.Edges.namedGames[name] = append(_m.Edges.namedGames[name], edges...)
 	}
 }
 
 // NamedWonGames returns the WonGames named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedWonGames(name string) ([]*Game, error) {
-	if u.Edges.namedWonGames == nil {
+func (_m *User) NamedWonGames(name string) ([]*Game, error) {
+	if _m.Edges.namedWonGames == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedWonGames[name]
+	nodes, ok := _m.Edges.namedWonGames[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedWonGames(name string, edges ...*Game) {
-	if u.Edges.namedWonGames == nil {
-		u.Edges.namedWonGames = make(map[string][]*Game)
+func (_m *User) appendNamedWonGames(name string, edges ...*Game) {
+	if _m.Edges.namedWonGames == nil {
+		_m.Edges.namedWonGames = make(map[string][]*Game)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedWonGames[name] = []*Game{}
+		_m.Edges.namedWonGames[name] = []*Game{}
 	} else {
-		u.Edges.namedWonGames[name] = append(u.Edges.namedWonGames[name], edges...)
+		_m.Edges.namedWonGames[name] = append(_m.Edges.namedWonGames[name], edges...)
 	}
 }
 
 // NamedCurrentTurnGames returns the CurrentTurnGames named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedCurrentTurnGames(name string) ([]*Game, error) {
-	if u.Edges.namedCurrentTurnGames == nil {
+func (_m *User) NamedCurrentTurnGames(name string) ([]*Game, error) {
+	if _m.Edges.namedCurrentTurnGames == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedCurrentTurnGames[name]
+	nodes, ok := _m.Edges.namedCurrentTurnGames[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedCurrentTurnGames(name string, edges ...*Game) {
-	if u.Edges.namedCurrentTurnGames == nil {
-		u.Edges.namedCurrentTurnGames = make(map[string][]*Game)
+func (_m *User) appendNamedCurrentTurnGames(name string, edges ...*Game) {
+	if _m.Edges.namedCurrentTurnGames == nil {
+		_m.Edges.namedCurrentTurnGames = make(map[string][]*Game)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedCurrentTurnGames[name] = []*Game{}
+		_m.Edges.namedCurrentTurnGames[name] = []*Game{}
 	} else {
-		u.Edges.namedCurrentTurnGames[name] = append(u.Edges.namedCurrentTurnGames[name], edges...)
+		_m.Edges.namedCurrentTurnGames[name] = append(_m.Edges.namedCurrentTurnGames[name], edges...)
 	}
 }
 
 // NamedGamePlayer returns the GamePlayer named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedGamePlayer(name string) ([]*GamePlayer, error) {
-	if u.Edges.namedGamePlayer == nil {
+func (_m *User) NamedGamePlayer(name string) ([]*GamePlayer, error) {
+	if _m.Edges.namedGamePlayer == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedGamePlayer[name]
+	nodes, ok := _m.Edges.namedGamePlayer[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedGamePlayer(name string, edges ...*GamePlayer) {
-	if u.Edges.namedGamePlayer == nil {
-		u.Edges.namedGamePlayer = make(map[string][]*GamePlayer)
+func (_m *User) appendNamedGamePlayer(name string, edges ...*GamePlayer) {
+	if _m.Edges.namedGamePlayer == nil {
+		_m.Edges.namedGamePlayer = make(map[string][]*GamePlayer)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedGamePlayer[name] = []*GamePlayer{}
+		_m.Edges.namedGamePlayer[name] = []*GamePlayer{}
 	} else {
-		u.Edges.namedGamePlayer[name] = append(u.Edges.namedGamePlayer[name], edges...)
+		_m.Edges.namedGamePlayer[name] = append(_m.Edges.namedGamePlayer[name], edges...)
 	}
 }
 

@@ -79,7 +79,7 @@ func (*GamePlayer) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the GamePlayer fields.
-func (gp *GamePlayer) assignValues(columns []string, values []any) error {
+func (_m *GamePlayer) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -90,21 +90,21 @@ func (gp *GamePlayer) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gp.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case gameplayer.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				gp.UserID = int(value.Int64)
+				_m.UserID = int(value.Int64)
 			}
 		case gameplayer.FieldGameID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field game_id", values[i])
 			} else if value.Valid {
-				gp.GameID = int(value.Int64)
+				_m.GameID = int(value.Int64)
 			}
 		default:
-			gp.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -112,48 +112,48 @@ func (gp *GamePlayer) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the GamePlayer.
 // This includes values selected through modifiers, order, etc.
-func (gp *GamePlayer) Value(name string) (ent.Value, error) {
-	return gp.selectValues.Get(name)
+func (_m *GamePlayer) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the GamePlayer entity.
-func (gp *GamePlayer) QueryUser() *UserQuery {
-	return NewGamePlayerClient(gp.config).QueryUser(gp)
+func (_m *GamePlayer) QueryUser() *UserQuery {
+	return NewGamePlayerClient(_m.config).QueryUser(_m)
 }
 
 // QueryGame queries the "game" edge of the GamePlayer entity.
-func (gp *GamePlayer) QueryGame() *GameQuery {
-	return NewGamePlayerClient(gp.config).QueryGame(gp)
+func (_m *GamePlayer) QueryGame() *GameQuery {
+	return NewGamePlayerClient(_m.config).QueryGame(_m)
 }
 
 // Update returns a builder for updating this GamePlayer.
 // Note that you need to call GamePlayer.Unwrap() before calling this method if this GamePlayer
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gp *GamePlayer) Update() *GamePlayerUpdateOne {
-	return NewGamePlayerClient(gp.config).UpdateOne(gp)
+func (_m *GamePlayer) Update() *GamePlayerUpdateOne {
+	return NewGamePlayerClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the GamePlayer entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gp *GamePlayer) Unwrap() *GamePlayer {
-	_tx, ok := gp.config.driver.(*txDriver)
+func (_m *GamePlayer) Unwrap() *GamePlayer {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("codegen: GamePlayer is not a transactional entity")
 	}
-	gp.config.driver = _tx.drv
-	return gp
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (gp *GamePlayer) String() string {
+func (_m *GamePlayer) String() string {
 	var builder strings.Builder
 	builder.WriteString("GamePlayer(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gp.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", gp.UserID))
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("game_id=")
-	builder.WriteString(fmt.Sprintf("%v", gp.GameID))
+	builder.WriteString(fmt.Sprintf("%v", _m.GameID))
 	builder.WriteByte(')')
 	return builder.String()
 }

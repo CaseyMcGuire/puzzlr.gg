@@ -274,8 +274,8 @@ func (c *GameClient) Update() *GameUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GameClient) UpdateOne(ga *Game) *GameUpdateOne {
-	mutation := newGameMutation(c.config, OpUpdateOne, withGame(ga))
+func (c *GameClient) UpdateOne(_m *Game) *GameUpdateOne {
+	mutation := newGameMutation(c.config, OpUpdateOne, withGame(_m))
 	return &GameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -292,8 +292,8 @@ func (c *GameClient) Delete() *GameDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *GameClient) DeleteOne(ga *Game) *GameDeleteOne {
-	return c.DeleteOneID(ga.ID)
+func (c *GameClient) DeleteOne(_m *Game) *GameDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -328,64 +328,64 @@ func (c *GameClient) GetX(ctx context.Context, id int) *Game {
 }
 
 // QueryUser queries the user edge of a Game.
-func (c *GameClient) QueryUser(ga *Game) *UserQuery {
+func (c *GameClient) QueryUser(_m *Game) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ga.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(game.Table, game.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, game.UserTable, game.UserPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryWinner queries the winner edge of a Game.
-func (c *GameClient) QueryWinner(ga *Game) *UserQuery {
+func (c *GameClient) QueryWinner(_m *Game) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ga.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(game.Table, game.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, game.WinnerTable, game.WinnerColumn),
 		)
-		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCurrentTurn queries the current_turn edge of a Game.
-func (c *GameClient) QueryCurrentTurn(ga *Game) *UserQuery {
+func (c *GameClient) QueryCurrentTurn(_m *Game) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ga.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(game.Table, game.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, game.CurrentTurnTable, game.CurrentTurnColumn),
 		)
-		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryGamePlayer queries the game_player edge of a Game.
-func (c *GameClient) QueryGamePlayer(ga *Game) *GamePlayerQuery {
+func (c *GameClient) QueryGamePlayer(_m *Game) *GamePlayerQuery {
 	query := (&GamePlayerClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ga.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(game.Table, game.FieldID, id),
 			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, game.GamePlayerTable, game.GamePlayerColumn),
 		)
-		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -471,8 +471,8 @@ func (c *GamePlayerClient) Update() *GamePlayerUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GamePlayerClient) UpdateOne(gp *GamePlayer) *GamePlayerUpdateOne {
-	mutation := newGamePlayerMutation(c.config, OpUpdateOne, withGamePlayer(gp))
+func (c *GamePlayerClient) UpdateOne(_m *GamePlayer) *GamePlayerUpdateOne {
+	mutation := newGamePlayerMutation(c.config, OpUpdateOne, withGamePlayer(_m))
 	return &GamePlayerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -489,8 +489,8 @@ func (c *GamePlayerClient) Delete() *GamePlayerDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *GamePlayerClient) DeleteOne(gp *GamePlayer) *GamePlayerDeleteOne {
-	return c.DeleteOneID(gp.ID)
+func (c *GamePlayerClient) DeleteOne(_m *GamePlayer) *GamePlayerDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -525,32 +525,32 @@ func (c *GamePlayerClient) GetX(ctx context.Context, id int) *GamePlayer {
 }
 
 // QueryUser queries the user edge of a GamePlayer.
-func (c *GamePlayerClient) QueryUser(gp *GamePlayer) *UserQuery {
+func (c *GamePlayerClient) QueryUser(_m *GamePlayer) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := gp.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(gameplayer.Table, gameplayer.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, gameplayer.UserTable, gameplayer.UserColumn),
 		)
-		fromV = sqlgraph.Neighbors(gp.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryGame queries the game edge of a GamePlayer.
-func (c *GamePlayerClient) QueryGame(gp *GamePlayer) *GameQuery {
+func (c *GamePlayerClient) QueryGame(_m *GamePlayer) *GameQuery {
 	query := (&GameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := gp.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(gameplayer.Table, gameplayer.FieldID, id),
 			sqlgraph.To(game.Table, game.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, gameplayer.GameTable, gameplayer.GameColumn),
 		)
-		fromV = sqlgraph.Neighbors(gp.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -636,8 +636,8 @@ func (c *UserClient) Update() *UserUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+func (c *UserClient) UpdateOne(_m *User) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(_m))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -654,8 +654,8 @@ func (c *UserClient) Delete() *UserDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
-	return c.DeleteOneID(u.ID)
+func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -690,64 +690,64 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 }
 
 // QueryGames queries the games edge of a User.
-func (c *UserClient) QueryGames(u *User) *GameQuery {
+func (c *UserClient) QueryGames(_m *User) *GameQuery {
 	query := (&GameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(game.Table, game.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.GamesTable, user.GamesPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryWonGames queries the won_games edge of a User.
-func (c *UserClient) QueryWonGames(u *User) *GameQuery {
+func (c *UserClient) QueryWonGames(_m *User) *GameQuery {
 	query := (&GameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(game.Table, game.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.WonGamesTable, user.WonGamesColumn),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryCurrentTurnGames queries the current_turn_games edge of a User.
-func (c *UserClient) QueryCurrentTurnGames(u *User) *GameQuery {
+func (c *UserClient) QueryCurrentTurnGames(_m *User) *GameQuery {
 	query := (&GameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(game.Table, game.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.CurrentTurnGamesTable, user.CurrentTurnGamesColumn),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryGamePlayer queries the game_player edge of a User.
-func (c *UserClient) QueryGamePlayer(u *User) *GamePlayerQuery {
+func (c *UserClient) QueryGamePlayer(_m *User) *GamePlayerQuery {
 	query := (&GamePlayerClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.GamePlayerTable, user.GamePlayerColumn),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query

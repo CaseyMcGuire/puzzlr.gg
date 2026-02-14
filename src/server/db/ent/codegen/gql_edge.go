@@ -8,42 +8,42 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func (ga *Game) User(ctx context.Context) (result []*User, err error) {
+func (_m *Game) User(ctx context.Context) (result []*User, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = ga.NamedUser(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedUser(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = ga.Edges.UserOrErr()
+		result, err = _m.Edges.UserOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = ga.QueryUser().All(ctx)
+		result, err = _m.QueryUser().All(ctx)
 	}
 	return result, err
 }
 
-func (ga *Game) Winner(ctx context.Context) (*User, error) {
-	result, err := ga.Edges.WinnerOrErr()
+func (_m *Game) Winner(ctx context.Context) (*User, error) {
+	result, err := _m.Edges.WinnerOrErr()
 	if IsNotLoaded(err) {
-		result, err = ga.QueryWinner().Only(ctx)
+		result, err = _m.QueryWinner().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (ga *Game) CurrentTurn(ctx context.Context) (*User, error) {
-	result, err := ga.Edges.CurrentTurnOrErr()
+func (_m *Game) CurrentTurn(ctx context.Context) (*User, error) {
+	result, err := _m.Edges.CurrentTurnOrErr()
 	if IsNotLoaded(err) {
-		result, err = ga.QueryCurrentTurn().Only(ctx)
+		result, err = _m.QueryCurrentTurn().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (u *User) Games(ctx context.Context) (result []*Game, err error) {
+func (_m *User) Games(ctx context.Context) (result []*Game, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = u.NamedGames(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedGames(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = u.Edges.GamesOrErr()
+		result, err = _m.Edges.GamesOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = u.QueryGames().All(ctx)
+		result, err = _m.QueryGames().All(ctx)
 	}
 	return result, err
 }

@@ -26,165 +26,165 @@ type GameUpdate struct {
 }
 
 // Where appends a list predicates to the GameUpdate builder.
-func (gu *GameUpdate) Where(ps ...predicate.Game) *GameUpdate {
-	gu.mutation.Where(ps...)
-	return gu
+func (_u *GameUpdate) Where(ps ...predicate.Game) *GameUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (gu *GameUpdate) SetUpdateTime(t time.Time) *GameUpdate {
-	gu.mutation.SetUpdateTime(t)
-	return gu
+func (_u *GameUpdate) SetUpdateTime(v time.Time) *GameUpdate {
+	_u.mutation.SetUpdateTime(v)
+	return _u
 }
 
 // SetBoard sets the "board" field.
-func (gu *GameUpdate) SetBoard(s [][]string) *GameUpdate {
-	gu.mutation.SetBoard(s)
-	return gu
+func (_u *GameUpdate) SetBoard(v [][]string) *GameUpdate {
+	_u.mutation.SetBoard(v)
+	return _u
 }
 
-// AppendBoard appends s to the "board" field.
-func (gu *GameUpdate) AppendBoard(s [][]string) *GameUpdate {
-	gu.mutation.AppendBoard(s)
-	return gu
+// AppendBoard appends value to the "board" field.
+func (_u *GameUpdate) AppendBoard(v [][]string) *GameUpdate {
+	_u.mutation.AppendBoard(v)
+	return _u
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (gu *GameUpdate) AddUserIDs(ids ...int) *GameUpdate {
-	gu.mutation.AddUserIDs(ids...)
-	return gu
+func (_u *GameUpdate) AddUserIDs(ids ...int) *GameUpdate {
+	_u.mutation.AddUserIDs(ids...)
+	return _u
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (gu *GameUpdate) AddUser(u ...*User) *GameUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GameUpdate) AddUser(v ...*User) *GameUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gu.AddUserIDs(ids...)
+	return _u.AddUserIDs(ids...)
 }
 
 // SetWinnerID sets the "winner" edge to the User entity by ID.
-func (gu *GameUpdate) SetWinnerID(id int) *GameUpdate {
-	gu.mutation.SetWinnerID(id)
-	return gu
+func (_u *GameUpdate) SetWinnerID(id int) *GameUpdate {
+	_u.mutation.SetWinnerID(id)
+	return _u
 }
 
 // SetNillableWinnerID sets the "winner" edge to the User entity by ID if the given value is not nil.
-func (gu *GameUpdate) SetNillableWinnerID(id *int) *GameUpdate {
+func (_u *GameUpdate) SetNillableWinnerID(id *int) *GameUpdate {
 	if id != nil {
-		gu = gu.SetWinnerID(*id)
+		_u = _u.SetWinnerID(*id)
 	}
-	return gu
+	return _u
 }
 
 // SetWinner sets the "winner" edge to the User entity.
-func (gu *GameUpdate) SetWinner(u *User) *GameUpdate {
-	return gu.SetWinnerID(u.ID)
+func (_u *GameUpdate) SetWinner(v *User) *GameUpdate {
+	return _u.SetWinnerID(v.ID)
 }
 
 // SetCurrentTurnID sets the "current_turn" edge to the User entity by ID.
-func (gu *GameUpdate) SetCurrentTurnID(id int) *GameUpdate {
-	gu.mutation.SetCurrentTurnID(id)
-	return gu
+func (_u *GameUpdate) SetCurrentTurnID(id int) *GameUpdate {
+	_u.mutation.SetCurrentTurnID(id)
+	return _u
 }
 
 // SetNillableCurrentTurnID sets the "current_turn" edge to the User entity by ID if the given value is not nil.
-func (gu *GameUpdate) SetNillableCurrentTurnID(id *int) *GameUpdate {
+func (_u *GameUpdate) SetNillableCurrentTurnID(id *int) *GameUpdate {
 	if id != nil {
-		gu = gu.SetCurrentTurnID(*id)
+		_u = _u.SetCurrentTurnID(*id)
 	}
-	return gu
+	return _u
 }
 
 // SetCurrentTurn sets the "current_turn" edge to the User entity.
-func (gu *GameUpdate) SetCurrentTurn(u *User) *GameUpdate {
-	return gu.SetCurrentTurnID(u.ID)
+func (_u *GameUpdate) SetCurrentTurn(v *User) *GameUpdate {
+	return _u.SetCurrentTurnID(v.ID)
 }
 
 // AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
-func (gu *GameUpdate) AddGamePlayerIDs(ids ...int) *GameUpdate {
-	gu.mutation.AddGamePlayerIDs(ids...)
-	return gu
+func (_u *GameUpdate) AddGamePlayerIDs(ids ...int) *GameUpdate {
+	_u.mutation.AddGamePlayerIDs(ids...)
+	return _u
 }
 
 // AddGamePlayer adds the "game_player" edges to the GamePlayer entity.
-func (gu *GameUpdate) AddGamePlayer(g ...*GamePlayer) *GameUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GameUpdate) AddGamePlayer(v ...*GamePlayer) *GameUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gu.AddGamePlayerIDs(ids...)
+	return _u.AddGamePlayerIDs(ids...)
 }
 
 // Mutation returns the GameMutation object of the builder.
-func (gu *GameUpdate) Mutation() *GameMutation {
-	return gu.mutation
+func (_u *GameUpdate) Mutation() *GameMutation {
+	return _u.mutation
 }
 
 // ClearUser clears all "user" edges to the User entity.
-func (gu *GameUpdate) ClearUser() *GameUpdate {
-	gu.mutation.ClearUser()
-	return gu
+func (_u *GameUpdate) ClearUser() *GameUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (gu *GameUpdate) RemoveUserIDs(ids ...int) *GameUpdate {
-	gu.mutation.RemoveUserIDs(ids...)
-	return gu
+func (_u *GameUpdate) RemoveUserIDs(ids ...int) *GameUpdate {
+	_u.mutation.RemoveUserIDs(ids...)
+	return _u
 }
 
 // RemoveUser removes "user" edges to User entities.
-func (gu *GameUpdate) RemoveUser(u ...*User) *GameUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GameUpdate) RemoveUser(v ...*User) *GameUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gu.RemoveUserIDs(ids...)
+	return _u.RemoveUserIDs(ids...)
 }
 
 // ClearWinner clears the "winner" edge to the User entity.
-func (gu *GameUpdate) ClearWinner() *GameUpdate {
-	gu.mutation.ClearWinner()
-	return gu
+func (_u *GameUpdate) ClearWinner() *GameUpdate {
+	_u.mutation.ClearWinner()
+	return _u
 }
 
 // ClearCurrentTurn clears the "current_turn" edge to the User entity.
-func (gu *GameUpdate) ClearCurrentTurn() *GameUpdate {
-	gu.mutation.ClearCurrentTurn()
-	return gu
+func (_u *GameUpdate) ClearCurrentTurn() *GameUpdate {
+	_u.mutation.ClearCurrentTurn()
+	return _u
 }
 
 // ClearGamePlayer clears all "game_player" edges to the GamePlayer entity.
-func (gu *GameUpdate) ClearGamePlayer() *GameUpdate {
-	gu.mutation.ClearGamePlayer()
-	return gu
+func (_u *GameUpdate) ClearGamePlayer() *GameUpdate {
+	_u.mutation.ClearGamePlayer()
+	return _u
 }
 
 // RemoveGamePlayerIDs removes the "game_player" edge to GamePlayer entities by IDs.
-func (gu *GameUpdate) RemoveGamePlayerIDs(ids ...int) *GameUpdate {
-	gu.mutation.RemoveGamePlayerIDs(ids...)
-	return gu
+func (_u *GameUpdate) RemoveGamePlayerIDs(ids ...int) *GameUpdate {
+	_u.mutation.RemoveGamePlayerIDs(ids...)
+	return _u
 }
 
 // RemoveGamePlayer removes "game_player" edges to GamePlayer entities.
-func (gu *GameUpdate) RemoveGamePlayer(g ...*GamePlayer) *GameUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GameUpdate) RemoveGamePlayer(v ...*GamePlayer) *GameUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gu.RemoveGamePlayerIDs(ids...)
+	return _u.RemoveGamePlayerIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (gu *GameUpdate) Save(ctx context.Context) (int, error) {
-	gu.defaults()
-	return withHooks(ctx, gu.sqlSave, gu.mutation, gu.hooks)
+func (_u *GameUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gu *GameUpdate) SaveX(ctx context.Context) int {
-	affected, err := gu.Save(ctx)
+func (_u *GameUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -192,47 +192,47 @@ func (gu *GameUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (gu *GameUpdate) Exec(ctx context.Context) error {
-	_, err := gu.Save(ctx)
+func (_u *GameUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gu *GameUpdate) ExecX(ctx context.Context) {
-	if err := gu.Exec(ctx); err != nil {
+func (_u *GameUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (gu *GameUpdate) defaults() {
-	if _, ok := gu.mutation.UpdateTime(); !ok {
+func (_u *GameUpdate) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
 		v := game.UpdateDefaultUpdateTime()
-		gu.mutation.SetUpdateTime(v)
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
-func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GameUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(game.Table, game.Columns, sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt))
-	if ps := gu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := gu.mutation.UpdateTime(); ok {
+	if value, ok := _u.mutation.UpdateTime(); ok {
 		_spec.SetField(game.FieldUpdateTime, field.TypeTime, value)
 	}
-	if value, ok := gu.mutation.Board(); ok {
+	if value, ok := _u.mutation.Board(); ok {
 		_spec.SetField(game.FieldBoard, field.TypeJSON, value)
 	}
-	if value, ok := gu.mutation.AppendedBoard(); ok {
+	if value, ok := _u.mutation.AppendedBoard(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, game.FieldBoard, value)
 		})
 	}
-	if gu.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -245,7 +245,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.RemovedUserIDs(); len(nodes) > 0 && !gu.mutation.UserCleared() {
+	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -261,7 +261,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -277,7 +277,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gu.mutation.WinnerCleared() {
+	if _u.mutation.WinnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -290,7 +290,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.WinnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.WinnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -306,7 +306,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gu.mutation.CurrentTurnCleared() {
+	if _u.mutation.CurrentTurnCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -319,7 +319,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.CurrentTurnIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CurrentTurnIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -335,7 +335,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gu.mutation.GamePlayerCleared() {
+	if _u.mutation.GamePlayerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -348,7 +348,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.RemovedGamePlayerIDs(); len(nodes) > 0 && !gu.mutation.GamePlayerCleared() {
+	if nodes := _u.mutation.RemovedGamePlayerIDs(); len(nodes) > 0 && !_u.mutation.GamePlayerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -364,7 +364,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.GamePlayerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.GamePlayerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -380,7 +380,7 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{game.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -388,8 +388,8 @@ func (gu *GameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	gu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // GameUpdateOne is the builder for updating a single Game entity.
@@ -401,172 +401,172 @@ type GameUpdateOne struct {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (guo *GameUpdateOne) SetUpdateTime(t time.Time) *GameUpdateOne {
-	guo.mutation.SetUpdateTime(t)
-	return guo
+func (_u *GameUpdateOne) SetUpdateTime(v time.Time) *GameUpdateOne {
+	_u.mutation.SetUpdateTime(v)
+	return _u
 }
 
 // SetBoard sets the "board" field.
-func (guo *GameUpdateOne) SetBoard(s [][]string) *GameUpdateOne {
-	guo.mutation.SetBoard(s)
-	return guo
+func (_u *GameUpdateOne) SetBoard(v [][]string) *GameUpdateOne {
+	_u.mutation.SetBoard(v)
+	return _u
 }
 
-// AppendBoard appends s to the "board" field.
-func (guo *GameUpdateOne) AppendBoard(s [][]string) *GameUpdateOne {
-	guo.mutation.AppendBoard(s)
-	return guo
+// AppendBoard appends value to the "board" field.
+func (_u *GameUpdateOne) AppendBoard(v [][]string) *GameUpdateOne {
+	_u.mutation.AppendBoard(v)
+	return _u
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (guo *GameUpdateOne) AddUserIDs(ids ...int) *GameUpdateOne {
-	guo.mutation.AddUserIDs(ids...)
-	return guo
+func (_u *GameUpdateOne) AddUserIDs(ids ...int) *GameUpdateOne {
+	_u.mutation.AddUserIDs(ids...)
+	return _u
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (guo *GameUpdateOne) AddUser(u ...*User) *GameUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GameUpdateOne) AddUser(v ...*User) *GameUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return guo.AddUserIDs(ids...)
+	return _u.AddUserIDs(ids...)
 }
 
 // SetWinnerID sets the "winner" edge to the User entity by ID.
-func (guo *GameUpdateOne) SetWinnerID(id int) *GameUpdateOne {
-	guo.mutation.SetWinnerID(id)
-	return guo
+func (_u *GameUpdateOne) SetWinnerID(id int) *GameUpdateOne {
+	_u.mutation.SetWinnerID(id)
+	return _u
 }
 
 // SetNillableWinnerID sets the "winner" edge to the User entity by ID if the given value is not nil.
-func (guo *GameUpdateOne) SetNillableWinnerID(id *int) *GameUpdateOne {
+func (_u *GameUpdateOne) SetNillableWinnerID(id *int) *GameUpdateOne {
 	if id != nil {
-		guo = guo.SetWinnerID(*id)
+		_u = _u.SetWinnerID(*id)
 	}
-	return guo
+	return _u
 }
 
 // SetWinner sets the "winner" edge to the User entity.
-func (guo *GameUpdateOne) SetWinner(u *User) *GameUpdateOne {
-	return guo.SetWinnerID(u.ID)
+func (_u *GameUpdateOne) SetWinner(v *User) *GameUpdateOne {
+	return _u.SetWinnerID(v.ID)
 }
 
 // SetCurrentTurnID sets the "current_turn" edge to the User entity by ID.
-func (guo *GameUpdateOne) SetCurrentTurnID(id int) *GameUpdateOne {
-	guo.mutation.SetCurrentTurnID(id)
-	return guo
+func (_u *GameUpdateOne) SetCurrentTurnID(id int) *GameUpdateOne {
+	_u.mutation.SetCurrentTurnID(id)
+	return _u
 }
 
 // SetNillableCurrentTurnID sets the "current_turn" edge to the User entity by ID if the given value is not nil.
-func (guo *GameUpdateOne) SetNillableCurrentTurnID(id *int) *GameUpdateOne {
+func (_u *GameUpdateOne) SetNillableCurrentTurnID(id *int) *GameUpdateOne {
 	if id != nil {
-		guo = guo.SetCurrentTurnID(*id)
+		_u = _u.SetCurrentTurnID(*id)
 	}
-	return guo
+	return _u
 }
 
 // SetCurrentTurn sets the "current_turn" edge to the User entity.
-func (guo *GameUpdateOne) SetCurrentTurn(u *User) *GameUpdateOne {
-	return guo.SetCurrentTurnID(u.ID)
+func (_u *GameUpdateOne) SetCurrentTurn(v *User) *GameUpdateOne {
+	return _u.SetCurrentTurnID(v.ID)
 }
 
 // AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
-func (guo *GameUpdateOne) AddGamePlayerIDs(ids ...int) *GameUpdateOne {
-	guo.mutation.AddGamePlayerIDs(ids...)
-	return guo
+func (_u *GameUpdateOne) AddGamePlayerIDs(ids ...int) *GameUpdateOne {
+	_u.mutation.AddGamePlayerIDs(ids...)
+	return _u
 }
 
 // AddGamePlayer adds the "game_player" edges to the GamePlayer entity.
-func (guo *GameUpdateOne) AddGamePlayer(g ...*GamePlayer) *GameUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GameUpdateOne) AddGamePlayer(v ...*GamePlayer) *GameUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return guo.AddGamePlayerIDs(ids...)
+	return _u.AddGamePlayerIDs(ids...)
 }
 
 // Mutation returns the GameMutation object of the builder.
-func (guo *GameUpdateOne) Mutation() *GameMutation {
-	return guo.mutation
+func (_u *GameUpdateOne) Mutation() *GameMutation {
+	return _u.mutation
 }
 
 // ClearUser clears all "user" edges to the User entity.
-func (guo *GameUpdateOne) ClearUser() *GameUpdateOne {
-	guo.mutation.ClearUser()
-	return guo
+func (_u *GameUpdateOne) ClearUser() *GameUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (guo *GameUpdateOne) RemoveUserIDs(ids ...int) *GameUpdateOne {
-	guo.mutation.RemoveUserIDs(ids...)
-	return guo
+func (_u *GameUpdateOne) RemoveUserIDs(ids ...int) *GameUpdateOne {
+	_u.mutation.RemoveUserIDs(ids...)
+	return _u
 }
 
 // RemoveUser removes "user" edges to User entities.
-func (guo *GameUpdateOne) RemoveUser(u ...*User) *GameUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GameUpdateOne) RemoveUser(v ...*User) *GameUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return guo.RemoveUserIDs(ids...)
+	return _u.RemoveUserIDs(ids...)
 }
 
 // ClearWinner clears the "winner" edge to the User entity.
-func (guo *GameUpdateOne) ClearWinner() *GameUpdateOne {
-	guo.mutation.ClearWinner()
-	return guo
+func (_u *GameUpdateOne) ClearWinner() *GameUpdateOne {
+	_u.mutation.ClearWinner()
+	return _u
 }
 
 // ClearCurrentTurn clears the "current_turn" edge to the User entity.
-func (guo *GameUpdateOne) ClearCurrentTurn() *GameUpdateOne {
-	guo.mutation.ClearCurrentTurn()
-	return guo
+func (_u *GameUpdateOne) ClearCurrentTurn() *GameUpdateOne {
+	_u.mutation.ClearCurrentTurn()
+	return _u
 }
 
 // ClearGamePlayer clears all "game_player" edges to the GamePlayer entity.
-func (guo *GameUpdateOne) ClearGamePlayer() *GameUpdateOne {
-	guo.mutation.ClearGamePlayer()
-	return guo
+func (_u *GameUpdateOne) ClearGamePlayer() *GameUpdateOne {
+	_u.mutation.ClearGamePlayer()
+	return _u
 }
 
 // RemoveGamePlayerIDs removes the "game_player" edge to GamePlayer entities by IDs.
-func (guo *GameUpdateOne) RemoveGamePlayerIDs(ids ...int) *GameUpdateOne {
-	guo.mutation.RemoveGamePlayerIDs(ids...)
-	return guo
+func (_u *GameUpdateOne) RemoveGamePlayerIDs(ids ...int) *GameUpdateOne {
+	_u.mutation.RemoveGamePlayerIDs(ids...)
+	return _u
 }
 
 // RemoveGamePlayer removes "game_player" edges to GamePlayer entities.
-func (guo *GameUpdateOne) RemoveGamePlayer(g ...*GamePlayer) *GameUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GameUpdateOne) RemoveGamePlayer(v ...*GamePlayer) *GameUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return guo.RemoveGamePlayerIDs(ids...)
+	return _u.RemoveGamePlayerIDs(ids...)
 }
 
 // Where appends a list predicates to the GameUpdate builder.
-func (guo *GameUpdateOne) Where(ps ...predicate.Game) *GameUpdateOne {
-	guo.mutation.Where(ps...)
-	return guo
+func (_u *GameUpdateOne) Where(ps ...predicate.Game) *GameUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (guo *GameUpdateOne) Select(field string, fields ...string) *GameUpdateOne {
-	guo.fields = append([]string{field}, fields...)
-	return guo
+func (_u *GameUpdateOne) Select(field string, fields ...string) *GameUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Game entity.
-func (guo *GameUpdateOne) Save(ctx context.Context) (*Game, error) {
-	guo.defaults()
-	return withHooks(ctx, guo.sqlSave, guo.mutation, guo.hooks)
+func (_u *GameUpdateOne) Save(ctx context.Context) (*Game, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (guo *GameUpdateOne) SaveX(ctx context.Context) *Game {
-	node, err := guo.Save(ctx)
+func (_u *GameUpdateOne) SaveX(ctx context.Context) *Game {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -574,34 +574,34 @@ func (guo *GameUpdateOne) SaveX(ctx context.Context) *Game {
 }
 
 // Exec executes the query on the entity.
-func (guo *GameUpdateOne) Exec(ctx context.Context) error {
-	_, err := guo.Save(ctx)
+func (_u *GameUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (guo *GameUpdateOne) ExecX(ctx context.Context) {
-	if err := guo.Exec(ctx); err != nil {
+func (_u *GameUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (guo *GameUpdateOne) defaults() {
-	if _, ok := guo.mutation.UpdateTime(); !ok {
+func (_u *GameUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
 		v := game.UpdateDefaultUpdateTime()
-		guo.mutation.SetUpdateTime(v)
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
-func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) {
+func (_u *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) {
 	_spec := sqlgraph.NewUpdateSpec(game.Table, game.Columns, sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt))
-	id, ok := guo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`codegen: missing "Game.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := guo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, game.FieldID)
 		for _, f := range fields {
@@ -613,25 +613,25 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 			}
 		}
 	}
-	if ps := guo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := guo.mutation.UpdateTime(); ok {
+	if value, ok := _u.mutation.UpdateTime(); ok {
 		_spec.SetField(game.FieldUpdateTime, field.TypeTime, value)
 	}
-	if value, ok := guo.mutation.Board(); ok {
+	if value, ok := _u.mutation.Board(); ok {
 		_spec.SetField(game.FieldBoard, field.TypeJSON, value)
 	}
-	if value, ok := guo.mutation.AppendedBoard(); ok {
+	if value, ok := _u.mutation.AppendedBoard(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, game.FieldBoard, value)
 		})
 	}
-	if guo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -644,7 +644,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.RemovedUserIDs(); len(nodes) > 0 && !guo.mutation.UserCleared() {
+	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -660,7 +660,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -676,7 +676,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if guo.mutation.WinnerCleared() {
+	if _u.mutation.WinnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -689,7 +689,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.WinnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.WinnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -705,7 +705,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if guo.mutation.CurrentTurnCleared() {
+	if _u.mutation.CurrentTurnCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -718,7 +718,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.CurrentTurnIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CurrentTurnIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -734,7 +734,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if guo.mutation.GamePlayerCleared() {
+	if _u.mutation.GamePlayerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -747,7 +747,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.RemovedGamePlayerIDs(); len(nodes) > 0 && !guo.mutation.GamePlayerCleared() {
+	if nodes := _u.mutation.RemovedGamePlayerIDs(); len(nodes) > 0 && !_u.mutation.GamePlayerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -763,7 +763,7 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.GamePlayerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.GamePlayerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -779,10 +779,10 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Game{config: guo.config}
+	_node = &Game{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{game.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -790,6 +790,6 @@ func (guo *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) 
 		}
 		return nil, err
 	}
-	guo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

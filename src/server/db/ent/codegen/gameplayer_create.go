@@ -22,40 +22,40 @@ type GamePlayerCreate struct {
 }
 
 // SetUserID sets the "user_id" field.
-func (gpc *GamePlayerCreate) SetUserID(i int) *GamePlayerCreate {
-	gpc.mutation.SetUserID(i)
-	return gpc
+func (_c *GamePlayerCreate) SetUserID(v int) *GamePlayerCreate {
+	_c.mutation.SetUserID(v)
+	return _c
 }
 
 // SetGameID sets the "game_id" field.
-func (gpc *GamePlayerCreate) SetGameID(i int) *GamePlayerCreate {
-	gpc.mutation.SetGameID(i)
-	return gpc
+func (_c *GamePlayerCreate) SetGameID(v int) *GamePlayerCreate {
+	_c.mutation.SetGameID(v)
+	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (gpc *GamePlayerCreate) SetUser(u *User) *GamePlayerCreate {
-	return gpc.SetUserID(u.ID)
+func (_c *GamePlayerCreate) SetUser(v *User) *GamePlayerCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // SetGame sets the "game" edge to the Game entity.
-func (gpc *GamePlayerCreate) SetGame(g *Game) *GamePlayerCreate {
-	return gpc.SetGameID(g.ID)
+func (_c *GamePlayerCreate) SetGame(v *Game) *GamePlayerCreate {
+	return _c.SetGameID(v.ID)
 }
 
 // Mutation returns the GamePlayerMutation object of the builder.
-func (gpc *GamePlayerCreate) Mutation() *GamePlayerMutation {
-	return gpc.mutation
+func (_c *GamePlayerCreate) Mutation() *GamePlayerMutation {
+	return _c.mutation
 }
 
 // Save creates the GamePlayer in the database.
-func (gpc *GamePlayerCreate) Save(ctx context.Context) (*GamePlayer, error) {
-	return withHooks(ctx, gpc.sqlSave, gpc.mutation, gpc.hooks)
+func (_c *GamePlayerCreate) Save(ctx context.Context) (*GamePlayer, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (gpc *GamePlayerCreate) SaveX(ctx context.Context) *GamePlayer {
-	v, err := gpc.Save(ctx)
+func (_c *GamePlayerCreate) SaveX(ctx context.Context) *GamePlayer {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -63,41 +63,41 @@ func (gpc *GamePlayerCreate) SaveX(ctx context.Context) *GamePlayer {
 }
 
 // Exec executes the query.
-func (gpc *GamePlayerCreate) Exec(ctx context.Context) error {
-	_, err := gpc.Save(ctx)
+func (_c *GamePlayerCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gpc *GamePlayerCreate) ExecX(ctx context.Context) {
-	if err := gpc.Exec(ctx); err != nil {
+func (_c *GamePlayerCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gpc *GamePlayerCreate) check() error {
-	if _, ok := gpc.mutation.UserID(); !ok {
+func (_c *GamePlayerCreate) check() error {
+	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`codegen: missing required field "GamePlayer.user_id"`)}
 	}
-	if _, ok := gpc.mutation.GameID(); !ok {
+	if _, ok := _c.mutation.GameID(); !ok {
 		return &ValidationError{Name: "game_id", err: errors.New(`codegen: missing required field "GamePlayer.game_id"`)}
 	}
-	if len(gpc.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`codegen: missing required edge "GamePlayer.user"`)}
 	}
-	if len(gpc.mutation.GameIDs()) == 0 {
+	if len(_c.mutation.GameIDs()) == 0 {
 		return &ValidationError{Name: "game", err: errors.New(`codegen: missing required edge "GamePlayer.game"`)}
 	}
 	return nil
 }
 
-func (gpc *GamePlayerCreate) sqlSave(ctx context.Context) (*GamePlayer, error) {
-	if err := gpc.check(); err != nil {
+func (_c *GamePlayerCreate) sqlSave(ctx context.Context) (*GamePlayer, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := gpc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, gpc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -105,17 +105,17 @@ func (gpc *GamePlayerCreate) sqlSave(ctx context.Context) (*GamePlayer, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	gpc.mutation.id = &_node.ID
-	gpc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (gpc *GamePlayerCreate) createSpec() (*GamePlayer, *sqlgraph.CreateSpec) {
+func (_c *GamePlayerCreate) createSpec() (*GamePlayer, *sqlgraph.CreateSpec) {
 	var (
-		_node = &GamePlayer{config: gpc.config}
+		_node = &GamePlayer{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(gameplayer.Table, sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt))
 	)
-	if nodes := gpc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -132,7 +132,7 @@ func (gpc *GamePlayerCreate) createSpec() (*GamePlayer, *sqlgraph.CreateSpec) {
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gpc.mutation.GameIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.GameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -160,16 +160,16 @@ type GamePlayerCreateBulk struct {
 }
 
 // Save creates the GamePlayer entities in the database.
-func (gpcb *GamePlayerCreateBulk) Save(ctx context.Context) ([]*GamePlayer, error) {
-	if gpcb.err != nil {
-		return nil, gpcb.err
+func (_c *GamePlayerCreateBulk) Save(ctx context.Context) ([]*GamePlayer, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(gpcb.builders))
-	nodes := make([]*GamePlayer, len(gpcb.builders))
-	mutators := make([]Mutator, len(gpcb.builders))
-	for i := range gpcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*GamePlayer, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := gpcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GamePlayerMutation)
 				if !ok {
@@ -182,11 +182,11 @@ func (gpcb *GamePlayerCreateBulk) Save(ctx context.Context) ([]*GamePlayer, erro
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, gpcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gpcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -210,7 +210,7 @@ func (gpcb *GamePlayerCreateBulk) Save(ctx context.Context) ([]*GamePlayer, erro
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, gpcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -218,8 +218,8 @@ func (gpcb *GamePlayerCreateBulk) Save(ctx context.Context) ([]*GamePlayer, erro
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gpcb *GamePlayerCreateBulk) SaveX(ctx context.Context) []*GamePlayer {
-	v, err := gpcb.Save(ctx)
+func (_c *GamePlayerCreateBulk) SaveX(ctx context.Context) []*GamePlayer {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -227,14 +227,14 @@ func (gpcb *GamePlayerCreateBulk) SaveX(ctx context.Context) []*GamePlayer {
 }
 
 // Exec executes the query.
-func (gpcb *GamePlayerCreateBulk) Exec(ctx context.Context) error {
-	_, err := gpcb.Save(ctx)
+func (_c *GamePlayerCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gpcb *GamePlayerCreateBulk) ExecX(ctx context.Context) {
-	if err := gpcb.Exec(ctx); err != nil {
+func (_c *GamePlayerCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

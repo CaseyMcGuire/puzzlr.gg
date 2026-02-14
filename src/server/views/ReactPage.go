@@ -19,7 +19,7 @@ func ReactPage(title string, bundleName string) Node {
 				),
 				html.Link(
 					Attr("rel", "stylesheet"),
-					Attr("href", "/assets/bundles/stylex.stylex.css"),
+					Attr("href", "/assets/bundles/stylex.css"),
 				),
 				html.Script(
 					Attr("type", "importmap"),
@@ -34,7 +34,7 @@ func ReactPage(title string, bundleName string) Node {
 			Body: []Node{
 				html.Div(Attr("id", "root")),
 				html.Script(
-					Attr("src", "/assets/bundles/bundle.js"),
+					Attr("src", "/assets/bundles/index.bundle.js"),
 					Attr("type", "module"),
 				),
 			},

@@ -64,9 +64,7 @@ const config : Configuration = {
       useCSSLayers: true,
       cssInjectionTarget: (fileName: string) => fileName.includes('stylex'),
     }),
-    new MiniCssExtractPlugin({
-      filename: '[name].stylex.css'
-    })
+    new MiniCssExtractPlugin()
   ],
 };
 

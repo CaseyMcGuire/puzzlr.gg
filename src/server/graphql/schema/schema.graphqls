@@ -1,3 +1,5 @@
+scalar Time
+
 extend type Query {
   gameboard: GameBoard
 }

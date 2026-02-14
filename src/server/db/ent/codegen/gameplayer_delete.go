@@ -20,56 +20,56 @@ type GamePlayerDelete struct {
 }
 
 // Where appends a list predicates to the GamePlayerDelete builder.
-func (gpd *GamePlayerDelete) Where(ps ...predicate.GamePlayer) *GamePlayerDelete {
-	gpd.mutation.Where(ps...)
-	return gpd
+func (_d *GamePlayerDelete) Where(ps ...predicate.GamePlayer) *GamePlayerDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (gpd *GamePlayerDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, gpd.sqlExec, gpd.mutation, gpd.hooks)
+func (_d *GamePlayerDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gpd *GamePlayerDelete) ExecX(ctx context.Context) int {
-	n, err := gpd.Exec(ctx)
+func (_d *GamePlayerDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (gpd *GamePlayerDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *GamePlayerDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(gameplayer.Table, sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt))
-	if ps := gpd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, gpd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	gpd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // GamePlayerDeleteOne is the builder for deleting a single GamePlayer entity.
 type GamePlayerDeleteOne struct {
-	gpd *GamePlayerDelete
+	_d *GamePlayerDelete
 }
 
 // Where appends a list predicates to the GamePlayerDelete builder.
-func (gpdo *GamePlayerDeleteOne) Where(ps ...predicate.GamePlayer) *GamePlayerDeleteOne {
-	gpdo.gpd.mutation.Where(ps...)
-	return gpdo
+func (_d *GamePlayerDeleteOne) Where(ps ...predicate.GamePlayer) *GamePlayerDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (gpdo *GamePlayerDeleteOne) Exec(ctx context.Context) error {
-	n, err := gpdo.gpd.Exec(ctx)
+func (_d *GamePlayerDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (gpdo *GamePlayerDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gpdo *GamePlayerDeleteOne) ExecX(ctx context.Context) {
-	if err := gpdo.Exec(ctx); err != nil {
+func (_d *GamePlayerDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

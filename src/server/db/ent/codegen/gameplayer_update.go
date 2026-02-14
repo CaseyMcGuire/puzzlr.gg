@@ -24,74 +24,74 @@ type GamePlayerUpdate struct {
 }
 
 // Where appends a list predicates to the GamePlayerUpdate builder.
-func (gpu *GamePlayerUpdate) Where(ps ...predicate.GamePlayer) *GamePlayerUpdate {
-	gpu.mutation.Where(ps...)
-	return gpu
+func (_u *GamePlayerUpdate) Where(ps ...predicate.GamePlayer) *GamePlayerUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (gpu *GamePlayerUpdate) SetUserID(i int) *GamePlayerUpdate {
-	gpu.mutation.SetUserID(i)
-	return gpu
+func (_u *GamePlayerUpdate) SetUserID(v int) *GamePlayerUpdate {
+	_u.mutation.SetUserID(v)
+	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (gpu *GamePlayerUpdate) SetNillableUserID(i *int) *GamePlayerUpdate {
-	if i != nil {
-		gpu.SetUserID(*i)
+func (_u *GamePlayerUpdate) SetNillableUserID(v *int) *GamePlayerUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
-	return gpu
+	return _u
 }
 
 // SetGameID sets the "game_id" field.
-func (gpu *GamePlayerUpdate) SetGameID(i int) *GamePlayerUpdate {
-	gpu.mutation.SetGameID(i)
-	return gpu
+func (_u *GamePlayerUpdate) SetGameID(v int) *GamePlayerUpdate {
+	_u.mutation.SetGameID(v)
+	return _u
 }
 
 // SetNillableGameID sets the "game_id" field if the given value is not nil.
-func (gpu *GamePlayerUpdate) SetNillableGameID(i *int) *GamePlayerUpdate {
-	if i != nil {
-		gpu.SetGameID(*i)
+func (_u *GamePlayerUpdate) SetNillableGameID(v *int) *GamePlayerUpdate {
+	if v != nil {
+		_u.SetGameID(*v)
 	}
-	return gpu
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (gpu *GamePlayerUpdate) SetUser(u *User) *GamePlayerUpdate {
-	return gpu.SetUserID(u.ID)
+func (_u *GamePlayerUpdate) SetUser(v *User) *GamePlayerUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // SetGame sets the "game" edge to the Game entity.
-func (gpu *GamePlayerUpdate) SetGame(g *Game) *GamePlayerUpdate {
-	return gpu.SetGameID(g.ID)
+func (_u *GamePlayerUpdate) SetGame(v *Game) *GamePlayerUpdate {
+	return _u.SetGameID(v.ID)
 }
 
 // Mutation returns the GamePlayerMutation object of the builder.
-func (gpu *GamePlayerUpdate) Mutation() *GamePlayerMutation {
-	return gpu.mutation
+func (_u *GamePlayerUpdate) Mutation() *GamePlayerMutation {
+	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (gpu *GamePlayerUpdate) ClearUser() *GamePlayerUpdate {
-	gpu.mutation.ClearUser()
-	return gpu
+func (_u *GamePlayerUpdate) ClearUser() *GamePlayerUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // ClearGame clears the "game" edge to the Game entity.
-func (gpu *GamePlayerUpdate) ClearGame() *GamePlayerUpdate {
-	gpu.mutation.ClearGame()
-	return gpu
+func (_u *GamePlayerUpdate) ClearGame() *GamePlayerUpdate {
+	_u.mutation.ClearGame()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (gpu *GamePlayerUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, gpu.sqlSave, gpu.mutation, gpu.hooks)
+func (_u *GamePlayerUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gpu *GamePlayerUpdate) SaveX(ctx context.Context) int {
-	affected, err := gpu.Save(ctx)
+func (_u *GamePlayerUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -99,42 +99,42 @@ func (gpu *GamePlayerUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (gpu *GamePlayerUpdate) Exec(ctx context.Context) error {
-	_, err := gpu.Save(ctx)
+func (_u *GamePlayerUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gpu *GamePlayerUpdate) ExecX(ctx context.Context) {
-	if err := gpu.Exec(ctx); err != nil {
+func (_u *GamePlayerUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gpu *GamePlayerUpdate) check() error {
-	if gpu.mutation.UserCleared() && len(gpu.mutation.UserIDs()) > 0 {
+func (_u *GamePlayerUpdate) check() error {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`codegen: clearing a required unique edge "GamePlayer.user"`)
 	}
-	if gpu.mutation.GameCleared() && len(gpu.mutation.GameIDs()) > 0 {
+	if _u.mutation.GameCleared() && len(_u.mutation.GameIDs()) > 0 {
 		return errors.New(`codegen: clearing a required unique edge "GamePlayer.game"`)
 	}
 	return nil
 }
 
-func (gpu *GamePlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := gpu.check(); err != nil {
-		return n, err
+func (_u *GamePlayerUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(gameplayer.Table, gameplayer.Columns, sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt))
-	if ps := gpu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if gpu.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -147,7 +147,7 @@ func (gpu *GamePlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gpu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -163,7 +163,7 @@ func (gpu *GamePlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gpu.mutation.GameCleared() {
+	if _u.mutation.GameCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -176,7 +176,7 @@ func (gpu *GamePlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gpu.mutation.GameIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.GameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -192,7 +192,7 @@ func (gpu *GamePlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, gpu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{gameplayer.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -200,8 +200,8 @@ func (gpu *GamePlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	gpu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // GamePlayerUpdateOne is the builder for updating a single GamePlayer entity.
@@ -213,81 +213,81 @@ type GamePlayerUpdateOne struct {
 }
 
 // SetUserID sets the "user_id" field.
-func (gpuo *GamePlayerUpdateOne) SetUserID(i int) *GamePlayerUpdateOne {
-	gpuo.mutation.SetUserID(i)
-	return gpuo
+func (_u *GamePlayerUpdateOne) SetUserID(v int) *GamePlayerUpdateOne {
+	_u.mutation.SetUserID(v)
+	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (gpuo *GamePlayerUpdateOne) SetNillableUserID(i *int) *GamePlayerUpdateOne {
-	if i != nil {
-		gpuo.SetUserID(*i)
+func (_u *GamePlayerUpdateOne) SetNillableUserID(v *int) *GamePlayerUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
-	return gpuo
+	return _u
 }
 
 // SetGameID sets the "game_id" field.
-func (gpuo *GamePlayerUpdateOne) SetGameID(i int) *GamePlayerUpdateOne {
-	gpuo.mutation.SetGameID(i)
-	return gpuo
+func (_u *GamePlayerUpdateOne) SetGameID(v int) *GamePlayerUpdateOne {
+	_u.mutation.SetGameID(v)
+	return _u
 }
 
 // SetNillableGameID sets the "game_id" field if the given value is not nil.
-func (gpuo *GamePlayerUpdateOne) SetNillableGameID(i *int) *GamePlayerUpdateOne {
-	if i != nil {
-		gpuo.SetGameID(*i)
+func (_u *GamePlayerUpdateOne) SetNillableGameID(v *int) *GamePlayerUpdateOne {
+	if v != nil {
+		_u.SetGameID(*v)
 	}
-	return gpuo
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (gpuo *GamePlayerUpdateOne) SetUser(u *User) *GamePlayerUpdateOne {
-	return gpuo.SetUserID(u.ID)
+func (_u *GamePlayerUpdateOne) SetUser(v *User) *GamePlayerUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // SetGame sets the "game" edge to the Game entity.
-func (gpuo *GamePlayerUpdateOne) SetGame(g *Game) *GamePlayerUpdateOne {
-	return gpuo.SetGameID(g.ID)
+func (_u *GamePlayerUpdateOne) SetGame(v *Game) *GamePlayerUpdateOne {
+	return _u.SetGameID(v.ID)
 }
 
 // Mutation returns the GamePlayerMutation object of the builder.
-func (gpuo *GamePlayerUpdateOne) Mutation() *GamePlayerMutation {
-	return gpuo.mutation
+func (_u *GamePlayerUpdateOne) Mutation() *GamePlayerMutation {
+	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (gpuo *GamePlayerUpdateOne) ClearUser() *GamePlayerUpdateOne {
-	gpuo.mutation.ClearUser()
-	return gpuo
+func (_u *GamePlayerUpdateOne) ClearUser() *GamePlayerUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // ClearGame clears the "game" edge to the Game entity.
-func (gpuo *GamePlayerUpdateOne) ClearGame() *GamePlayerUpdateOne {
-	gpuo.mutation.ClearGame()
-	return gpuo
+func (_u *GamePlayerUpdateOne) ClearGame() *GamePlayerUpdateOne {
+	_u.mutation.ClearGame()
+	return _u
 }
 
 // Where appends a list predicates to the GamePlayerUpdate builder.
-func (gpuo *GamePlayerUpdateOne) Where(ps ...predicate.GamePlayer) *GamePlayerUpdateOne {
-	gpuo.mutation.Where(ps...)
-	return gpuo
+func (_u *GamePlayerUpdateOne) Where(ps ...predicate.GamePlayer) *GamePlayerUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (gpuo *GamePlayerUpdateOne) Select(field string, fields ...string) *GamePlayerUpdateOne {
-	gpuo.fields = append([]string{field}, fields...)
-	return gpuo
+func (_u *GamePlayerUpdateOne) Select(field string, fields ...string) *GamePlayerUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated GamePlayer entity.
-func (gpuo *GamePlayerUpdateOne) Save(ctx context.Context) (*GamePlayer, error) {
-	return withHooks(ctx, gpuo.sqlSave, gpuo.mutation, gpuo.hooks)
+func (_u *GamePlayerUpdateOne) Save(ctx context.Context) (*GamePlayer, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gpuo *GamePlayerUpdateOne) SaveX(ctx context.Context) *GamePlayer {
-	node, err := gpuo.Save(ctx)
+func (_u *GamePlayerUpdateOne) SaveX(ctx context.Context) *GamePlayer {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -295,40 +295,40 @@ func (gpuo *GamePlayerUpdateOne) SaveX(ctx context.Context) *GamePlayer {
 }
 
 // Exec executes the query on the entity.
-func (gpuo *GamePlayerUpdateOne) Exec(ctx context.Context) error {
-	_, err := gpuo.Save(ctx)
+func (_u *GamePlayerUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gpuo *GamePlayerUpdateOne) ExecX(ctx context.Context) {
-	if err := gpuo.Exec(ctx); err != nil {
+func (_u *GamePlayerUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gpuo *GamePlayerUpdateOne) check() error {
-	if gpuo.mutation.UserCleared() && len(gpuo.mutation.UserIDs()) > 0 {
+func (_u *GamePlayerUpdateOne) check() error {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`codegen: clearing a required unique edge "GamePlayer.user"`)
 	}
-	if gpuo.mutation.GameCleared() && len(gpuo.mutation.GameIDs()) > 0 {
+	if _u.mutation.GameCleared() && len(_u.mutation.GameIDs()) > 0 {
 		return errors.New(`codegen: clearing a required unique edge "GamePlayer.game"`)
 	}
 	return nil
 }
 
-func (gpuo *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer, err error) {
-	if err := gpuo.check(); err != nil {
+func (_u *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(gameplayer.Table, gameplayer.Columns, sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt))
-	id, ok := gpuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`codegen: missing "GamePlayer.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := gpuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, gameplayer.FieldID)
 		for _, f := range fields {
@@ -340,14 +340,14 @@ func (gpuo *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer
 			}
 		}
 	}
-	if ps := gpuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if gpuo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -360,7 +360,7 @@ func (gpuo *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gpuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -376,7 +376,7 @@ func (gpuo *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gpuo.mutation.GameCleared() {
+	if _u.mutation.GameCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -389,7 +389,7 @@ func (gpuo *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gpuo.mutation.GameIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.GameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -405,10 +405,10 @@ func (gpuo *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &GamePlayer{config: gpuo.config}
+	_node = &GamePlayer{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, gpuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{gameplayer.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -416,6 +416,6 @@ func (gpuo *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer
 		}
 		return nil, err
 	}
-	gpuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -23,127 +23,127 @@ type GameCreate struct {
 }
 
 // SetCreateTime sets the "create_time" field.
-func (gc *GameCreate) SetCreateTime(t time.Time) *GameCreate {
-	gc.mutation.SetCreateTime(t)
-	return gc
+func (_c *GameCreate) SetCreateTime(v time.Time) *GameCreate {
+	_c.mutation.SetCreateTime(v)
+	return _c
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (gc *GameCreate) SetNillableCreateTime(t *time.Time) *GameCreate {
-	if t != nil {
-		gc.SetCreateTime(*t)
+func (_c *GameCreate) SetNillableCreateTime(v *time.Time) *GameCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
 	}
-	return gc
+	return _c
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (gc *GameCreate) SetUpdateTime(t time.Time) *GameCreate {
-	gc.mutation.SetUpdateTime(t)
-	return gc
+func (_c *GameCreate) SetUpdateTime(v time.Time) *GameCreate {
+	_c.mutation.SetUpdateTime(v)
+	return _c
 }
 
 // SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (gc *GameCreate) SetNillableUpdateTime(t *time.Time) *GameCreate {
-	if t != nil {
-		gc.SetUpdateTime(*t)
+func (_c *GameCreate) SetNillableUpdateTime(v *time.Time) *GameCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
 	}
-	return gc
+	return _c
 }
 
 // SetType sets the "type" field.
-func (gc *GameCreate) SetType(ga game.Type) *GameCreate {
-	gc.mutation.SetType(ga)
-	return gc
+func (_c *GameCreate) SetType(v game.Type) *GameCreate {
+	_c.mutation.SetType(v)
+	return _c
 }
 
 // SetBoard sets the "board" field.
-func (gc *GameCreate) SetBoard(s [][]string) *GameCreate {
-	gc.mutation.SetBoard(s)
-	return gc
+func (_c *GameCreate) SetBoard(v [][]string) *GameCreate {
+	_c.mutation.SetBoard(v)
+	return _c
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (gc *GameCreate) AddUserIDs(ids ...int) *GameCreate {
-	gc.mutation.AddUserIDs(ids...)
-	return gc
+func (_c *GameCreate) AddUserIDs(ids ...int) *GameCreate {
+	_c.mutation.AddUserIDs(ids...)
+	return _c
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (gc *GameCreate) AddUser(u ...*User) *GameCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GameCreate) AddUser(v ...*User) *GameCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gc.AddUserIDs(ids...)
+	return _c.AddUserIDs(ids...)
 }
 
 // SetWinnerID sets the "winner" edge to the User entity by ID.
-func (gc *GameCreate) SetWinnerID(id int) *GameCreate {
-	gc.mutation.SetWinnerID(id)
-	return gc
+func (_c *GameCreate) SetWinnerID(id int) *GameCreate {
+	_c.mutation.SetWinnerID(id)
+	return _c
 }
 
 // SetNillableWinnerID sets the "winner" edge to the User entity by ID if the given value is not nil.
-func (gc *GameCreate) SetNillableWinnerID(id *int) *GameCreate {
+func (_c *GameCreate) SetNillableWinnerID(id *int) *GameCreate {
 	if id != nil {
-		gc = gc.SetWinnerID(*id)
+		_c = _c.SetWinnerID(*id)
 	}
-	return gc
+	return _c
 }
 
 // SetWinner sets the "winner" edge to the User entity.
-func (gc *GameCreate) SetWinner(u *User) *GameCreate {
-	return gc.SetWinnerID(u.ID)
+func (_c *GameCreate) SetWinner(v *User) *GameCreate {
+	return _c.SetWinnerID(v.ID)
 }
 
 // SetCurrentTurnID sets the "current_turn" edge to the User entity by ID.
-func (gc *GameCreate) SetCurrentTurnID(id int) *GameCreate {
-	gc.mutation.SetCurrentTurnID(id)
-	return gc
+func (_c *GameCreate) SetCurrentTurnID(id int) *GameCreate {
+	_c.mutation.SetCurrentTurnID(id)
+	return _c
 }
 
 // SetNillableCurrentTurnID sets the "current_turn" edge to the User entity by ID if the given value is not nil.
-func (gc *GameCreate) SetNillableCurrentTurnID(id *int) *GameCreate {
+func (_c *GameCreate) SetNillableCurrentTurnID(id *int) *GameCreate {
 	if id != nil {
-		gc = gc.SetCurrentTurnID(*id)
+		_c = _c.SetCurrentTurnID(*id)
 	}
-	return gc
+	return _c
 }
 
 // SetCurrentTurn sets the "current_turn" edge to the User entity.
-func (gc *GameCreate) SetCurrentTurn(u *User) *GameCreate {
-	return gc.SetCurrentTurnID(u.ID)
+func (_c *GameCreate) SetCurrentTurn(v *User) *GameCreate {
+	return _c.SetCurrentTurnID(v.ID)
 }
 
 // AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
-func (gc *GameCreate) AddGamePlayerIDs(ids ...int) *GameCreate {
-	gc.mutation.AddGamePlayerIDs(ids...)
-	return gc
+func (_c *GameCreate) AddGamePlayerIDs(ids ...int) *GameCreate {
+	_c.mutation.AddGamePlayerIDs(ids...)
+	return _c
 }
 
 // AddGamePlayer adds the "game_player" edges to the GamePlayer entity.
-func (gc *GameCreate) AddGamePlayer(g ...*GamePlayer) *GameCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_c *GameCreate) AddGamePlayer(v ...*GamePlayer) *GameCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gc.AddGamePlayerIDs(ids...)
+	return _c.AddGamePlayerIDs(ids...)
 }
 
 // Mutation returns the GameMutation object of the builder.
-func (gc *GameCreate) Mutation() *GameMutation {
-	return gc.mutation
+func (_c *GameCreate) Mutation() *GameMutation {
+	return _c.mutation
 }
 
 // Save creates the Game in the database.
-func (gc *GameCreate) Save(ctx context.Context) (*Game, error) {
-	gc.defaults()
-	return withHooks(ctx, gc.sqlSave, gc.mutation, gc.hooks)
+func (_c *GameCreate) Save(ctx context.Context) (*Game, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (gc *GameCreate) SaveX(ctx context.Context) *Game {
-	v, err := gc.Save(ctx)
+func (_c *GameCreate) SaveX(ctx context.Context) *Game {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -151,58 +151,58 @@ func (gc *GameCreate) SaveX(ctx context.Context) *Game {
 }
 
 // Exec executes the query.
-func (gc *GameCreate) Exec(ctx context.Context) error {
-	_, err := gc.Save(ctx)
+func (_c *GameCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gc *GameCreate) ExecX(ctx context.Context) {
-	if err := gc.Exec(ctx); err != nil {
+func (_c *GameCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (gc *GameCreate) defaults() {
-	if _, ok := gc.mutation.CreateTime(); !ok {
+func (_c *GameCreate) defaults() {
+	if _, ok := _c.mutation.CreateTime(); !ok {
 		v := game.DefaultCreateTime()
-		gc.mutation.SetCreateTime(v)
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := gc.mutation.UpdateTime(); !ok {
+	if _, ok := _c.mutation.UpdateTime(); !ok {
 		v := game.DefaultUpdateTime()
-		gc.mutation.SetUpdateTime(v)
+		_c.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gc *GameCreate) check() error {
-	if _, ok := gc.mutation.CreateTime(); !ok {
+func (_c *GameCreate) check() error {
+	if _, ok := _c.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`codegen: missing required field "Game.create_time"`)}
 	}
-	if _, ok := gc.mutation.UpdateTime(); !ok {
+	if _, ok := _c.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`codegen: missing required field "Game.update_time"`)}
 	}
-	if _, ok := gc.mutation.GetType(); !ok {
+	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`codegen: missing required field "Game.type"`)}
 	}
-	if v, ok := gc.mutation.GetType(); ok {
+	if v, ok := _c.mutation.GetType(); ok {
 		if err := game.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`codegen: validator failed for field "Game.type": %w`, err)}
 		}
 	}
-	if _, ok := gc.mutation.Board(); !ok {
+	if _, ok := _c.mutation.Board(); !ok {
 		return &ValidationError{Name: "board", err: errors.New(`codegen: missing required field "Game.board"`)}
 	}
 	return nil
 }
 
-func (gc *GameCreate) sqlSave(ctx context.Context) (*Game, error) {
-	if err := gc.check(); err != nil {
+func (_c *GameCreate) sqlSave(ctx context.Context) (*Game, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := gc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -210,33 +210,33 @@ func (gc *GameCreate) sqlSave(ctx context.Context) (*Game, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	gc.mutation.id = &_node.ID
-	gc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (gc *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
+func (_c *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Game{config: gc.config}
+		_node = &Game{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(game.Table, sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt))
 	)
-	if value, ok := gc.mutation.CreateTime(); ok {
+	if value, ok := _c.mutation.CreateTime(); ok {
 		_spec.SetField(game.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
-	if value, ok := gc.mutation.UpdateTime(); ok {
+	if value, ok := _c.mutation.UpdateTime(); ok {
 		_spec.SetField(game.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
-	if value, ok := gc.mutation.GetType(); ok {
+	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(game.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
-	if value, ok := gc.mutation.Board(); ok {
+	if value, ok := _c.mutation.Board(); ok {
 		_spec.SetField(game.FieldBoard, field.TypeJSON, value)
 		_node.Board = value
 	}
-	if nodes := gc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -252,7 +252,7 @@ func (gc *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.mutation.WinnerIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.WinnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -269,7 +269,7 @@ func (gc *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 		_node.user_won_games = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.mutation.CurrentTurnIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.CurrentTurnIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -286,7 +286,7 @@ func (gc *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 		_node.user_current_turn_games = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.mutation.GamePlayerIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.GamePlayerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -313,16 +313,16 @@ type GameCreateBulk struct {
 }
 
 // Save creates the Game entities in the database.
-func (gcb *GameCreateBulk) Save(ctx context.Context) ([]*Game, error) {
-	if gcb.err != nil {
-		return nil, gcb.err
+func (_c *GameCreateBulk) Save(ctx context.Context) ([]*Game, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(gcb.builders))
-	nodes := make([]*Game, len(gcb.builders))
-	mutators := make([]Mutator, len(gcb.builders))
-	for i := range gcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Game, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := gcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GameMutation)
@@ -336,11 +336,11 @@ func (gcb *GameCreateBulk) Save(ctx context.Context) ([]*Game, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, gcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -364,7 +364,7 @@ func (gcb *GameCreateBulk) Save(ctx context.Context) ([]*Game, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, gcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -372,8 +372,8 @@ func (gcb *GameCreateBulk) Save(ctx context.Context) ([]*Game, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gcb *GameCreateBulk) SaveX(ctx context.Context) []*Game {
-	v, err := gcb.Save(ctx)
+func (_c *GameCreateBulk) SaveX(ctx context.Context) []*Game {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -381,14 +381,14 @@ func (gcb *GameCreateBulk) SaveX(ctx context.Context) []*Game {
 }
 
 // Exec executes the query.
-func (gcb *GameCreateBulk) Exec(ctx context.Context) error {
-	_, err := gcb.Save(ctx)
+func (_c *GameCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gcb *GameCreateBulk) ExecX(ctx context.Context) {
-	if err := gcb.Exec(ctx); err != nil {
+func (_c *GameCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
