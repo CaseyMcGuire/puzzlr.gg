@@ -65,7 +65,15 @@ const config : Configuration = {
   plugins: [
     stylexPlugin.webpack({
       useCSSLayers: true,
+      treeshakeCompensation: true,
       cssInjectionTarget: (fileName: string) => fileName.includes('stylex'),
+      unstable_moduleResolution: {
+        type: 'commonJS',
+        rootDir: __dirname,
+      },
+      aliases: {
+        '*': [path.resolve(__dirname, 'src/client/*')],
+      },
     }),
     new MiniCssExtractPlugin()
   ],
