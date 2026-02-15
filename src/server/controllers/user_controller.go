@@ -12,14 +12,14 @@ type UserController struct {
 	userService services.UserService
 }
 
-var (
-	Store         = build.CreateCookieStore()
+const (
+	SessionName   = "user_session"
 	Authenticated = "authenticated"
 	UserID        = "UserID"
 )
 
 func (u *UserController) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	session, _ := Store.Get(r, "user_session")
+	session, _ := build.CreateCookieStore().Get(r, SessionName)
 	if auth, ok := session.Values[Authenticated].(bool); ok && auth {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -55,7 +55,7 @@ func (u *UserController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserController) HandleRegister(w http.ResponseWriter, r *http.Request) {
-	session, _ := Store.Get(r, "user_session")
+	session, _ := build.CreateCookieStore().Get(r, SessionName)
 	if auth, ok := session.Values[Authenticated].(bool); ok && auth {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -86,7 +86,7 @@ func (u *UserController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 }
 
 func (u *UserController) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	session, _ := Store.Get(r, "user_session")
+	session, _ := build.CreateCookieStore().Get(r, SessionName)
 
 	// Set MaxAge to -1 to delete the cookie
 	session.Values[Authenticated] = false

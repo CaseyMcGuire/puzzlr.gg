@@ -10,8 +10,7 @@ import (
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		store := build.CreateCookieStore()
-		session, err := store.Get(r, controllers.Authenticated)
+		session, err := build.CreateCookieStore().Get(r, controllers.SessionName)
 		if err != nil {
 			// If the cookie is invalid or not present, store.Get might still return
 			// a new empty session, so checking err is important for store issues.
