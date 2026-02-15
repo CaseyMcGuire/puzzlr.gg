@@ -1,8 +1,10 @@
 import {graphql, useLazyLoadQuery} from "react-relay";
 import {IndexPageQuery} from "relay/__generated__/IndexPageQuery.graphql";
 import * as stylex from "@stylexjs/stylex";
+import {create} from "@stylexjs/stylex";
+import SidebarPageWrapper from "components/SidebarPageWrapper";
 
-const styles = stylex.create({
+const styles = create({
   body: {
     backgroundColor: 'blue'
   }
@@ -20,7 +22,7 @@ export default function IndexPage() {
   `, {});
 
   return (
-    <div>
+    <SidebarPageWrapper>
       {
         query.users.map(users => {
           return (
@@ -31,7 +33,7 @@ export default function IndexPage() {
         })
       }
       <div {...stylex.props(styles.body)}>hello</div>
-    </div>
+    </SidebarPageWrapper>
   )
 }
 

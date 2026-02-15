@@ -12,6 +12,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"puzzlr.gg/src/server/graphql/models"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
@@ -33,6 +34,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Game() GameResolver
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -59,6 +61,15 @@ type ComplexityRoot struct {
 		Elements func(childComplexity int) int
 	}
 
+	Link struct {
+		External func(childComplexity int) int
+		Href     func(childComplexity int) int
+	}
+
+	Mutation struct {
+		CreateGame func(childComplexity int, input *models.CreateGameInput) int
+	}
+
 	PageInfo struct {
 		EndCursor       func(childComplexity int) int
 		HasNextPage     func(childComplexity int) int
@@ -70,7 +81,18 @@ type ComplexityRoot struct {
 		Gameboard func(childComplexity int) int
 		Node      func(childComplexity int, id int) int
 		Nodes     func(childComplexity int, ids []int) int
+		Sidebar   func(childComplexity int) int
 		Users     func(childComplexity int) int
+	}
+
+	SidebarFolder struct {
+		Children func(childComplexity int) int
+		Name     func(childComplexity int) int
+	}
+
+	SidebarLink struct {
+		Link func(childComplexity int) int
+		Name func(childComplexity int) int
 	}
 
 	User struct {
@@ -169,6 +191,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.GameBoardRow.Elements(childComplexity), true
 
+	case "Link.external":
+		if e.complexity.Link.External == nil {
+			break
+		}
+
+		return e.complexity.Link.External(childComplexity), true
+
+	case "Link.href":
+		if e.complexity.Link.Href == nil {
+			break
+		}
+
+		return e.complexity.Link.Href(childComplexity), true
+
+	case "Mutation.createGame":
+		if e.complexity.Mutation.CreateGame == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createGame_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateGame(childComplexity, args["input"].(*models.CreateGameInput)), true
+
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
 			break
@@ -228,12 +276,47 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Nodes(childComplexity, args["ids"].([]int)), true
 
+	case "Query.sidebar":
+		if e.complexity.Query.Sidebar == nil {
+			break
+		}
+
+		return e.complexity.Query.Sidebar(childComplexity), true
+
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
 			break
 		}
 
 		return e.complexity.Query.Users(childComplexity), true
+
+	case "SidebarFolder.children":
+		if e.complexity.SidebarFolder.Children == nil {
+			break
+		}
+
+		return e.complexity.SidebarFolder.Children(childComplexity), true
+
+	case "SidebarFolder.name":
+		if e.complexity.SidebarFolder.Name == nil {
+			break
+		}
+
+		return e.complexity.SidebarFolder.Name(childComplexity), true
+
+	case "SidebarLink.link":
+		if e.complexity.SidebarLink.Link == nil {
+			break
+		}
+
+		return e.complexity.SidebarLink.Link(childComplexity), true
+
+	case "SidebarLink.name":
+		if e.complexity.SidebarLink.Name == nil {
+			break
+		}
+
+		return e.complexity.SidebarLink.Name(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -264,6 +347,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputCreateGameInput,
+		ec.unmarshalInputCreateSudokuInput,
 		ec.unmarshalInputGameWhereInput,
 		ec.unmarshalInputUserWhereInput,
 	)
@@ -299,6 +384,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 
 			return &response
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
 		}
 
 	default:
@@ -548,10 +648,46 @@ input UserWhereInput {
   hasGamesWith: [GameWhereInput!]
 }
 `, BuiltIn: false},
+	{Name: "../schema/mutations/create_game_mutation.graphqls", Input: `
+type Mutation {
+    createGame(input: CreateGameInput): Game
+}
+
+input CreateGameInput @oneOf {
+    sudokuInput: CreateSudokuInput!
+}
+
+enum SudokuDifficulty {
+    EASY
+    MEDIUM
+    HARD
+}
+
+input CreateSudokuInput {
+    difficulty: SudokuDifficulty!
+}`, BuiltIn: false},
 	{Name: "../schema/schema.graphqls", Input: `scalar Time
 
 extend type Query {
   gameboard: GameBoard
+  sidebar: SidebarFolder
+}
+
+union SidebarItem = SidebarFolder | SidebarLink
+
+type SidebarFolder {
+  name: String!
+  children: [SidebarItem!]!
+}
+
+type SidebarLink {
+  name: String!
+  link: Link!
+}
+
+type Link {
+  href: String!
+  external: Boolean!
 }
 
 type GameBoard {

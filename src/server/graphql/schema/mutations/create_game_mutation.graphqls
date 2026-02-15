@@ -1,0 +1,18 @@
+
+type Mutation {
+    createGame(input: CreateGameInput): Game
+}
+
+input CreateGameInput @oneOf {
+    sudokuInput: CreateSudokuInput!
+}
+
+enum SudokuDifficulty {
+    EASY
+    MEDIUM
+    HARD
+}
+
+input CreateSudokuInput {
+    difficulty: SudokuDifficulty!
+}

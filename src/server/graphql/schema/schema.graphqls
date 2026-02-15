@@ -2,6 +2,24 @@ scalar Time
 
 extend type Query {
   gameboard: GameBoard
+  sidebar: SidebarFolder
+}
+
+union SidebarItem = SidebarFolder | SidebarLink
+
+type SidebarFolder {
+  name: String!
+  children: [SidebarItem!]!
+}
+
+type SidebarLink {
+  name: String!
+  link: Link!
+}
+
+type Link {
+  href: String!
+  external: Boolean!
 }
 
 type GameBoard {

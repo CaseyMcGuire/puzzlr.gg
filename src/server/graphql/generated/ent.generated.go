@@ -28,6 +28,7 @@ type QueryResolver interface {
 	Nodes(ctx context.Context, ids []int) ([]codegen.Noder, error)
 	Users(ctx context.Context) ([]*codegen.User, error)
 	Gameboard(ctx context.Context) (*models.GameBoard, error)
+	Sidebar(ctx context.Context) (*models.SidebarFolder, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -598,6 +599,41 @@ func (ec *executionContext) fieldContext_Query_gameboard(_ context.Context, fiel
 				return ec.fieldContext_GameBoard_rows(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GameBoard", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_sidebar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_sidebar,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Sidebar(ctx)
+		},
+		nil,
+		ec.marshalOSidebarFolder2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐSidebarFolder,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_sidebar(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_SidebarFolder_name(ctx, field)
+			case "children":
+				return ec.fieldContext_SidebarFolder_children(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SidebarFolder", field.Name)
 		},
 	}
 	return fc, nil
@@ -1670,6 +1706,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "sidebar":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_sidebar(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -1965,6 +2020,13 @@ func (ec *executionContext) marshalOGame2ᚕᚖpuzzlrᚗggᚋsrcᚋserverᚋdb�
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalOGame2ᚖpuzzlrᚗggᚋsrcᚋserverᚋdbᚋentᚋcodegenᚐGame(ctx context.Context, sel ast.SelectionSet, v *codegen.Game) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Game(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOGameType2ᚕpuzzlrᚗggᚋsrcᚋserverᚋdbᚋentᚋcodegenᚋgameᚐTypeᚄ(ctx context.Context, v any) ([]game.Type, error) {

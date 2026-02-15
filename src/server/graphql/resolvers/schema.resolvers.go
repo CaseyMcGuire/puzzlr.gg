@@ -16,3 +16,19 @@ import (
 func (r *queryResolver) Gameboard(ctx context.Context) (*models.GameBoard, error) {
 	panic(fmt.Errorf("not implemented: Gameboard - gameboard"))
 }
+
+// Sidebar is the resolver for the sidebar field.
+func (r *queryResolver) Sidebar(ctx context.Context) (*models.SidebarFolder, error) {
+	return &models.SidebarFolder{
+		Name: "Root",
+		Children: []models.SidebarItem{
+			models.SidebarLink{
+				Name: "home",
+				Link: &models.Link{
+					Href:     "/",
+					External: false,
+				},
+			},
+		},
+	}, nil
+}
