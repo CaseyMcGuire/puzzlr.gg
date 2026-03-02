@@ -4,6 +4,7 @@ package codegen
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -59,6 +60,12 @@ func (_c *GameCreate) SetType(v game.Type) *GameCreate {
 // SetBoard sets the "board" field.
 func (_c *GameCreate) SetBoard(v [][]string) *GameCreate {
 	_c.mutation.SetBoard(v)
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *GameCreate) SetMetadata(v json.RawMessage) *GameCreate {
+	_c.mutation.SetMetadata(v)
 	return _c
 }
 
@@ -137,7 +144,9 @@ func (_c *GameCreate) Mutation() *GameMutation {
 
 // Save creates the Game in the database.
 func (_c *GameCreate) Save(ctx context.Context) (*Game, error) {
-	_c.defaults()
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -164,15 +173,22 @@ func (_c *GameCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *GameCreate) defaults() {
+func (_c *GameCreate) defaults() error {
 	if _, ok := _c.mutation.CreateTime(); !ok {
+		if game.DefaultCreateTime == nil {
+			return fmt.Errorf("codegen: uninitialized game.DefaultCreateTime (forgotten import codegen/runtime?)")
+		}
 		v := game.DefaultCreateTime()
 		_c.mutation.SetCreateTime(v)
 	}
 	if _, ok := _c.mutation.UpdateTime(); !ok {
+		if game.DefaultUpdateTime == nil {
+			return fmt.Errorf("codegen: uninitialized game.DefaultUpdateTime (forgotten import codegen/runtime?)")
+		}
 		v := game.DefaultUpdateTime()
 		_c.mutation.SetUpdateTime(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -235,6 +251,10 @@ func (_c *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Board(); ok {
 		_spec.SetField(game.FieldBoard, field.TypeJSON, value)
 		_node.Board = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(game.FieldMetadata, field.TypeJSON, value)
+		_node.Metadata = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

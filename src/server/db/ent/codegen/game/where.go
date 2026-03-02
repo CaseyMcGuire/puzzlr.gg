@@ -165,6 +165,16 @@ func TypeNotIn(vs ...Type) predicate.Game {
 	return predicate.Game(sql.FieldNotIn(FieldType, vs...))
 }
 
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Game {
+	return predicate.Game(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Game {
+	return predicate.Game(sql.FieldNotNull(FieldMetadata))
+}
+
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {

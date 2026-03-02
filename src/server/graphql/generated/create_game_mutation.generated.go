@@ -113,47 +113,47 @@ func (ec *executionContext) unmarshalInputCreateGameInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"sudokuInput"}
+	fieldsInOrder := [...]string{"ticTacToeInput"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "sudokuInput":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sudokuInput"))
-			data, err := ec.unmarshalNCreateSudokuInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐCreateSudokuInput(ctx, v)
+		case "ticTacToeInput":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ticTacToeInput"))
+			data, err := ec.unmarshalNCreateTicTacToeInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐCreateTicTacToeInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.SudokuInput = data
+			it.TicTacToeInput = data
 		}
 	}
 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCreateSudokuInput(ctx context.Context, obj any) (models.CreateSudokuInput, error) {
-	var it models.CreateSudokuInput
+func (ec *executionContext) unmarshalInputCreateTicTacToeInput(ctx context.Context, obj any) (models.CreateTicTacToeInput, error) {
+	var it models.CreateTicTacToeInput
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"difficulty"}
+	fieldsInOrder := [...]string{"opponentId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "difficulty":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("difficulty"))
-			data, err := ec.unmarshalNSudokuDifficulty2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐSudokuDifficulty(ctx, v)
+		case "opponentId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("opponentId"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Difficulty = data
+			it.OpponentID = data
 		}
 	}
 
@@ -218,19 +218,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNCreateSudokuInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐCreateSudokuInput(ctx context.Context, v any) (*models.CreateSudokuInput, error) {
-	res, err := ec.unmarshalInputCreateSudokuInput(ctx, v)
+func (ec *executionContext) unmarshalNCreateTicTacToeInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐCreateTicTacToeInput(ctx context.Context, v any) (*models.CreateTicTacToeInput, error) {
+	res, err := ec.unmarshalInputCreateTicTacToeInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNSudokuDifficulty2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐSudokuDifficulty(ctx context.Context, v any) (models.SudokuDifficulty, error) {
-	var res models.SudokuDifficulty
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNSudokuDifficulty2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐSudokuDifficulty(ctx context.Context, sel ast.SelectionSet, v models.SudokuDifficulty) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) unmarshalOCreateGameInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐCreateGameInput(ctx context.Context, v any) (*models.CreateGameInput, error) {

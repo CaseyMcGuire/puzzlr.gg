@@ -4,6 +4,7 @@ package codegen
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -42,6 +43,8 @@ type GameMutation struct {
 	_type               *game.Type
 	board               *[][]string
 	appendboard         [][]string
+	metadata            *json.RawMessage
+	appendmetadata      json.RawMessage
 	clearedFields       map[string]struct{}
 	user                map[int]struct{}
 	removeduser         map[int]struct{}
@@ -315,6 +318,71 @@ func (m *GameMutation) ResetBoard() {
 	m.appendboard = nil
 }
 
+// SetMetadata sets the "metadata" field.
+func (m *GameMutation) SetMetadata(jm json.RawMessage) {
+	m.metadata = &jm
+	m.appendmetadata = nil
+}
+
+// Metadata returns the value of the "metadata" field in the mutation.
+func (m *GameMutation) Metadata() (r json.RawMessage, exists bool) {
+	v := m.metadata
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadata returns the old "metadata" field's value of the Game entity.
+// If the Game object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameMutation) OldMetadata(ctx context.Context) (v json.RawMessage, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadata requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
+	}
+	return oldValue.Metadata, nil
+}
+
+// AppendMetadata adds jm to the "metadata" field.
+func (m *GameMutation) AppendMetadata(jm json.RawMessage) {
+	m.appendmetadata = append(m.appendmetadata, jm...)
+}
+
+// AppendedMetadata returns the list of values that were appended to the "metadata" field in this mutation.
+func (m *GameMutation) AppendedMetadata() (json.RawMessage, bool) {
+	if len(m.appendmetadata) == 0 {
+		return nil, false
+	}
+	return m.appendmetadata, true
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (m *GameMutation) ClearMetadata() {
+	m.metadata = nil
+	m.appendmetadata = nil
+	m.clearedFields[game.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "metadata" field was cleared in this mutation.
+func (m *GameMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[game.FieldMetadata]
+	return ok
+}
+
+// ResetMetadata resets all changes to the "metadata" field.
+func (m *GameMutation) ResetMetadata() {
+	m.metadata = nil
+	m.appendmetadata = nil
+	delete(m.clearedFields, game.FieldMetadata)
+}
+
 // AddUserIDs adds the "user" edge to the User entity by ids.
 func (m *GameMutation) AddUserIDs(ids ...int) {
 	if m.user == nil {
@@ -535,7 +603,7 @@ func (m *GameMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.create_time != nil {
 		fields = append(fields, game.FieldCreateTime)
 	}
@@ -547,6 +615,9 @@ func (m *GameMutation) Fields() []string {
 	}
 	if m.board != nil {
 		fields = append(fields, game.FieldBoard)
+	}
+	if m.metadata != nil {
+		fields = append(fields, game.FieldMetadata)
 	}
 	return fields
 }
@@ -564,6 +635,8 @@ func (m *GameMutation) Field(name string) (ent.Value, bool) {
 		return m.GetType()
 	case game.FieldBoard:
 		return m.Board()
+	case game.FieldMetadata:
+		return m.Metadata()
 	}
 	return nil, false
 }
@@ -581,6 +654,8 @@ func (m *GameMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldType(ctx)
 	case game.FieldBoard:
 		return m.OldBoard(ctx)
+	case game.FieldMetadata:
+		return m.OldMetadata(ctx)
 	}
 	return nil, fmt.Errorf("unknown Game field %s", name)
 }
@@ -618,6 +693,13 @@ func (m *GameMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetBoard(v)
 		return nil
+	case game.FieldMetadata:
+		v, ok := value.(json.RawMessage)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadata(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Game field %s", name)
 }
@@ -647,7 +729,11 @@ func (m *GameMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *GameMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(game.FieldMetadata) {
+		fields = append(fields, game.FieldMetadata)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -660,6 +746,11 @@ func (m *GameMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *GameMutation) ClearField(name string) error {
+	switch name {
+	case game.FieldMetadata:
+		m.ClearMetadata()
+		return nil
+	}
 	return fmt.Errorf("unknown Game nullable field %s", name)
 }
 
@@ -678,6 +769,9 @@ func (m *GameMutation) ResetField(name string) error {
 		return nil
 	case game.FieldBoard:
 		m.ResetBoard()
+		return nil
+	case game.FieldMetadata:
+		m.ResetMetadata()
 		return nil
 	}
 	return fmt.Errorf("unknown Game field %s", name)

@@ -1,11 +1,14 @@
 package schema
 
 import (
+	"encoding/json"
+
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
+	"puzzlr.gg/src/server/db/ent/codegen/hook"
 )
 
 // Game holds the schema definition for the Game entity.
@@ -25,6 +28,11 @@ func (Game) Fields() []ent.Field {
 		field.JSON("board", [][]string{}).Annotations(
 			entgql.Type("GameBoard"),
 		),
+		field.JSON("metadata", json.RawMessage(nil)).
+			Optional().
+			Annotations(
+				entgql.Skip(),
+			),
 	}
 }
 
@@ -40,6 +48,19 @@ func (Game) Edges() []ent.Edge {
 		edge.From("current_turn", User.Type).
 			Ref("current_turn_games").
 			Unique(),
+	}
+}
+
+func (Game) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hook.On(
+			ValidatePlayerCountOnCreate,
+			ent.OpCreate,
+		),
+		hook.On(
+			ValidatePlayerCountOnUpdate,
+			ent.OpUpdate|ent.OpUpdateOne,
+		),
 	}
 }
 

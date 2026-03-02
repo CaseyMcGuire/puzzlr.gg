@@ -9,13 +9,15 @@ import (
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	graphql "puzzlr.gg/src/server/graphql/generated"
 	"puzzlr.gg/src/server/graphql/resolvers"
+	"puzzlr.gg/src/server/services"
 )
 
 func CreateGraphqlServer(ent *ent.Client) *handler.Server {
 	srv := handler.New(graphql.NewExecutableSchema(
 		graphql.Config{
 			Resolvers: &resolvers.Resolver{
-				Ent: ent,
+				Ent:         ent,
+				GameService: services.NewGameService(ent),
 			}},
 	))
 

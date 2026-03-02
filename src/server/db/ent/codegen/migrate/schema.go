@@ -15,6 +15,7 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"TIC_TAC_TOE"}},
 		{Name: "board", Type: field.TypeJSON},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "user_won_games", Type: field.TypeInt, Nullable: true},
 		{Name: "user_current_turn_games", Type: field.TypeInt, Nullable: true},
 	}
@@ -26,13 +27,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "games_users_won_games",
-				Columns:    []*schema.Column{GamesColumns[5]},
+				Columns:    []*schema.Column{GamesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "games_users_current_turn_games",
-				Columns:    []*schema.Column{GamesColumns[6]},
+				Columns:    []*schema.Column{GamesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

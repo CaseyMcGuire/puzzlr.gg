@@ -6,6 +6,7 @@ require (
 	entgo.io/contrib v0.7.0
 	entgo.io/ent v0.14.5
 	github.com/99designs/gqlgen v0.17.86
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
 	github.com/hashicorp/go-multierror v1.1.1

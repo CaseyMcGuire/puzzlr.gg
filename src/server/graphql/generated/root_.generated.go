@@ -348,7 +348,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateGameInput,
-		ec.unmarshalInputCreateSudokuInput,
+		ec.unmarshalInputCreateTicTacToeInput,
 		ec.unmarshalInputGameWhereInput,
 		ec.unmarshalInputUserWhereInput,
 	)
@@ -654,17 +654,11 @@ type Mutation {
 }
 
 input CreateGameInput @oneOf {
-    sudokuInput: CreateSudokuInput!
+    ticTacToeInput: CreateTicTacToeInput!
 }
 
-enum SudokuDifficulty {
-    EASY
-    MEDIUM
-    HARD
-}
-
-input CreateSudokuInput {
-    difficulty: SudokuDifficulty!
+input CreateTicTacToeInput {
+    opponentId: Int!
 }`, BuiltIn: false},
 	{Name: "../schema/schema.graphqls", Input: `scalar Time
 

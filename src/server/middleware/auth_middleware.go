@@ -1,38 +1,42 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 
 	"puzzlr.gg/src/server/build"
 	"puzzlr.gg/src/server/controllers"
+	"puzzlr.gg/src/server/reqctx"
 )
 
-func AuthMiddleware(next http.Handler) http.Handler {
+// SessionMiddleware extracts the user ID from the session and adds it to the
+// context if present, but does not require authentication.
+func SessionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := build.CreateCookieStore().Get(r, controllers.SessionName)
 		if err != nil {
-			// If the cookie is invalid or not present, store.Get might still return
-			// a new empty session, so checking err is important for store issues.
-			// However, the primary check is for the authenticated flag or userID.
-			http.Error(w, "Unauthorized: session error", http.StatusUnauthorized)
+			next.ServeHTTP(w, r)
 			return
 		}
 
-		// Check if the user is authenticated
-		auth, okAuth := session.Values[controllers.Authenticated].(bool)
+		authenticated, okAuth := session.Values[controllers.Authenticated].(bool)
 		userID, okUserID := session.Values[controllers.UserID].(int)
 
-		if !okAuth || !auth || !okUserID || userID == -1 {
+		if okAuth && authenticated && okUserID && userID != -1 {
+			ctx := reqctx.WithUserID(r.Context(), userID)
+			r = r.WithContext(ctx)
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// AuthMiddleware requires authentication before advancing
+func AuthMiddleware(next http.Handler) http.Handler {
+	return SessionMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := reqctx.UserIDFromContext(r.Context()); err != nil {
 			http.Error(w, "Unauthorized: please login", http.StatusUnauthorized)
 			return
 		}
-
-		ctx := context.WithValue(r.Context(), "userID", userID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-
-		// For simplicity here, we just proceed.
-		// In a real app, you'd likely want to pass the userID along.
-		// log.Printf("User %s authenticated for %s", userID, r.URL.Path)
-	})
+		next.ServeHTTP(w, r)
+	}))
 }

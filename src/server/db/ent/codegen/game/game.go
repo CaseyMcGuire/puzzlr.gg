@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -25,6 +26,8 @@ const (
 	FieldType = "type"
 	// FieldBoard holds the string denoting the board field in the database.
 	FieldBoard = "board"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeWinner holds the string denoting the winner edge name in mutations.
@@ -70,6 +73,7 @@ var Columns = []string{
 	FieldUpdateTime,
 	FieldType,
 	FieldBoard,
+	FieldMetadata,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "games"
@@ -100,7 +104,13 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "puzzlr.gg/src/server/db/ent/codegen/runtime"
 var (
+	Hooks [2]ent.Hook
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.

@@ -393,7 +393,8 @@ func (c *GameClient) QueryGamePlayer(_m *Game) *GamePlayerQuery {
 
 // Hooks returns the client hooks.
 func (c *GameClient) Hooks() []Hook {
-	return c.hooks.Game
+	hooks := c.hooks.Game
+	return append(hooks[:len(hooks):len(hooks)], game.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.

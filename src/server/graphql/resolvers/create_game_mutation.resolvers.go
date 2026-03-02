@@ -12,11 +12,19 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen"
 	graphql1 "puzzlr.gg/src/server/graphql/generated"
 	"puzzlr.gg/src/server/graphql/models"
+	"puzzlr.gg/src/server/reqctx"
 )
 
 // CreateGame is the resolver for the createGame field.
 func (r *mutationResolver) CreateGame(ctx context.Context, input *models.CreateGameInput) (*codegen.Game, error) {
-	panic(fmt.Errorf("not implemented: CreateGame - createGame"))
+	if input.TicTacToeInput != nil {
+		userId, err := reqctx.UserIDFromContext(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return r.GameService.CreateTicTacToeGame(ctx, userId, input.TicTacToeInput.OpponentID)
+	}
+	return nil, fmt.Errorf("unsupported game type")
 }
 
 // Mutation returns graphql1.MutationResolver implementation.

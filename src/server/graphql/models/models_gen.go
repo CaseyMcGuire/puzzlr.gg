@@ -2,23 +2,16 @@
 
 package models
 
-import (
-	"bytes"
-	"fmt"
-	"io"
-	"strconv"
-)
-
 type SidebarItem interface {
 	IsSidebarItem()
 }
 
 type CreateGameInput struct {
-	SudokuInput *CreateSudokuInput `json:"sudokuInput"`
+	TicTacToeInput *CreateTicTacToeInput `json:"ticTacToeInput"`
 }
 
-type CreateSudokuInput struct {
-	Difficulty SudokuDifficulty `json:"difficulty"`
+type CreateTicTacToeInput struct {
+	OpponentID int `json:"opponentId"`
 }
 
 type GameBoard struct {
@@ -47,60 +40,3 @@ type SidebarLink struct {
 }
 
 func (SidebarLink) IsSidebarItem() {}
-
-type SudokuDifficulty string
-
-const (
-	SudokuDifficultyEasy   SudokuDifficulty = "EASY"
-	SudokuDifficultyMedium SudokuDifficulty = "MEDIUM"
-	SudokuDifficultyHard   SudokuDifficulty = "HARD"
-)
-
-var AllSudokuDifficulty = []SudokuDifficulty{
-	SudokuDifficultyEasy,
-	SudokuDifficultyMedium,
-	SudokuDifficultyHard,
-}
-
-func (e SudokuDifficulty) IsValid() bool {
-	switch e {
-	case SudokuDifficultyEasy, SudokuDifficultyMedium, SudokuDifficultyHard:
-		return true
-	}
-	return false
-}
-
-func (e SudokuDifficulty) String() string {
-	return string(e)
-}
-
-func (e *SudokuDifficulty) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = SudokuDifficulty(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid SudokuDifficulty", str)
-	}
-	return nil
-}
-
-func (e SudokuDifficulty) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *SudokuDifficulty) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e SudokuDifficulty) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}

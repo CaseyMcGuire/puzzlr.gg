@@ -2,12 +2,14 @@ package db
 
 import (
 	"context"
-	"entgo.io/ent/dialect"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log"
 	"os"
+
+	"entgo.io/ent/dialect"
+	_ "github.com/lib/pq"
 	ent "puzzlr.gg/src/server/db/ent/codegen"
+	_ "puzzlr.gg/src/server/db/ent/codegen/runtime"
 )
 
 func CreateDatabaseClientAndRunMigrations() (*ent.Client, error) {

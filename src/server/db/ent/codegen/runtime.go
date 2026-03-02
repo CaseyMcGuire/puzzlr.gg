@@ -2,41 +2,4 @@
 
 package codegen
 
-import (
-	"time"
-
-	"puzzlr.gg/src/server/db/ent/codegen/game"
-	"puzzlr.gg/src/server/db/ent/codegen/user"
-	"puzzlr.gg/src/server/db/ent/schema"
-)
-
-// The init function reads all schema descriptors with runtime code
-// (default values, validators, hooks and policies) and stitches it
-// to their package variables.
-func init() {
-	gameMixin := schema.Game{}.Mixin()
-	gameMixinFields0 := gameMixin[0].Fields()
-	_ = gameMixinFields0
-	gameFields := schema.Game{}.Fields()
-	_ = gameFields
-	// gameDescCreateTime is the schema descriptor for create_time field.
-	gameDescCreateTime := gameMixinFields0[0].Descriptor()
-	// game.DefaultCreateTime holds the default value on creation for the create_time field.
-	game.DefaultCreateTime = gameDescCreateTime.Default.(func() time.Time)
-	// gameDescUpdateTime is the schema descriptor for update_time field.
-	gameDescUpdateTime := gameMixinFields0[1].Descriptor()
-	// game.DefaultUpdateTime holds the default value on creation for the update_time field.
-	game.DefaultUpdateTime = gameDescUpdateTime.Default.(func() time.Time)
-	// game.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
-	game.UpdateDefaultUpdateTime = gameDescUpdateTime.UpdateDefault.(func() time.Time)
-	userFields := schema.User{}.Fields()
-	_ = userFields
-	// userDescEmail is the schema descriptor for email field.
-	userDescEmail := userFields[0].Descriptor()
-	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
-	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
-	// userDescHashedPassword is the schema descriptor for hashed_password field.
-	userDescHashedPassword := userFields[1].Descriptor()
-	// user.HashedPasswordValidator is a validator for the "hashed_password" field. It is called by the builders before save.
-	user.HashedPasswordValidator = userDescHashedPassword.Validators[0].(func(string) error)
-}
+// The schema-stitching logic is generated in puzzlr.gg/src/server/db/ent/codegen/runtime/runtime.go

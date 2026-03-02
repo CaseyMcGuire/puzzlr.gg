@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"puzzlr.gg/src/server/build"
 	"puzzlr.gg/src/server/controllers"
@@ -41,15 +42,13 @@ func main() {
 		dbClient,
 	)
 
+	r := chi.NewRouter()
+
 	// serve static assets from `/assets`
 	fs := http.FileServer(http.Dir("src/assets"))
-	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
+	r.Handle("/assets/*", http.StripPrefix("/assets/", fs))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		foo := views.ReactPage("Foo", "index")
 		err := foo.Render(w)
 		if err != nil {
@@ -58,17 +57,22 @@ func main() {
 	})
 
 	srv := build.CreateGraphqlServer(dbClient)
-	var mainHandler http.Handler = http.DefaultServeMux
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.SessionMiddleware)
+		r.Handle("/graphql", srv)
+		r.Post("/logout", userController.HandleLogout)
+	})
 
-	http.Handle("/graphql_playground", middleware.AuthMiddleware(playground.Handler("GraphQL playground", "/graphql")))
-	http.Handle("/graphql", srv)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.AuthMiddleware)
+		r.Handle("/graphql_playground", playground.Handler("GraphQL playground", "/graphql"))
+	})
 
-	http.HandleFunc("/login", userController.HandleLogin)
-	http.HandleFunc("/register", userController.HandleRegister)
-	http.HandleFunc("/logout", userController.HandleLogout)
+	r.Post("/login", userController.HandleLogin)
+	r.Post("/register", userController.HandleRegister)
 
 	fmt.Printf("Starting server...")
-	err = http.ListenAndServe(":3001", mainHandler)
+	err = http.ListenAndServe(":3001", r)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Failed starting server %v", err))
 		return

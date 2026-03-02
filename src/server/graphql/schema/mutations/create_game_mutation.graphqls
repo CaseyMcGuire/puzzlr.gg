@@ -4,15 +4,9 @@ type Mutation {
 }
 
 input CreateGameInput @oneOf {
-    sudokuInput: CreateSudokuInput!
+    ticTacToeInput: CreateTicTacToeInput!
 }
 
-enum SudokuDifficulty {
-    EASY
-    MEDIUM
-    HARD
-}
-
-input CreateSudokuInput {
-    difficulty: SudokuDifficulty!
+input CreateTicTacToeInput {
+    opponentId: Int!
 }

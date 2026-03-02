@@ -4,6 +4,7 @@ package codegen
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -46,6 +47,24 @@ func (_u *GameUpdate) SetBoard(v [][]string) *GameUpdate {
 // AppendBoard appends value to the "board" field.
 func (_u *GameUpdate) AppendBoard(v [][]string) *GameUpdate {
 	_u.mutation.AppendBoard(v)
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *GameUpdate) SetMetadata(v json.RawMessage) *GameUpdate {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// AppendMetadata appends value to the "metadata" field.
+func (_u *GameUpdate) AppendMetadata(v json.RawMessage) *GameUpdate {
+	_u.mutation.AppendMetadata(v)
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *GameUpdate) ClearMetadata() *GameUpdate {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -178,7 +197,9 @@ func (_u *GameUpdate) RemoveGamePlayer(v ...*GamePlayer) *GameUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GameUpdate) Save(ctx context.Context) (int, error) {
-	_u.defaults()
+	if err := _u.defaults(); err != nil {
+		return 0, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -205,11 +226,15 @@ func (_u *GameUpdate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *GameUpdate) defaults() {
+func (_u *GameUpdate) defaults() error {
 	if _, ok := _u.mutation.UpdateTime(); !ok {
+		if game.UpdateDefaultUpdateTime == nil {
+			return fmt.Errorf("codegen: uninitialized game.UpdateDefaultUpdateTime (forgotten import codegen/runtime?)")
+		}
 		v := game.UpdateDefaultUpdateTime()
 		_u.mutation.SetUpdateTime(v)
 	}
+	return nil
 }
 
 func (_u *GameUpdate) sqlSave(ctx context.Context) (_node int, err error) {
@@ -231,6 +256,17 @@ func (_u *GameUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, game.FieldBoard, value)
 		})
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(game.FieldMetadata, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedMetadata(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, game.FieldMetadata, value)
+		})
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(game.FieldMetadata, field.TypeJSON)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -418,6 +454,24 @@ func (_u *GameUpdateOne) AppendBoard(v [][]string) *GameUpdateOne {
 	return _u
 }
 
+// SetMetadata sets the "metadata" field.
+func (_u *GameUpdateOne) SetMetadata(v json.RawMessage) *GameUpdateOne {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// AppendMetadata appends value to the "metadata" field.
+func (_u *GameUpdateOne) AppendMetadata(v json.RawMessage) *GameUpdateOne {
+	_u.mutation.AppendMetadata(v)
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *GameUpdateOne) ClearMetadata() *GameUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *GameUpdateOne) AddUserIDs(ids ...int) *GameUpdateOne {
 	_u.mutation.AddUserIDs(ids...)
@@ -560,7 +614,9 @@ func (_u *GameUpdateOne) Select(field string, fields ...string) *GameUpdateOne {
 
 // Save executes the query and returns the updated Game entity.
 func (_u *GameUpdateOne) Save(ctx context.Context) (*Game, error) {
-	_u.defaults()
+	if err := _u.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -587,11 +643,15 @@ func (_u *GameUpdateOne) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *GameUpdateOne) defaults() {
+func (_u *GameUpdateOne) defaults() error {
 	if _, ok := _u.mutation.UpdateTime(); !ok {
+		if game.UpdateDefaultUpdateTime == nil {
+			return fmt.Errorf("codegen: uninitialized game.UpdateDefaultUpdateTime (forgotten import codegen/runtime?)")
+		}
 		v := game.UpdateDefaultUpdateTime()
 		_u.mutation.SetUpdateTime(v)
 	}
+	return nil
 }
 
 func (_u *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) {
@@ -630,6 +690,17 @@ func (_u *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, game.FieldBoard, value)
 		})
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(game.FieldMetadata, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedMetadata(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, game.FieldMetadata, value)
+		})
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(game.FieldMetadata, field.TypeJSON)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
