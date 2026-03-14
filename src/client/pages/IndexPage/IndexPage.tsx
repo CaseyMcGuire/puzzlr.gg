@@ -6,7 +6,7 @@ import SidebarPageWrapper from "components/SidebarPageWrapper";
 
 const styles = create({
   body: {
-    backgroundColor: 'blue'
+    backgroundColor: 'green'
   }
 });
 
@@ -32,7 +32,7 @@ export default function IndexPage() {
           )
         })
       }
-      <div {...stylex.props(styles.body)}>hello</div>
+      <div sx={styles.body}>hello</div>
     </SidebarPageWrapper>
   )
 }

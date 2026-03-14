@@ -72,13 +72,13 @@ function SidebarFolder({item}: {item: SidebarFolderItem}) {
   return (
     <div>
       <div
-        {...stylex.props(styles.groupLabel)}
+        sx={styles.groupLabel}
         onClick={() => setExpanded(!expanded)}
       >
         {item.label}
       </div>
       {expanded && (
-        <div {...stylex.props(styles.children)}>
+        <div sx={styles.children}>
           {item.children.map((child, i) => (
             <SidebarItemView key={i} item={child} />
           ))}
@@ -90,7 +90,7 @@ function SidebarFolder({item}: {item: SidebarFolderItem}) {
 
 function SidebarLink({item}: {item: SidebarLinkItem}) {
   return (
-    <a href={item.href} {...stylex.props(styles.link)}>
+    <a href={item.href} sx={styles.link}>
       {item.label}
     </a>
   );
@@ -98,7 +98,7 @@ function SidebarLink({item}: {item: SidebarLinkItem}) {
 
 export default function Sidebar(props: SidebarProps) {
   return (
-    <nav {...stylex.props(styles.sidebar)}>
+    <nav sx={styles.sidebar}>
       {props.items.map((item, i) => (
         <SidebarItemView key={i} item={item} />
       ))}

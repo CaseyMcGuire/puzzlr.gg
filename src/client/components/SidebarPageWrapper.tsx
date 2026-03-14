@@ -20,11 +20,11 @@ const styles = stylex.create({
 
 export default function SidebarPageWrapper(props: Props) {
   return (
-    <div {...stylex.props(styles.wrapper)}>
+    <div sx={styles.wrapper}>
       <Sidebar items={[
         {type: 'link', label: 'Home', href: '/'},
       ]} />
-      <div {...stylex.props(styles.sidebarPageContents)}>
+      <div sx={styles.sidebarPageContents}>
         {props.children}
       </div>
     </div>
