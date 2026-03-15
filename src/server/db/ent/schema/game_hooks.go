@@ -99,7 +99,8 @@ func validateStatusTransition(ctx context.Context, m *codegen.GameMutation, oldS
 		return fmt.Errorf("cannot transition from %s to %s", oldStatus, newStatus)
 	}
 
-	if oldStatus == game.StatusPENDING && newStatus == game.StatusIN_PROGRESS {
+	switch oldStatus {
+	case game.StatusPENDING:
 		return validatePlayerCountForMutation(ctx, m)
 	}
 
