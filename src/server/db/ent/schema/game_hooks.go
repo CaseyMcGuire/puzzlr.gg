@@ -66,17 +66,17 @@ func RejectBulkGameMutation(next ent.Mutator) ent.Mutator {
 	})
 }
 
-func getGamePlayerCounts(gameType game.Type) (minimum, maximum int) {
+func getGamePlayerCounts(gameType game.Type) (minimum, maximum int, ok bool) {
 	switch gameType {
 	case game.TypeTIC_TAC_TOE:
-		return 2, 2
+		return 2, 2, true
 	}
-	return -1, -1
+	return -1, -1, false
 }
 
 func validatePlayerCount(numPlayers int, gameType game.Type) error {
-	minimumPlayers, maximumPlayers := getGamePlayerCounts(gameType)
-	if minimumPlayers == -1 || maximumPlayers == -1 {
+	minimumPlayers, maximumPlayers, ok := getGamePlayerCounts(gameType)
+	if !ok {
 		return fmt.Errorf("game of type %s is not supported", gameType)
 	}
 
