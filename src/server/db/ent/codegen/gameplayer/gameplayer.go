@@ -3,6 +3,7 @@
 package gameplayer
 
 import (
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -16,6 +17,8 @@ const (
 	FieldUserID = "user_id"
 	// FieldGameID holds the string denoting the game_id field in the database.
 	FieldGameID = "game_id"
+	// FieldMarker holds the string denoting the marker field in the database.
+	FieldMarker = "marker"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeGame holds the string denoting the game edge name in mutations.
@@ -43,6 +46,7 @@ var Columns = []string{
 	FieldID,
 	FieldUserID,
 	FieldGameID,
+	FieldMarker,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -54,6 +58,17 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "puzzlr.gg/src/server/db/ent/codegen/runtime"
+var (
+	Hooks [2]ent.Hook
+	// MarkerValidator is a validator for the "marker" field. It is called by the builders before save.
+	MarkerValidator func(string) error
+)
 
 // OrderOption defines the ordering options for the GamePlayer queries.
 type OrderOption func(*sql.Selector)
@@ -71,6 +86,11 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByGameID orders the results by the game_id field.
 func ByGameID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGameID, opts...).ToFunc()
+}
+
+// ByMarker orders the results by the marker field.
+func ByMarker(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMarker, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

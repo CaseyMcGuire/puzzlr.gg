@@ -47,6 +47,7 @@ type ComplexityRoot struct {
 		CreateTime  func(childComplexity int) int
 		CurrentTurn func(childComplexity int) int
 		ID          func(childComplexity int) int
+		Status      func(childComplexity int) int
 		Type        func(childComplexity int) int
 		UpdateTime  func(childComplexity int) int
 		User        func(childComplexity int) int
@@ -67,7 +68,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateGame func(childComplexity int, input *models.CreateGameInput) int
+		CreateGame   func(childComplexity int, input *models.CreateGameInput) int
+		MakeGameMove func(childComplexity int, input models.MakeGameMoveInput) int
 	}
 
 	PageInfo struct {
@@ -149,6 +151,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Game.ID(childComplexity), true
 
+	case "Game.status":
+		if e.complexity.Game.Status == nil {
+			break
+		}
+
+		return e.complexity.Game.Status(childComplexity), true
+
 	case "Game.type":
 		if e.complexity.Game.Type == nil {
 			break
@@ -216,6 +225,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.CreateGame(childComplexity, args["input"].(*models.CreateGameInput)), true
+
+	case "Mutation.makeGameMove":
+		if e.complexity.Mutation.MakeGameMove == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_makeGameMove_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.MakeGameMove(childComplexity, args["input"].(models.MakeGameMoveInput)), true
 
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
@@ -349,7 +370,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateGameInput,
 		ec.unmarshalInputCreateTicTacToeInput,
+		ec.unmarshalInputGameMoveInput,
 		ec.unmarshalInputGameWhereInput,
+		ec.unmarshalInputMakeGameMoveInput,
+		ec.unmarshalInputTicTacToeMoveInput,
 		ec.unmarshalInputUserWhereInput,
 	)
 	first := true
@@ -461,9 +485,19 @@ type Game implements Node {
   updateTime: Time!
   type: GameType!
   board: GameBoard!
+  status: GameStatus!
   user: [User!]
   winner: User
   currentTurn: User
+}
+"""
+GameStatus is enum for the field status
+"""
+enum GameStatus @goModel(model: "puzzlr.gg/src/server/db/ent/codegen/game.Status") {
+  PENDING
+  IN_PROGRESS
+  WON
+  DRAW
 }
 """
 GameType is enum for the field type
@@ -519,6 +553,13 @@ input GameWhereInput {
   typeNEQ: GameType
   typeIn: [GameType!]
   typeNotIn: [GameType!]
+  """
+  status field predicates
+  """
+  status: GameStatus
+  statusNEQ: GameStatus
+  statusIn: [GameStatus!]
+  statusNotIn: [GameStatus!]
   """
   user edge predicates
   """
@@ -659,6 +700,24 @@ input CreateGameInput @oneOf {
 
 input CreateTicTacToeInput {
     opponentId: Int!
+}`, BuiltIn: false},
+	{Name: "../schema/mutations/make_game_move_mutation.graphqls", Input: `
+extend type Mutation {
+    makeGameMove(input: MakeGameMoveInput!): Game
+}
+
+input MakeGameMoveInput {
+    gameId: ID!
+    move: GameMoveInput!
+}
+
+input GameMoveInput @oneOf {
+    ticTacToeMove: TicTacToeMoveInput!
+}
+
+input TicTacToeMoveInput {
+    row: Int!
+    col: Int!
 }`, BuiltIn: false},
 	{Name: "../schema/schema.graphqls", Input: `scalar Time
 

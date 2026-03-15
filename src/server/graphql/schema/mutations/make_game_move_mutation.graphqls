@@ -1,0 +1,18 @@
+
+extend type Mutation {
+    makeGameMove(input: MakeGameMoveInput!): Game
+}
+
+input MakeGameMoveInput {
+    gameId: ID!
+    move: GameMoveInput!
+}
+
+input GameMoveInput @oneOf {
+    ticTacToeMove: TicTacToeMoveInput!
+}
+
+input TicTacToeMoveInput {
+    row: Int!
+    col: Int!
+}

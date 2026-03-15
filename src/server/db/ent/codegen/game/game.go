@@ -28,6 +28,8 @@ const (
 	FieldBoard = "board"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeWinner holds the string denoting the winner edge name in mutations.
@@ -74,6 +76,7 @@ var Columns = []string{
 	FieldType,
 	FieldBoard,
 	FieldMetadata,
+	FieldStatus,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "games"
@@ -110,7 +113,7 @@ func ValidColumn(column string) bool {
 //
 //	import _ "puzzlr.gg/src/server/db/ent/codegen/runtime"
 var (
-	Hooks [2]ent.Hook
+	Hooks [4]ent.Hook
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
@@ -141,6 +144,34 @@ func TypeValidator(_type Type) error {
 	}
 }
 
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusPENDING is the default value of the Status enum.
+const DefaultStatus = StatusPENDING
+
+// Status values.
+const (
+	StatusPENDING     Status = "PENDING"
+	StatusIN_PROGRESS Status = "IN_PROGRESS"
+	StatusWON         Status = "WON"
+	StatusDRAW        Status = "DRAW"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusPENDING, StatusIN_PROGRESS, StatusWON, StatusDRAW:
+		return nil
+	default:
+		return fmt.Errorf("game: invalid enum value for status field: %q", s)
+	}
+}
+
 // OrderOption defines the ordering options for the Game queries.
 type OrderOption func(*sql.Selector)
 
@@ -162,6 +193,11 @@ func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
 // ByType orders the results by the type field.
 func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByUserCount orders the results by user count.
@@ -248,6 +284,24 @@ func (e *Type) UnmarshalGQL(val interface{}) error {
 	*e = Type(str)
 	if err := TypeValidator(*e); err != nil {
 		return fmt.Errorf("%s is not a valid Type", str)
+	}
+	return nil
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e Status) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *Status) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = Status(str)
+	if err := StatusValidator(*e); err != nil {
+		return fmt.Errorf("%s is not a valid Status", str)
 	}
 	return nil
 }

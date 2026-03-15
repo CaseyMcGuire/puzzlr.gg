@@ -69,6 +69,20 @@ func (_c *GameCreate) SetMetadata(v json.RawMessage) *GameCreate {
 	return _c
 }
 
+// SetStatus sets the "status" field.
+func (_c *GameCreate) SetStatus(v game.Status) *GameCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *GameCreate) SetNillableStatus(v *game.Status) *GameCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_c *GameCreate) AddUserIDs(ids ...int) *GameCreate {
 	_c.mutation.AddUserIDs(ids...)
@@ -188,6 +202,10 @@ func (_c *GameCreate) defaults() error {
 		v := game.DefaultUpdateTime()
 		_c.mutation.SetUpdateTime(v)
 	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := game.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
 	return nil
 }
 
@@ -209,6 +227,14 @@ func (_c *GameCreate) check() error {
 	}
 	if _, ok := _c.mutation.Board(); !ok {
 		return &ValidationError{Name: "board", err: errors.New(`codegen: missing required field "Game.board"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`codegen: missing required field "Game.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := game.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`codegen: validator failed for field "Game.status": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -255,6 +281,10 @@ func (_c *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(game.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(game.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

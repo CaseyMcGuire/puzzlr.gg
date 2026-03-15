@@ -45,6 +45,7 @@ type GameMutation struct {
 	appendboard         [][]string
 	metadata            *json.RawMessage
 	appendmetadata      json.RawMessage
+	status              *game.Status
 	clearedFields       map[string]struct{}
 	user                map[int]struct{}
 	removeduser         map[int]struct{}
@@ -383,6 +384,42 @@ func (m *GameMutation) ResetMetadata() {
 	delete(m.clearedFields, game.FieldMetadata)
 }
 
+// SetStatus sets the "status" field.
+func (m *GameMutation) SetStatus(ga game.Status) {
+	m.status = &ga
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *GameMutation) Status() (r game.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Game entity.
+// If the Game object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameMutation) OldStatus(ctx context.Context) (v game.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *GameMutation) ResetStatus() {
+	m.status = nil
+}
+
 // AddUserIDs adds the "user" edge to the User entity by ids.
 func (m *GameMutation) AddUserIDs(ids ...int) {
 	if m.user == nil {
@@ -603,7 +640,7 @@ func (m *GameMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.create_time != nil {
 		fields = append(fields, game.FieldCreateTime)
 	}
@@ -618,6 +655,9 @@ func (m *GameMutation) Fields() []string {
 	}
 	if m.metadata != nil {
 		fields = append(fields, game.FieldMetadata)
+	}
+	if m.status != nil {
+		fields = append(fields, game.FieldStatus)
 	}
 	return fields
 }
@@ -637,6 +677,8 @@ func (m *GameMutation) Field(name string) (ent.Value, bool) {
 		return m.Board()
 	case game.FieldMetadata:
 		return m.Metadata()
+	case game.FieldStatus:
+		return m.Status()
 	}
 	return nil, false
 }
@@ -656,6 +698,8 @@ func (m *GameMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldBoard(ctx)
 	case game.FieldMetadata:
 		return m.OldMetadata(ctx)
+	case game.FieldStatus:
+		return m.OldStatus(ctx)
 	}
 	return nil, fmt.Errorf("unknown Game field %s", name)
 }
@@ -699,6 +743,13 @@ func (m *GameMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMetadata(v)
+		return nil
+	case game.FieldStatus:
+		v, ok := value.(game.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Game field %s", name)
@@ -772,6 +823,9 @@ func (m *GameMutation) ResetField(name string) error {
 		return nil
 	case game.FieldMetadata:
 		m.ResetMetadata()
+		return nil
+	case game.FieldStatus:
+		m.ResetStatus()
 		return nil
 	}
 	return fmt.Errorf("unknown Game field %s", name)
@@ -929,6 +983,7 @@ type GamePlayerMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	marker        *string
 	clearedFields map[string]struct{}
 	user          *int
 	cleareduser   bool
@@ -1109,6 +1164,42 @@ func (m *GamePlayerMutation) ResetGameID() {
 	m.game = nil
 }
 
+// SetMarker sets the "marker" field.
+func (m *GamePlayerMutation) SetMarker(s string) {
+	m.marker = &s
+}
+
+// Marker returns the value of the "marker" field in the mutation.
+func (m *GamePlayerMutation) Marker() (r string, exists bool) {
+	v := m.marker
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMarker returns the old "marker" field's value of the GamePlayer entity.
+// If the GamePlayer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GamePlayerMutation) OldMarker(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMarker is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMarker requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMarker: %w", err)
+	}
+	return oldValue.Marker, nil
+}
+
+// ResetMarker resets all changes to the "marker" field.
+func (m *GamePlayerMutation) ResetMarker() {
+	m.marker = nil
+}
+
 // ClearUser clears the "user" edge to the User entity.
 func (m *GamePlayerMutation) ClearUser() {
 	m.cleareduser = true
@@ -1197,12 +1288,15 @@ func (m *GamePlayerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GamePlayerMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.user != nil {
 		fields = append(fields, gameplayer.FieldUserID)
 	}
 	if m.game != nil {
 		fields = append(fields, gameplayer.FieldGameID)
+	}
+	if m.marker != nil {
+		fields = append(fields, gameplayer.FieldMarker)
 	}
 	return fields
 }
@@ -1216,6 +1310,8 @@ func (m *GamePlayerMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case gameplayer.FieldGameID:
 		return m.GameID()
+	case gameplayer.FieldMarker:
+		return m.Marker()
 	}
 	return nil, false
 }
@@ -1229,6 +1325,8 @@ func (m *GamePlayerMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUserID(ctx)
 	case gameplayer.FieldGameID:
 		return m.OldGameID(ctx)
+	case gameplayer.FieldMarker:
+		return m.OldMarker(ctx)
 	}
 	return nil, fmt.Errorf("unknown GamePlayer field %s", name)
 }
@@ -1251,6 +1349,13 @@ func (m *GamePlayerMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetGameID(v)
+		return nil
+	case gameplayer.FieldMarker:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMarker(v)
 		return nil
 	}
 	return fmt.Errorf("unknown GamePlayer field %s", name)
@@ -1309,6 +1414,9 @@ func (m *GamePlayerMutation) ResetField(name string) error {
 		return nil
 	case gameplayer.FieldGameID:
 		m.ResetGameID()
+		return nil
+	case gameplayer.FieldMarker:
+		m.ResetMarker()
 		return nil
 	}
 	return fmt.Errorf("unknown GamePlayer field %s", name)

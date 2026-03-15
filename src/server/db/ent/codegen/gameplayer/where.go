@@ -63,6 +63,11 @@ func GameID(v int) predicate.GamePlayer {
 	return predicate.GamePlayer(sql.FieldEQ(FieldGameID, v))
 }
 
+// Marker applies equality check predicate on the "marker" field. It's identical to MarkerEQ.
+func Marker(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldEQ(FieldMarker, v))
+}
+
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.GamePlayer {
 	return predicate.GamePlayer(sql.FieldEQ(FieldUserID, v))
@@ -101,6 +106,71 @@ func GameIDIn(vs ...int) predicate.GamePlayer {
 // GameIDNotIn applies the NotIn predicate on the "game_id" field.
 func GameIDNotIn(vs ...int) predicate.GamePlayer {
 	return predicate.GamePlayer(sql.FieldNotIn(FieldGameID, vs...))
+}
+
+// MarkerEQ applies the EQ predicate on the "marker" field.
+func MarkerEQ(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldEQ(FieldMarker, v))
+}
+
+// MarkerNEQ applies the NEQ predicate on the "marker" field.
+func MarkerNEQ(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldNEQ(FieldMarker, v))
+}
+
+// MarkerIn applies the In predicate on the "marker" field.
+func MarkerIn(vs ...string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldIn(FieldMarker, vs...))
+}
+
+// MarkerNotIn applies the NotIn predicate on the "marker" field.
+func MarkerNotIn(vs ...string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldNotIn(FieldMarker, vs...))
+}
+
+// MarkerGT applies the GT predicate on the "marker" field.
+func MarkerGT(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldGT(FieldMarker, v))
+}
+
+// MarkerGTE applies the GTE predicate on the "marker" field.
+func MarkerGTE(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldGTE(FieldMarker, v))
+}
+
+// MarkerLT applies the LT predicate on the "marker" field.
+func MarkerLT(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldLT(FieldMarker, v))
+}
+
+// MarkerLTE applies the LTE predicate on the "marker" field.
+func MarkerLTE(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldLTE(FieldMarker, v))
+}
+
+// MarkerContains applies the Contains predicate on the "marker" field.
+func MarkerContains(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldContains(FieldMarker, v))
+}
+
+// MarkerHasPrefix applies the HasPrefix predicate on the "marker" field.
+func MarkerHasPrefix(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldHasPrefix(FieldMarker, v))
+}
+
+// MarkerHasSuffix applies the HasSuffix predicate on the "marker" field.
+func MarkerHasSuffix(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldHasSuffix(FieldMarker, v))
+}
+
+// MarkerEqualFold applies the EqualFold predicate on the "marker" field.
+func MarkerEqualFold(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldEqualFold(FieldMarker, v))
+}
+
+// MarkerContainsFold applies the ContainsFold predicate on the "marker" field.
+func MarkerContainsFold(v string) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldContainsFold(FieldMarker, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

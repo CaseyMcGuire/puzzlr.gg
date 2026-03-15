@@ -22,9 +22,18 @@ type GameBoardRow struct {
 	Elements []*string `json:"elements"`
 }
 
+type GameMoveInput struct {
+	TicTacToeMove *TicTacToeMoveInput `json:"ticTacToeMove"`
+}
+
 type Link struct {
 	Href     string `json:"href"`
 	External bool   `json:"external"`
+}
+
+type MakeGameMoveInput struct {
+	GameID int            `json:"gameId"`
+	Move   *GameMoveInput `json:"move"`
 }
 
 type SidebarFolder struct {
@@ -40,3 +49,8 @@ type SidebarLink struct {
 }
 
 func (SidebarLink) IsSidebarItem() {}
+
+type TicTacToeMoveInput struct {
+	Row int `json:"row"`
+	Col int `json:"col"`
+}

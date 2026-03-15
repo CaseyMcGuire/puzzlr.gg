@@ -11,9 +11,19 @@ type Game implements Node {
   updateTime: Time!
   type: GameType!
   board: GameBoard!
+  status: GameStatus!
   user: [User!]
   winner: User
   currentTurn: User
+}
+"""
+GameStatus is enum for the field status
+"""
+enum GameStatus @goModel(model: "puzzlr.gg/src/server/db/ent/codegen/game.Status") {
+  PENDING
+  IN_PROGRESS
+  WON
+  DRAW
 }
 """
 GameType is enum for the field type
@@ -69,6 +79,13 @@ input GameWhereInput {
   typeNEQ: GameType
   typeIn: [GameType!]
   typeNotIn: [GameType!]
+  """
+  status field predicates
+  """
+  status: GameStatus
+  statusNEQ: GameStatus
+  statusIn: [GameStatus!]
+  statusNotIn: [GameStatus!]
   """
   user edge predicates
   """

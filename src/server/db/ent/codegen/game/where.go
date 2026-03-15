@@ -175,6 +175,26 @@ func MetadataNotNil() predicate.Game {
 	return predicate.Game(sql.FieldNotNull(FieldMetadata))
 }
 
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v Status) predicate.Game {
+	return predicate.Game(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v Status) predicate.Game {
+	return predicate.Game(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...Status) predicate.Game {
+	return predicate.Game(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...Status) predicate.Game {
+	return predicate.Game(sql.FieldNotIn(FieldStatus, vs...))
+}
+
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {

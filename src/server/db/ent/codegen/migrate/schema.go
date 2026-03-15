@@ -16,6 +16,7 @@ var (
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"TIC_TAC_TOE"}},
 		{Name: "board", Type: field.TypeJSON},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "WON", "DRAW"}, Default: "PENDING"},
 		{Name: "user_won_games", Type: field.TypeInt, Nullable: true},
 		{Name: "user_current_turn_games", Type: field.TypeInt, Nullable: true},
 	}
@@ -27,13 +28,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "games_users_won_games",
-				Columns:    []*schema.Column{GamesColumns[6]},
+				Columns:    []*schema.Column{GamesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "games_users_current_turn_games",
-				Columns:    []*schema.Column{GamesColumns[7]},
+				Columns:    []*schema.Column{GamesColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -42,6 +43,7 @@ var (
 	// GamePlayersColumns holds the columns for the "game_players" table.
 	GamePlayersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "marker", Type: field.TypeString},
 		{Name: "user_id", Type: field.TypeInt},
 		{Name: "game_id", Type: field.TypeInt},
 	}
@@ -53,13 +55,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_players_users_user",
-				Columns:    []*schema.Column{GamePlayersColumns[1]},
+				Columns:    []*schema.Column{GamePlayersColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "game_players_games_game",
-				Columns:    []*schema.Column{GamePlayersColumns[2]},
+				Columns:    []*schema.Column{GamePlayersColumns[3]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -68,7 +70,12 @@ var (
 			{
 				Name:    "gameplayer_user_id_game_id",
 				Unique:  true,
-				Columns: []*schema.Column{GamePlayersColumns[1], GamePlayersColumns[2]},
+				Columns: []*schema.Column{GamePlayersColumns[2], GamePlayersColumns[3]},
+			},
+			{
+				Name:    "gameplayer_game_id",
+				Unique:  false,
+				Columns: []*schema.Column{GamePlayersColumns[3]},
 			},
 		},
 	}

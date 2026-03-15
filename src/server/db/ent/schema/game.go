@@ -33,6 +33,12 @@ func (Game) Fields() []ent.Field {
 			Annotations(
 				entgql.Skip(),
 			),
+		field.Enum("status").
+			Values("PENDING", "IN_PROGRESS", "WON", "DRAW").
+			Default("PENDING").
+			Annotations(
+				entgql.Type("GameStatus"),
+			),
 	}
 }
 
@@ -58,8 +64,16 @@ func (Game) Hooks() []ent.Hook {
 			ent.OpCreate,
 		),
 		hook.On(
+			RejectBulkGameMutation,
+			ent.OpUpdate|ent.OpDelete,
+		),
+		hook.On(
 			ValidatePlayerCountOnUpdate,
-			ent.OpUpdate|ent.OpUpdateOne,
+			ent.OpUpdateOne,
+		),
+		hook.On(
+			ValidateStatusOnUpdate,
+			ent.OpUpdateOne,
 		),
 	}
 }

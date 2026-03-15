@@ -29,6 +29,8 @@ type Game struct {
 	Board [][]string `json:"board,omitempty"`
 	// Metadata holds the value of the "metadata" field.
 	Metadata json.RawMessage `json:"metadata,omitempty"`
+	// Status holds the value of the "status" field.
+	Status game.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GameQuery when eager-loading is set.
 	Edges                   GameEdges `json:"edges"`
@@ -106,7 +108,7 @@ func (*Game) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case game.FieldID:
 			values[i] = new(sql.NullInt64)
-		case game.FieldType:
+		case game.FieldType, game.FieldStatus:
 			values[i] = new(sql.NullString)
 		case game.FieldCreateTime, game.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -168,6 +170,12 @@ func (_m *Game) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
 					return fmt.Errorf("unmarshal field metadata: %w", err)
 				}
+			}
+		case game.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = game.Status(value.String)
 			}
 		case game.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -253,6 +261,9 @@ func (_m *Game) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteByte(')')
 	return builder.String()
 }

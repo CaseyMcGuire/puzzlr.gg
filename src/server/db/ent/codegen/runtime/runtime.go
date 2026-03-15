@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 	"puzzlr.gg/src/server/db/ent/schema"
 )
@@ -18,6 +19,8 @@ func init() {
 	gameHooks := schema.Game{}.Hooks()
 	game.Hooks[0] = gameHooks[0]
 	game.Hooks[1] = gameHooks[1]
+	game.Hooks[2] = gameHooks[2]
+	game.Hooks[3] = gameHooks[3]
 	gameMixinFields0 := gameMixin[0].Fields()
 	_ = gameMixinFields0
 	gameFields := schema.Game{}.Fields()
@@ -32,6 +35,15 @@ func init() {
 	game.DefaultUpdateTime = gameDescUpdateTime.Default.(func() time.Time)
 	// game.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	game.UpdateDefaultUpdateTime = gameDescUpdateTime.UpdateDefault.(func() time.Time)
+	gameplayerHooks := schema.GamePlayer{}.Hooks()
+	gameplayer.Hooks[0] = gameplayerHooks[0]
+	gameplayer.Hooks[1] = gameplayerHooks[1]
+	gameplayerFields := schema.GamePlayer{}.Fields()
+	_ = gameplayerFields
+	// gameplayerDescMarker is the schema descriptor for marker field.
+	gameplayerDescMarker := gameplayerFields[2].Descriptor()
+	// gameplayer.MarkerValidator is a validator for the "marker" field. It is called by the builders before save.
+	gameplayer.MarkerValidator = gameplayerDescMarker.Validators[0].(func(string) error)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescEmail is the schema descriptor for email field.

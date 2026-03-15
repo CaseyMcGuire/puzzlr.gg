@@ -68,6 +68,20 @@ func (_u *GameUpdate) ClearMetadata() *GameUpdate {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *GameUpdate) SetStatus(v game.Status) *GameUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *GameUpdate) SetNillableStatus(v *game.Status) *GameUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *GameUpdate) AddUserIDs(ids ...int) *GameUpdate {
 	_u.mutation.AddUserIDs(ids...)
@@ -237,7 +251,20 @@ func (_u *GameUpdate) defaults() error {
 	return nil
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *GameUpdate) check() error {
+	if v, ok := _u.mutation.Status(); ok {
+		if err := game.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`codegen: validator failed for field "Game.status": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *GameUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(game.Table, game.Columns, sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -267,6 +294,9 @@ func (_u *GameUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(game.FieldMetadata, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(game.FieldStatus, field.TypeEnum, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -472,6 +502,20 @@ func (_u *GameUpdateOne) ClearMetadata() *GameUpdateOne {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *GameUpdateOne) SetStatus(v game.Status) *GameUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *GameUpdateOne) SetNillableStatus(v *game.Status) *GameUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *GameUpdateOne) AddUserIDs(ids ...int) *GameUpdateOne {
 	_u.mutation.AddUserIDs(ids...)
@@ -654,7 +698,20 @@ func (_u *GameUpdateOne) defaults() error {
 	return nil
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *GameUpdateOne) check() error {
+	if v, ok := _u.mutation.Status(); ok {
+		if err := game.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`codegen: validator failed for field "Game.status": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(game.Table, game.Columns, sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -701,6 +758,9 @@ func (_u *GameUpdateOne) sqlSave(ctx context.Context) (_node *Game, err error) {
 	}
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(game.FieldMetadata, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(game.FieldStatus, field.TypeEnum, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

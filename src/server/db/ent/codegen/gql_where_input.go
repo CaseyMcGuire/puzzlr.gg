@@ -55,6 +55,12 @@ type GameWhereInput struct {
 	TypeIn    []game.Type `json:"typeIn,omitempty"`
 	TypeNotIn []game.Type `json:"typeNotIn,omitempty"`
 
+	// "status" field predicates.
+	Status      *game.Status  `json:"status,omitempty"`
+	StatusNEQ   *game.Status  `json:"statusNEQ,omitempty"`
+	StatusIn    []game.Status `json:"statusIn,omitempty"`
+	StatusNotIn []game.Status `json:"statusNotIn,omitempty"`
+
 	// "user" edge predicates.
 	HasUser     *bool             `json:"hasUser,omitempty"`
 	HasUserWith []*UserWhereInput `json:"hasUserWith,omitempty"`
@@ -222,6 +228,18 @@ func (i *GameWhereInput) P() (predicate.Game, error) {
 	}
 	if len(i.TypeNotIn) > 0 {
 		predicates = append(predicates, game.TypeNotIn(i.TypeNotIn...))
+	}
+	if i.Status != nil {
+		predicates = append(predicates, game.StatusEQ(*i.Status))
+	}
+	if i.StatusNEQ != nil {
+		predicates = append(predicates, game.StatusNEQ(*i.StatusNEQ))
+	}
+	if len(i.StatusIn) > 0 {
+		predicates = append(predicates, game.StatusIn(i.StatusIn...))
+	}
+	if len(i.StatusNotIn) > 0 {
+		predicates = append(predicates, game.StatusNotIn(i.StatusNotIn...))
 	}
 
 	if i.HasUser != nil {

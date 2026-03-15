@@ -22,6 +22,8 @@ type GamePlayer struct {
 	UserID int `json:"user_id,omitempty"`
 	// GameID holds the value of the "game_id" field.
 	GameID int `json:"game_id,omitempty"`
+	// Marker holds the value of the "marker" field.
+	Marker string `json:"marker,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GamePlayerQuery when eager-loading is set.
 	Edges        GamePlayerEdges `json:"edges"`
@@ -70,6 +72,8 @@ func (*GamePlayer) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gameplayer.FieldID, gameplayer.FieldUserID, gameplayer.FieldGameID:
 			values[i] = new(sql.NullInt64)
+		case gameplayer.FieldMarker:
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -102,6 +106,12 @@ func (_m *GamePlayer) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field game_id", values[i])
 			} else if value.Valid {
 				_m.GameID = int(value.Int64)
+			}
+		case gameplayer.FieldMarker:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field marker", values[i])
+			} else if value.Valid {
+				_m.Marker = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -154,6 +164,9 @@ func (_m *GamePlayer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("game_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GameID))
+	builder.WriteString(", ")
+	builder.WriteString("marker=")
+	builder.WriteString(_m.Marker)
 	builder.WriteByte(')')
 	return builder.String()
 }

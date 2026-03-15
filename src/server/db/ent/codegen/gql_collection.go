@@ -86,6 +86,11 @@ func (_q *GameQuery) collectField(ctx context.Context, oneNode bool, opCtx *grap
 				selectedFields = append(selectedFields, game.FieldBoard)
 				fieldSeen[game.FieldBoard] = struct{}{}
 			}
+		case "status":
+			if _, ok := fieldSeen[game.FieldStatus]; !ok {
+				selectedFields = append(selectedFields, game.FieldStatus)
+				fieldSeen[game.FieldStatus] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:

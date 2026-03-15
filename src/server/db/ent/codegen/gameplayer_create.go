@@ -33,6 +33,12 @@ func (_c *GamePlayerCreate) SetGameID(v int) *GamePlayerCreate {
 	return _c
 }
 
+// SetMarker sets the "marker" field.
+func (_c *GamePlayerCreate) SetMarker(v string) *GamePlayerCreate {
+	_c.mutation.SetMarker(v)
+	return _c
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (_c *GamePlayerCreate) SetUser(v *User) *GamePlayerCreate {
 	return _c.SetUserID(v.ID)
@@ -83,6 +89,14 @@ func (_c *GamePlayerCreate) check() error {
 	if _, ok := _c.mutation.GameID(); !ok {
 		return &ValidationError{Name: "game_id", err: errors.New(`codegen: missing required field "GamePlayer.game_id"`)}
 	}
+	if _, ok := _c.mutation.Marker(); !ok {
+		return &ValidationError{Name: "marker", err: errors.New(`codegen: missing required field "GamePlayer.marker"`)}
+	}
+	if v, ok := _c.mutation.Marker(); ok {
+		if err := gameplayer.MarkerValidator(v); err != nil {
+			return &ValidationError{Name: "marker", err: fmt.Errorf(`codegen: validator failed for field "GamePlayer.marker": %w`, err)}
+		}
+	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`codegen: missing required edge "GamePlayer.user"`)}
 	}
@@ -115,6 +129,10 @@ func (_c *GamePlayerCreate) createSpec() (*GamePlayer, *sqlgraph.CreateSpec) {
 		_node = &GamePlayer{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(gameplayer.Table, sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt))
 	)
+	if value, ok := _c.mutation.Marker(); ok {
+		_spec.SetField(gameplayer.FieldMarker, field.TypeString, value)
+		_node.Marker = value
+	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,

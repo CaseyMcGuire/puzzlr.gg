@@ -18,6 +18,7 @@ import (
 
 type MutationResolver interface {
 	CreateGame(ctx context.Context, input *models.CreateGameInput) (*codegen.Game, error)
+	MakeGameMove(ctx context.Context, input models.MakeGameMoveInput) (*codegen.Game, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -28,6 +29,17 @@ func (ec *executionContext) field_Mutation_createGame_args(ctx context.Context, 
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOCreateGameInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐCreateGameInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_makeGameMove_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNMakeGameMoveInput2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐMakeGameMoveInput)
 	if err != nil {
 		return nil, err
 	}
@@ -78,6 +90,8 @@ func (ec *executionContext) fieldContext_Mutation_createGame(ctx context.Context
 				return ec.fieldContext_Game_type(ctx, field)
 			case "board":
 				return ec.fieldContext_Game_board(ctx, field)
+			case "status":
+				return ec.fieldContext_Game_status(ctx, field)
 			case "user":
 				return ec.fieldContext_Game_user(ctx, field)
 			case "winner":
@@ -96,6 +110,67 @@ func (ec *executionContext) fieldContext_Mutation_createGame(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createGame_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_makeGameMove(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_makeGameMove,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().MakeGameMove(ctx, fc.Args["input"].(models.MakeGameMoveInput))
+		},
+		nil,
+		ec.marshalOGame2ᚖpuzzlrᚗggᚋsrcᚋserverᚋdbᚋentᚋcodegenᚐGame,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_makeGameMove(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Game_id(ctx, field)
+			case "createTime":
+				return ec.fieldContext_Game_createTime(ctx, field)
+			case "updateTime":
+				return ec.fieldContext_Game_updateTime(ctx, field)
+			case "type":
+				return ec.fieldContext_Game_type(ctx, field)
+			case "board":
+				return ec.fieldContext_Game_board(ctx, field)
+			case "status":
+				return ec.fieldContext_Game_status(ctx, field)
+			case "user":
+				return ec.fieldContext_Game_user(ctx, field)
+			case "winner":
+				return ec.fieldContext_Game_winner(ctx, field)
+			case "currentTurn":
+				return ec.fieldContext_Game_currentTurn(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Game", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_makeGameMove_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -190,6 +265,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "createGame":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createGame(ctx, field)
+			})
+		case "makeGameMove":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_makeGameMove(ctx, field)
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
