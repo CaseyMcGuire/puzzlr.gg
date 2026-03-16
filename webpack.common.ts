@@ -26,15 +26,10 @@ const config : Configuration = {
   },
   module: {
     rules: [
-      // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
+      // Transpile TS/TSX via Babel. Type-checking runs separately via `tsc --noEmit`.
       {
         test: /\.tsx?$/,
-        use: [
-          // then run it through babel (to, for example, convert our graphql queries)
-          {loader: 'babel-loader'},
-          // first compile our typescript into javascript
-          {loader: 'ts-loader'},
-        ]
+        use: [{loader: 'babel-loader'}]
       },
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
       {

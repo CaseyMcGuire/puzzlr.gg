@@ -4,8 +4,9 @@
   "description": "A gaming app",
   "main": "index.js",
   "scripts": {
-    "webpack": "webpack --config webpack.production.ts",
+    "webpack": "npm run typecheck && webpack --config webpack.production.ts",
     "webpack-development": "webpack --config webpack.development.ts",
+    "typecheck": "tsc --noEmit",
     "relay-compiler": "babel-node -x .ts -- bin/generateSchemaAndRunRelayCompiler.ts"
   },
   "relay": {
@@ -39,6 +40,7 @@
     "babel-loader": "^9.2.1",
     "babel-plugin-relay": "^20.1.1",
     "css-loader": "^7.1.2",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
     "graphql": "^16.10.0",
     "mini-css-extract-plugin": "^2.10.0",
     "relay-compiler": "^20.1.1",
