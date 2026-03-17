@@ -1,6 +1,8 @@
 package build
 
 import (
+	"fmt"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -12,12 +14,21 @@ import (
 	"puzzlr.gg/src/server/services"
 )
 
-func CreateGraphqlServer(ent *ent.Client) *handler.Server {
+func CreateGraphqlServer(entClient *ent.Client) (*handler.Server, error) {
+	if entClient == nil {
+		return nil, fmt.Errorf("build.CreateGraphqlServer requires a non-nil ent client")
+	}
+
+	gameService, err := services.NewGameService(entClient)
+	if err != nil {
+		return nil, err
+	}
+
 	srv := handler.New(graphql.NewExecutableSchema(
 		graphql.Config{
 			Resolvers: &resolvers.Resolver{
-				Ent:         ent,
-				GameService: services.NewGameService(ent),
+				Ent:         entClient,
+				GameService: gameService,
 			}},
 	))
 
@@ -32,5 +43,5 @@ func CreateGraphqlServer(ent *ent.Client) *handler.Server {
 		Cache: lru.New[string](100),
 	})
 
-	return srv
+	return srv, nil
 }

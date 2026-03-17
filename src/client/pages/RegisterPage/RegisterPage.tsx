@@ -53,7 +53,7 @@ const styles = stylex.create({
 export default function RegisterPage() {
   return (
     <div sx={styles.page}>
-      <form sx={styles.cardForm} action="/register" method="POST">
+      <form sx={styles.cardForm} action="/user/create" method="POST">
         <h1 sx={styles.title}>Register</h1>
         <FormTextInput name={"email"} id={"email"} label={"Email"} />
         <FormTextInput id={"password"} name={"password"} label={"Password"} isPassword={true}/>

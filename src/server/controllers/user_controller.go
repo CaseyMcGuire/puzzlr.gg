@@ -1,107 +1,67 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
-	"puzzlr.gg/src/server/build"
+
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/services"
+	"puzzlr.gg/src/server/session"
 	"puzzlr.gg/src/server/views"
 )
 
 type UserController struct {
-	userService services.UserService
+	userService    *services.UserService
+	sessionManager *session.SessionManager
 }
 
-const (
-	SessionName   = "user_session"
-	Authenticated = "authenticated"
-	UserID        = "UserID"
-)
+func (u *UserController) HandleRegisterGet(w http.ResponseWriter, r *http.Request) {
+	if u.sessionManager.RedirectIfAuthenticated(w, r, "/") {
+		return
+	}
+	err := views.ReactPage("Register", "index").Render(w)
+	if err != nil {
+		http.Error(w, "failed to render page", http.StatusInternalServerError)
+	}
+}
 
-func (u *UserController) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	session, _ := build.CreateCookieStore().Get(r, SessionName)
-	if auth, ok := session.Values[Authenticated].(bool); ok && auth {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+func (u *UserController) HandleRegisterPost(w http.ResponseWriter, r *http.Request) {
+	if u.sessionManager.RedirectIfAuthenticated(w, r, "/") {
 		return
 	}
 
-	if r.Method == http.MethodGet {
-		views.ReactPage("Login", "index").Render(w)
-		return
-	} else if r.Method == http.MethodPost {
-		email := r.FormValue("email")
-		password := r.FormValue("password")
-		user, err := u.userService.GetUserWithPassword(r.Context(), email, password)
-		if err != nil {
-			http.Redirect(w, r, "/500", http.StatusInternalServerError)
-			return
-		}
-
-		if user != nil {
-			session.Values[Authenticated] = true
-			session.Values[UserID] = user.ID
-			sessionErr := session.Save(r, w)
-			if sessionErr == nil {
-				http.Redirect(w, r, "/", http.StatusOK)
-			} else {
-				http.Error(w, sessionErr.Error(), http.StatusInternalServerError)
-			}
-		} else {
-			http.Redirect(w, r, "/login?no_such_user=true", http.StatusFound)
-		}
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+	exists, err := u.userService.UserExists(r.Context(), email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else if exists {
+		http.Redirect(w, r, "/register?error=username_already_taken", http.StatusSeeOther)
 	} else {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func (u *UserController) HandleRegister(w http.ResponseWriter, r *http.Request) {
-	session, _ := build.CreateCookieStore().Get(r, SessionName)
-	if auth, ok := session.Values[Authenticated].(bool); ok && auth {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
-	if r.Method == http.MethodGet {
-		views.ReactPage("Register", "index").Render(w)
-		return
-	} else if r.Method == http.MethodPost {
-		email := r.FormValue("email")
-		password := r.FormValue("password")
-		exists, err := u.userService.UserExists(r.Context(), email)
+		_, err := u.userService.CreateUser(r.Context(), email, password)
 		if err != nil {
-			http.Redirect(w, r, "/500", http.StatusInternalServerError)
-		} else if exists {
-			http.Redirect(w, r, "/register?error=username_already_taken", http.StatusSeeOther)
+			http.Error(w, "Something went wrong. Please try again", http.StatusInternalServerError)
 		} else {
-			_, err := u.userService.CreateUser(r.Context(), email, password)
-			if err != nil {
-				http.Error(w, "Something went wrong. Please try again", http.StatusInternalServerError)
-			} else {
-				http.Redirect(w, r, "/login", http.StatusFound)
-			}
+			http.Redirect(w, r, "/login", http.StatusFound)
 		}
-	} else {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-}
-
-func (u *UserController) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	session, _ := build.CreateCookieStore().Get(r, SessionName)
-
-	// Set MaxAge to -1 to delete the cookie
-	session.Values[Authenticated] = false
-	session.Values[UserID] = -1
-	session.Options.MaxAge = -1
-	_ = session.Save(r, w)
-	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func NewUserController(
 	dbClient *ent.Client,
-) *UserController {
-	return &UserController{
-		userService: *services.NewUserService(
-			dbClient,
-		),
+	sessionManager *session.SessionManager,
+) (*UserController, error) {
+	if sessionManager == nil {
+		return nil, fmt.Errorf("controllers.NewUserController requires a non-nil sessionManager")
 	}
+
+	userService, err := services.NewUserService(dbClient)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserController{
+		userService:    userService,
+		sessionManager: sessionManager,
+	}, nil
 }

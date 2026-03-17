@@ -13,6 +13,7 @@ import (
 	"puzzlr.gg/src/server/db"
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/middleware"
+	"puzzlr.gg/src/server/session"
 	"puzzlr.gg/src/server/util"
 	"puzzlr.gg/src/server/views"
 )
@@ -38,9 +39,36 @@ func main() {
 		}
 	}(dbClient)
 
-	userController := controllers.NewUserController(
+	sessionManager, err := session.NewSessionManager(build.CreateCookieStore())
+	if err != nil {
+		log.Fatalf("Failed to initialize session manager: %v", err)
+	}
+
+	userController, err := controllers.NewUserController(
 		dbClient,
+		sessionManager,
 	)
+	if err != nil {
+		log.Fatalf("Failed to initialize user controller: %v", err)
+	}
+
+	sessionController, err := controllers.NewSessionController(
+		dbClient,
+		sessionManager,
+	)
+	if err != nil {
+		log.Fatalf("Failed to initialize session controller: %v", err)
+	}
+
+	sessionMiddleware, err := middleware.SessionMiddleware(sessionManager)
+	if err != nil {
+		log.Fatalf("Failed to initialize session middleware: %v", err)
+	}
+
+	authMiddleware, err := middleware.AuthMiddleware(sessionManager)
+	if err != nil {
+		log.Fatalf("Failed to initialize auth middleware: %v", err)
+	}
 
 	r := chi.NewRouter()
 
@@ -52,24 +80,29 @@ func main() {
 		foo := views.ReactPage("Foo", "index")
 		err := foo.Render(w)
 		if err != nil {
-			return
+			http.Error(w, "failed to render page", http.StatusInternalServerError)
 		}
 	})
 
-	srv := build.CreateGraphqlServer(dbClient)
+	srv, err := build.CreateGraphqlServer(dbClient)
+	if err != nil {
+		log.Fatalf("Failed to initialize graphql server: %v", err)
+	}
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.SessionMiddleware)
+		r.Use(sessionMiddleware)
 		r.Handle("/graphql", srv)
-		r.Post("/logout", userController.HandleLogout)
+		r.Post("/logout", sessionController.HandleLogout)
 	})
 
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware)
+		r.Use(authMiddleware)
 		r.Handle("/graphql_playground", playground.Handler("GraphQL playground", "/graphql"))
 	})
 
-	r.Post("/login", userController.HandleLogin)
-	r.Post("/register", userController.HandleRegister)
+	r.Get("/login", sessionController.HandleLoginGet)
+	r.Post("/session/create", sessionController.HandleLoginPost)
+	r.Get("/register", userController.HandleRegisterGet)
+	r.Post("/user/create", userController.HandleRegisterPost)
 
 	fmt.Printf("Starting server...")
 	err = http.ListenAndServe(":3001", r)

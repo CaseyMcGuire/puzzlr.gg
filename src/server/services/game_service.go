@@ -20,8 +20,12 @@ const (
 	TictactoeO = "O"
 )
 
-func NewGameService(client *ent.Client) *GameService {
-	return &GameService{dbClient: client}
+func NewGameService(client *ent.Client) (*GameService, error) {
+	if client == nil {
+		return nil, fmt.Errorf("services.NewGameService requires a non-nil dbClient")
+	}
+
+	return &GameService{dbClient: client}, nil
 }
 
 func (g *GameService) CreateTicTacToeGame(ctx context.Context, userID int, opponentID int) (*ent.Game, error) {

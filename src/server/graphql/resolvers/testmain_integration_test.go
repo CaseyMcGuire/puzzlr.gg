@@ -123,8 +123,13 @@ func startPostgresContainer(ctx context.Context) (container testcontainers.Conta
 }
 
 func newTestResolver() *resolvers.Resolver {
+	gameService, err := services.NewGameService(integrationClient)
+	if err != nil {
+		panic(err)
+	}
+
 	return &resolvers.Resolver{
 		Ent:         integrationClient,
-		GameService: services.NewGameService(integrationClient),
+		GameService: gameService,
 	}
 }

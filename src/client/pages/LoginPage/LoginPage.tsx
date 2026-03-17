@@ -52,7 +52,7 @@ const styles = stylex.create({
 export default function LoginPage() {
   return (
     <div sx={styles.page}>
-      <form sx={styles.cardForm} action="/login" method="POST">
+      <form sx={styles.cardForm} action="/session/create" method="POST">
         <h1 sx={styles.title}>Login</h1>
         <FormTextInput name={"email"} id={"email"} label={"Email"} />
         <FormTextInput id={"password"} name={"password"} label={"Password"} isPassword={true} />

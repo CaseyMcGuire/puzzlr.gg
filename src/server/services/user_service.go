@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
@@ -75,9 +77,12 @@ func checkPassword(hashedPassword, password string) bool {
 
 func NewUserService(
 	dbClient *ent.Client,
-) *UserService {
+) (*UserService, error) {
+	if dbClient == nil {
+		return nil, fmt.Errorf("services.NewUserService requires a non-nil dbClient")
+	}
 
 	return &UserService{
 		dbClient: dbClient,
-	}
+	}, nil
 }
