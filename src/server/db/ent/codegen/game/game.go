@@ -113,7 +113,7 @@ func ValidColumn(column string) bool {
 //
 //	import _ "puzzlr.gg/src/server/db/ent/codegen/runtime"
 var (
-	Hooks [4]ent.Hook
+	Hooks [5]ent.Hook
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.

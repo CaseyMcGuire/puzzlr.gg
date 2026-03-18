@@ -64,6 +64,10 @@ func (Game) Hooks() []ent.Hook {
 			ent.OpCreate,
 		),
 		hook.On(
+			ValidateBoardShapeForType,
+			ent.OpCreate|ent.OpUpdateOne,
+		),
+		hook.On(
 			RejectBulkGameMutation,
 			ent.OpUpdate|ent.OpDelete,
 		),

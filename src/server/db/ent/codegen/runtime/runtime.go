@@ -21,6 +21,7 @@ func init() {
 	game.Hooks[1] = gameHooks[1]
 	game.Hooks[2] = gameHooks[2]
 	game.Hooks[3] = gameHooks[3]
+	game.Hooks[4] = gameHooks[4]
 	gameMixinFields0 := gameMixin[0].Fields()
 	_ = gameMixinFields0
 	gameFields := schema.Game{}.Fields()

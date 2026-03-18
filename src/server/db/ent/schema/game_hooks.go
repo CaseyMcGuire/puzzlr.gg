@@ -60,6 +60,29 @@ func ValidateStatusOnUpdate(next ent.Mutator) ent.Mutator {
 	})
 }
 
+func ValidateBoardShapeForType(next ent.Mutator) ent.Mutator {
+	return hook.GameFunc(func(ctx context.Context, m *codegen.GameMutation) (ent.Value, error) {
+		board, ok := m.Board()
+		if !ok {
+			return next.Mutate(ctx, m)
+		}
+
+		gameType, err := gameTypeFromMutation(ctx, m)
+		if err != nil {
+			return nil, err
+		}
+
+		switch gameType {
+		case game.TypeTIC_TAC_TOE:
+			if err := validateTicTacToeBoardShape(board); err != nil {
+				return nil, err
+			}
+		}
+
+		return next.Mutate(ctx, m)
+	})
+}
+
 func RejectBulkGameMutation(next ent.Mutator) ent.Mutator {
 	return hook.GameFunc(func(ctx context.Context, m *codegen.GameMutation) (ent.Value, error) {
 		return nil, fmt.Errorf("bulk game mutation (%s) is not allowed; use UpdateOne/DeleteOne", m.Op())
@@ -104,6 +127,33 @@ func validateStatusTransition(ctx context.Context, m *codegen.GameMutation, oldS
 		return validatePlayerCountForMutation(ctx, m)
 	}
 
+	return nil
+}
+
+func gameTypeFromMutation(ctx context.Context, m *codegen.GameMutation) (game.Type, error) {
+	if m.Op().Is(ent.OpCreate) {
+		gameType, ok := m.GetType()
+		if !ok {
+			return "", fmt.Errorf("missing type for create")
+		}
+		return gameType, nil
+	}
+	if m.Op().Is(ent.OpUpdateOne) {
+		return m.OldType(ctx)
+	}
+
+	return "", fmt.Errorf("unsupported op for game type lookup: %s", m.Op())
+}
+
+func validateTicTacToeBoardShape(board [][]string) error {
+	if len(board) != 3 {
+		return fmt.Errorf("tic tac toe board must have exactly 3 rows")
+	}
+	for rowIndex, row := range board {
+		if len(row) != 3 {
+			return fmt.Errorf("tic tac toe board row %d must have exactly 3 columns", rowIndex)
+		}
+	}
 	return nil
 }
 
