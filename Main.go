@@ -76,13 +76,17 @@ func main() {
 	fs := http.FileServer(http.Dir("src/assets"))
 	r.Handle("/assets/*", http.StripPrefix("/assets/", fs))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		foo := views.ReactPage("Foo", "index")
-		err := foo.Render(w)
-		if err != nil {
-			http.Error(w, "failed to render page", http.StatusInternalServerError)
+	renderReactPage := func(title string) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			err := views.ReactPage(title, "index").Render(w)
+			if err != nil {
+				http.Error(w, "failed to render page", http.StatusInternalServerError)
+			}
 		}
-	})
+	}
+
+	r.Get("/", renderReactPage("Puzzlr"))
+	r.Get("/tictactoe", renderReactPage("Tic Tac Toe"))
 
 	srv, err := build.CreateGraphqlServer(dbClient)
 	if err != nil {
