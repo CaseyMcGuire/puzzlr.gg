@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
@@ -28,11 +29,603 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeFriendship = "Friendship"
-	TypeGame       = "Game"
-	TypeGamePlayer = "GamePlayer"
-	TypeUser       = "User"
+	TypeFriendRequest = "FriendRequest"
+	TypeFriendship    = "Friendship"
+	TypeGame          = "Game"
+	TypeGamePlayer    = "GamePlayer"
+	TypeUser          = "User"
 )
+
+// FriendRequestMutation represents an operation that mutates the FriendRequest nodes in the graph.
+type FriendRequestMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	create_time      *time.Time
+	update_time      *time.Time
+	clearedFields    map[string]struct{}
+	requester        *int
+	clearedrequester bool
+	recipient        *int
+	clearedrecipient bool
+	done             bool
+	oldValue         func(context.Context) (*FriendRequest, error)
+	predicates       []predicate.FriendRequest
+}
+
+var _ ent.Mutation = (*FriendRequestMutation)(nil)
+
+// friendrequestOption allows management of the mutation configuration using functional options.
+type friendrequestOption func(*FriendRequestMutation)
+
+// newFriendRequestMutation creates new mutation for the FriendRequest entity.
+func newFriendRequestMutation(c config, op Op, opts ...friendrequestOption) *FriendRequestMutation {
+	m := &FriendRequestMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeFriendRequest,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withFriendRequestID sets the ID field of the mutation.
+func withFriendRequestID(id int) friendrequestOption {
+	return func(m *FriendRequestMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *FriendRequest
+		)
+		m.oldValue = func(ctx context.Context) (*FriendRequest, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FriendRequest.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withFriendRequest sets the old FriendRequest of the mutation.
+func withFriendRequest(node *FriendRequest) friendrequestOption {
+	return func(m *FriendRequestMutation) {
+		m.oldValue = func(context.Context) (*FriendRequest, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FriendRequestMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FriendRequestMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("codegen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *FriendRequestMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *FriendRequestMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().FriendRequest.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *FriendRequestMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *FriendRequestMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the FriendRequest entity.
+// If the FriendRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendRequestMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *FriendRequestMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *FriendRequestMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *FriendRequestMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the FriendRequest entity.
+// If the FriendRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendRequestMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *FriendRequestMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// SetRequesterID sets the "requester_id" field.
+func (m *FriendRequestMutation) SetRequesterID(i int) {
+	m.requester = &i
+}
+
+// RequesterID returns the value of the "requester_id" field in the mutation.
+func (m *FriendRequestMutation) RequesterID() (r int, exists bool) {
+	v := m.requester
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequesterID returns the old "requester_id" field's value of the FriendRequest entity.
+// If the FriendRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendRequestMutation) OldRequesterID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequesterID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequesterID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequesterID: %w", err)
+	}
+	return oldValue.RequesterID, nil
+}
+
+// ResetRequesterID resets all changes to the "requester_id" field.
+func (m *FriendRequestMutation) ResetRequesterID() {
+	m.requester = nil
+}
+
+// SetRecipientID sets the "recipient_id" field.
+func (m *FriendRequestMutation) SetRecipientID(i int) {
+	m.recipient = &i
+}
+
+// RecipientID returns the value of the "recipient_id" field in the mutation.
+func (m *FriendRequestMutation) RecipientID() (r int, exists bool) {
+	v := m.recipient
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecipientID returns the old "recipient_id" field's value of the FriendRequest entity.
+// If the FriendRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendRequestMutation) OldRecipientID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecipientID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecipientID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecipientID: %w", err)
+	}
+	return oldValue.RecipientID, nil
+}
+
+// ResetRecipientID resets all changes to the "recipient_id" field.
+func (m *FriendRequestMutation) ResetRecipientID() {
+	m.recipient = nil
+}
+
+// ClearRequester clears the "requester" edge to the User entity.
+func (m *FriendRequestMutation) ClearRequester() {
+	m.clearedrequester = true
+	m.clearedFields[friendrequest.FieldRequesterID] = struct{}{}
+}
+
+// RequesterCleared reports if the "requester" edge to the User entity was cleared.
+func (m *FriendRequestMutation) RequesterCleared() bool {
+	return m.clearedrequester
+}
+
+// RequesterIDs returns the "requester" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RequesterID instead. It exists only for internal usage by the builders.
+func (m *FriendRequestMutation) RequesterIDs() (ids []int) {
+	if id := m.requester; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRequester resets all changes to the "requester" edge.
+func (m *FriendRequestMutation) ResetRequester() {
+	m.requester = nil
+	m.clearedrequester = false
+}
+
+// ClearRecipient clears the "recipient" edge to the User entity.
+func (m *FriendRequestMutation) ClearRecipient() {
+	m.clearedrecipient = true
+	m.clearedFields[friendrequest.FieldRecipientID] = struct{}{}
+}
+
+// RecipientCleared reports if the "recipient" edge to the User entity was cleared.
+func (m *FriendRequestMutation) RecipientCleared() bool {
+	return m.clearedrecipient
+}
+
+// RecipientIDs returns the "recipient" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RecipientID instead. It exists only for internal usage by the builders.
+func (m *FriendRequestMutation) RecipientIDs() (ids []int) {
+	if id := m.recipient; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRecipient resets all changes to the "recipient" edge.
+func (m *FriendRequestMutation) ResetRecipient() {
+	m.recipient = nil
+	m.clearedrecipient = false
+}
+
+// Where appends a list predicates to the FriendRequestMutation builder.
+func (m *FriendRequestMutation) Where(ps ...predicate.FriendRequest) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the FriendRequestMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FriendRequestMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FriendRequest, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *FriendRequestMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FriendRequestMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (FriendRequest).
+func (m *FriendRequestMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *FriendRequestMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.create_time != nil {
+		fields = append(fields, friendrequest.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, friendrequest.FieldUpdateTime)
+	}
+	if m.requester != nil {
+		fields = append(fields, friendrequest.FieldRequesterID)
+	}
+	if m.recipient != nil {
+		fields = append(fields, friendrequest.FieldRecipientID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *FriendRequestMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case friendrequest.FieldCreateTime:
+		return m.CreateTime()
+	case friendrequest.FieldUpdateTime:
+		return m.UpdateTime()
+	case friendrequest.FieldRequesterID:
+		return m.RequesterID()
+	case friendrequest.FieldRecipientID:
+		return m.RecipientID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *FriendRequestMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case friendrequest.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case friendrequest.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	case friendrequest.FieldRequesterID:
+		return m.OldRequesterID(ctx)
+	case friendrequest.FieldRecipientID:
+		return m.OldRecipientID(ctx)
+	}
+	return nil, fmt.Errorf("unknown FriendRequest field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FriendRequestMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case friendrequest.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case friendrequest.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	case friendrequest.FieldRequesterID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequesterID(v)
+		return nil
+	case friendrequest.FieldRecipientID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecipientID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FriendRequest field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *FriendRequestMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *FriendRequestMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FriendRequestMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown FriendRequest numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *FriendRequestMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *FriendRequestMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *FriendRequestMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown FriendRequest nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *FriendRequestMutation) ResetField(name string) error {
+	switch name {
+	case friendrequest.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case friendrequest.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	case friendrequest.FieldRequesterID:
+		m.ResetRequesterID()
+		return nil
+	case friendrequest.FieldRecipientID:
+		m.ResetRecipientID()
+		return nil
+	}
+	return fmt.Errorf("unknown FriendRequest field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *FriendRequestMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.requester != nil {
+		edges = append(edges, friendrequest.EdgeRequester)
+	}
+	if m.recipient != nil {
+		edges = append(edges, friendrequest.EdgeRecipient)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *FriendRequestMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case friendrequest.EdgeRequester:
+		if id := m.requester; id != nil {
+			return []ent.Value{*id}
+		}
+	case friendrequest.EdgeRecipient:
+		if id := m.recipient; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *FriendRequestMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *FriendRequestMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *FriendRequestMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedrequester {
+		edges = append(edges, friendrequest.EdgeRequester)
+	}
+	if m.clearedrecipient {
+		edges = append(edges, friendrequest.EdgeRecipient)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *FriendRequestMutation) EdgeCleared(name string) bool {
+	switch name {
+	case friendrequest.EdgeRequester:
+		return m.clearedrequester
+	case friendrequest.EdgeRecipient:
+		return m.clearedrecipient
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *FriendRequestMutation) ClearEdge(name string) error {
+	switch name {
+	case friendrequest.EdgeRequester:
+		m.ClearRequester()
+		return nil
+	case friendrequest.EdgeRecipient:
+		m.ClearRecipient()
+		return nil
+	}
+	return fmt.Errorf("unknown FriendRequest unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *FriendRequestMutation) ResetEdge(name string) error {
+	switch name {
+	case friendrequest.EdgeRequester:
+		m.ResetRequester()
+		return nil
+	case friendrequest.EdgeRecipient:
+		m.ResetRecipient()
+		return nil
+	}
+	return fmt.Errorf("unknown FriendRequest edge %s", name)
+}
 
 // FriendshipMutation represents an operation that mutates the Friendship nodes in the graph.
 type FriendshipMutation struct {
@@ -2002,33 +2595,39 @@ func (m *GamePlayerMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                        Op
-	typ                       string
-	id                        *int
-	email                     *string
-	hashed_password           *string
-	clearedFields             map[string]struct{}
-	games                     map[int]struct{}
-	removedgames              map[int]struct{}
-	clearedgames              bool
-	friends                   map[int]struct{}
-	removedfriends            map[int]struct{}
-	clearedfriends            bool
-	won_games                 map[int]struct{}
-	removedwon_games          map[int]struct{}
-	clearedwon_games          bool
-	current_turn_games        map[int]struct{}
-	removedcurrent_turn_games map[int]struct{}
-	clearedcurrent_turn_games bool
-	game_player               map[int]struct{}
-	removedgame_player        map[int]struct{}
-	clearedgame_player        bool
-	friendships               map[int]struct{}
-	removedfriendships        map[int]struct{}
-	clearedfriendships        bool
-	done                      bool
-	oldValue                  func(context.Context) (*User, error)
-	predicates                []predicate.User
+	op                              Op
+	typ                             string
+	id                              *int
+	email                           *string
+	hashed_password                 *string
+	clearedFields                   map[string]struct{}
+	games                           map[int]struct{}
+	removedgames                    map[int]struct{}
+	clearedgames                    bool
+	friends                         map[int]struct{}
+	removedfriends                  map[int]struct{}
+	clearedfriends                  bool
+	sent_friend_requests            map[int]struct{}
+	removedsent_friend_requests     map[int]struct{}
+	clearedsent_friend_requests     bool
+	received_friend_requests        map[int]struct{}
+	removedreceived_friend_requests map[int]struct{}
+	clearedreceived_friend_requests bool
+	won_games                       map[int]struct{}
+	removedwon_games                map[int]struct{}
+	clearedwon_games                bool
+	current_turn_games              map[int]struct{}
+	removedcurrent_turn_games       map[int]struct{}
+	clearedcurrent_turn_games       bool
+	game_player                     map[int]struct{}
+	removedgame_player              map[int]struct{}
+	clearedgame_player              bool
+	friendships                     map[int]struct{}
+	removedfriendships              map[int]struct{}
+	clearedfriendships              bool
+	done                            bool
+	oldValue                        func(context.Context) (*User, error)
+	predicates                      []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -2307,6 +2906,114 @@ func (m *UserMutation) ResetFriends() {
 	m.friends = nil
 	m.clearedfriends = false
 	m.removedfriends = nil
+}
+
+// AddSentFriendRequestIDs adds the "sent_friend_requests" edge to the FriendRequest entity by ids.
+func (m *UserMutation) AddSentFriendRequestIDs(ids ...int) {
+	if m.sent_friend_requests == nil {
+		m.sent_friend_requests = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.sent_friend_requests[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSentFriendRequests clears the "sent_friend_requests" edge to the FriendRequest entity.
+func (m *UserMutation) ClearSentFriendRequests() {
+	m.clearedsent_friend_requests = true
+}
+
+// SentFriendRequestsCleared reports if the "sent_friend_requests" edge to the FriendRequest entity was cleared.
+func (m *UserMutation) SentFriendRequestsCleared() bool {
+	return m.clearedsent_friend_requests
+}
+
+// RemoveSentFriendRequestIDs removes the "sent_friend_requests" edge to the FriendRequest entity by IDs.
+func (m *UserMutation) RemoveSentFriendRequestIDs(ids ...int) {
+	if m.removedsent_friend_requests == nil {
+		m.removedsent_friend_requests = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.sent_friend_requests, ids[i])
+		m.removedsent_friend_requests[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSentFriendRequests returns the removed IDs of the "sent_friend_requests" edge to the FriendRequest entity.
+func (m *UserMutation) RemovedSentFriendRequestsIDs() (ids []int) {
+	for id := range m.removedsent_friend_requests {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SentFriendRequestsIDs returns the "sent_friend_requests" edge IDs in the mutation.
+func (m *UserMutation) SentFriendRequestsIDs() (ids []int) {
+	for id := range m.sent_friend_requests {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSentFriendRequests resets all changes to the "sent_friend_requests" edge.
+func (m *UserMutation) ResetSentFriendRequests() {
+	m.sent_friend_requests = nil
+	m.clearedsent_friend_requests = false
+	m.removedsent_friend_requests = nil
+}
+
+// AddReceivedFriendRequestIDs adds the "received_friend_requests" edge to the FriendRequest entity by ids.
+func (m *UserMutation) AddReceivedFriendRequestIDs(ids ...int) {
+	if m.received_friend_requests == nil {
+		m.received_friend_requests = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.received_friend_requests[ids[i]] = struct{}{}
+	}
+}
+
+// ClearReceivedFriendRequests clears the "received_friend_requests" edge to the FriendRequest entity.
+func (m *UserMutation) ClearReceivedFriendRequests() {
+	m.clearedreceived_friend_requests = true
+}
+
+// ReceivedFriendRequestsCleared reports if the "received_friend_requests" edge to the FriendRequest entity was cleared.
+func (m *UserMutation) ReceivedFriendRequestsCleared() bool {
+	return m.clearedreceived_friend_requests
+}
+
+// RemoveReceivedFriendRequestIDs removes the "received_friend_requests" edge to the FriendRequest entity by IDs.
+func (m *UserMutation) RemoveReceivedFriendRequestIDs(ids ...int) {
+	if m.removedreceived_friend_requests == nil {
+		m.removedreceived_friend_requests = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.received_friend_requests, ids[i])
+		m.removedreceived_friend_requests[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedReceivedFriendRequests returns the removed IDs of the "received_friend_requests" edge to the FriendRequest entity.
+func (m *UserMutation) RemovedReceivedFriendRequestsIDs() (ids []int) {
+	for id := range m.removedreceived_friend_requests {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ReceivedFriendRequestsIDs returns the "received_friend_requests" edge IDs in the mutation.
+func (m *UserMutation) ReceivedFriendRequestsIDs() (ids []int) {
+	for id := range m.received_friend_requests {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetReceivedFriendRequests resets all changes to the "received_friend_requests" edge.
+func (m *UserMutation) ResetReceivedFriendRequests() {
+	m.received_friend_requests = nil
+	m.clearedreceived_friend_requests = false
+	m.removedreceived_friend_requests = nil
 }
 
 // AddWonGameIDs adds the "won_games" edge to the Game entity by ids.
@@ -2675,12 +3382,18 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.games != nil {
 		edges = append(edges, user.EdgeGames)
 	}
 	if m.friends != nil {
 		edges = append(edges, user.EdgeFriends)
+	}
+	if m.sent_friend_requests != nil {
+		edges = append(edges, user.EdgeSentFriendRequests)
+	}
+	if m.received_friend_requests != nil {
+		edges = append(edges, user.EdgeReceivedFriendRequests)
 	}
 	if m.won_games != nil {
 		edges = append(edges, user.EdgeWonGames)
@@ -2710,6 +3423,18 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	case user.EdgeFriends:
 		ids := make([]ent.Value, 0, len(m.friends))
 		for id := range m.friends {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeSentFriendRequests:
+		ids := make([]ent.Value, 0, len(m.sent_friend_requests))
+		for id := range m.sent_friend_requests {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeReceivedFriendRequests:
+		ids := make([]ent.Value, 0, len(m.received_friend_requests))
+		for id := range m.received_friend_requests {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2743,12 +3468,18 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.removedgames != nil {
 		edges = append(edges, user.EdgeGames)
 	}
 	if m.removedfriends != nil {
 		edges = append(edges, user.EdgeFriends)
+	}
+	if m.removedsent_friend_requests != nil {
+		edges = append(edges, user.EdgeSentFriendRequests)
+	}
+	if m.removedreceived_friend_requests != nil {
+		edges = append(edges, user.EdgeReceivedFriendRequests)
 	}
 	if m.removedwon_games != nil {
 		edges = append(edges, user.EdgeWonGames)
@@ -2778,6 +3509,18 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	case user.EdgeFriends:
 		ids := make([]ent.Value, 0, len(m.removedfriends))
 		for id := range m.removedfriends {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeSentFriendRequests:
+		ids := make([]ent.Value, 0, len(m.removedsent_friend_requests))
+		for id := range m.removedsent_friend_requests {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeReceivedFriendRequests:
+		ids := make([]ent.Value, 0, len(m.removedreceived_friend_requests))
+		for id := range m.removedreceived_friend_requests {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2811,12 +3554,18 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.clearedgames {
 		edges = append(edges, user.EdgeGames)
 	}
 	if m.clearedfriends {
 		edges = append(edges, user.EdgeFriends)
+	}
+	if m.clearedsent_friend_requests {
+		edges = append(edges, user.EdgeSentFriendRequests)
+	}
+	if m.clearedreceived_friend_requests {
+		edges = append(edges, user.EdgeReceivedFriendRequests)
 	}
 	if m.clearedwon_games {
 		edges = append(edges, user.EdgeWonGames)
@@ -2841,6 +3590,10 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedgames
 	case user.EdgeFriends:
 		return m.clearedfriends
+	case user.EdgeSentFriendRequests:
+		return m.clearedsent_friend_requests
+	case user.EdgeReceivedFriendRequests:
+		return m.clearedreceived_friend_requests
 	case user.EdgeWonGames:
 		return m.clearedwon_games
 	case user.EdgeCurrentTurnGames:
@@ -2870,6 +3623,12 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeFriends:
 		m.ResetFriends()
+		return nil
+	case user.EdgeSentFriendRequests:
+		m.ResetSentFriendRequests()
+		return nil
+	case user.EdgeReceivedFriendRequests:
+		m.ResetReceivedFriendRequests()
 		return nil
 	case user.EdgeWonGames:
 		m.ResetWonGames()

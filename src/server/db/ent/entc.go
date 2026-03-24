@@ -22,8 +22,9 @@ func main() {
 		log.Fatalf("creating entgql extension: %v", err)
 	}
 	if err := entc.Generate("./schema", &gen.Config{
-		Target:  "./codegen",
-		Package: "puzzlr.gg/src/server/db/ent/codegen",
+		Target:   "./codegen",
+		Package:  "puzzlr.gg/src/server/db/ent/codegen",
+		Features: []gen.Feature{gen.FeaturePrivacy},
 	}, entc.Extensions(ex)); err != nil {
 		log.Fatalf("running ent codegen: %v", err)
 	}

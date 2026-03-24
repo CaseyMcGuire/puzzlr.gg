@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
@@ -76,10 +77,11 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			friendship.Table: friendship.ValidColumn,
-			game.Table:       game.ValidColumn,
-			gameplayer.Table: gameplayer.ValidColumn,
-			user.Table:       user.ValidColumn,
+			friendrequest.Table: friendrequest.ValidColumn,
+			friendship.Table:    friendship.ValidColumn,
+			game.Table:          game.ValidColumn,
+			gameplayer.Table:    gameplayer.ValidColumn,
+			user.Table:          user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

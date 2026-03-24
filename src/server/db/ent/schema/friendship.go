@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"puzzlr.gg/src/server/db/ent/codegen/hook"
 )
 
 // Friendship holds the schema definition for the bidirectional friendship relationship.
@@ -45,6 +46,15 @@ func (Friendship) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("user_id", "friend_id").
 			Unique(),
+	}
+}
+
+func (Friendship) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hook.On(
+			RejectDirectFriendshipMutation,
+			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne|ent.OpDelete|ent.OpDeleteOne,
+		),
 	}
 }
 

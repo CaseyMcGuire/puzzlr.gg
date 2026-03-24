@@ -32,6 +32,10 @@ type UserEdges struct {
 	Games []*Game `json:"games,omitempty"`
 	// Friends holds the value of the friends edge.
 	Friends []*User `json:"friends,omitempty"`
+	// SentFriendRequests holds the value of the sent_friend_requests edge.
+	SentFriendRequests []*FriendRequest `json:"sent_friend_requests,omitempty"`
+	// ReceivedFriendRequests holds the value of the received_friend_requests edge.
+	ReceivedFriendRequests []*FriendRequest `json:"received_friend_requests,omitempty"`
 	// WonGames holds the value of the won_games edge.
 	WonGames []*Game `json:"won_games,omitempty"`
 	// CurrentTurnGames holds the value of the current_turn_games edge.
@@ -42,16 +46,18 @@ type UserEdges struct {
 	Friendships []*Friendship `json:"friendships,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [8]bool
 	// totalCount holds the count of the edges above.
 	totalCount [2]map[string]int
 
-	namedGames            map[string][]*Game
-	namedFriends          map[string][]*User
-	namedWonGames         map[string][]*Game
-	namedCurrentTurnGames map[string][]*Game
-	namedGamePlayer       map[string][]*GamePlayer
-	namedFriendships      map[string][]*Friendship
+	namedGames                  map[string][]*Game
+	namedFriends                map[string][]*User
+	namedSentFriendRequests     map[string][]*FriendRequest
+	namedReceivedFriendRequests map[string][]*FriendRequest
+	namedWonGames               map[string][]*Game
+	namedCurrentTurnGames       map[string][]*Game
+	namedGamePlayer             map[string][]*GamePlayer
+	namedFriendships            map[string][]*Friendship
 }
 
 // GamesOrErr returns the Games value or an error if the edge
@@ -72,10 +78,28 @@ func (e UserEdges) FriendsOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "friends"}
 }
 
+// SentFriendRequestsOrErr returns the SentFriendRequests value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SentFriendRequestsOrErr() ([]*FriendRequest, error) {
+	if e.loadedTypes[2] {
+		return e.SentFriendRequests, nil
+	}
+	return nil, &NotLoadedError{edge: "sent_friend_requests"}
+}
+
+// ReceivedFriendRequestsOrErr returns the ReceivedFriendRequests value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ReceivedFriendRequestsOrErr() ([]*FriendRequest, error) {
+	if e.loadedTypes[3] {
+		return e.ReceivedFriendRequests, nil
+	}
+	return nil, &NotLoadedError{edge: "received_friend_requests"}
+}
+
 // WonGamesOrErr returns the WonGames value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) WonGamesOrErr() ([]*Game, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[4] {
 		return e.WonGames, nil
 	}
 	return nil, &NotLoadedError{edge: "won_games"}
@@ -84,7 +108,7 @@ func (e UserEdges) WonGamesOrErr() ([]*Game, error) {
 // CurrentTurnGamesOrErr returns the CurrentTurnGames value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CurrentTurnGamesOrErr() ([]*Game, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[5] {
 		return e.CurrentTurnGames, nil
 	}
 	return nil, &NotLoadedError{edge: "current_turn_games"}
@@ -93,7 +117,7 @@ func (e UserEdges) CurrentTurnGamesOrErr() ([]*Game, error) {
 // GamePlayerOrErr returns the GamePlayer value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) GamePlayerOrErr() ([]*GamePlayer, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[6] {
 		return e.GamePlayer, nil
 	}
 	return nil, &NotLoadedError{edge: "game_player"}
@@ -102,7 +126,7 @@ func (e UserEdges) GamePlayerOrErr() ([]*GamePlayer, error) {
 // FriendshipsOrErr returns the Friendships value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FriendshipsOrErr() ([]*Friendship, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[7] {
 		return e.Friendships, nil
 	}
 	return nil, &NotLoadedError{edge: "friendships"}
@@ -171,6 +195,16 @@ func (_m *User) QueryGames() *GameQuery {
 // QueryFriends queries the "friends" edge of the User entity.
 func (_m *User) QueryFriends() *UserQuery {
 	return NewUserClient(_m.config).QueryFriends(_m)
+}
+
+// QuerySentFriendRequests queries the "sent_friend_requests" edge of the User entity.
+func (_m *User) QuerySentFriendRequests() *FriendRequestQuery {
+	return NewUserClient(_m.config).QuerySentFriendRequests(_m)
+}
+
+// QueryReceivedFriendRequests queries the "received_friend_requests" edge of the User entity.
+func (_m *User) QueryReceivedFriendRequests() *FriendRequestQuery {
+	return NewUserClient(_m.config).QueryReceivedFriendRequests(_m)
 }
 
 // QueryWonGames queries the "won_games" edge of the User entity.
@@ -269,6 +303,54 @@ func (_m *User) appendNamedFriends(name string, edges ...*User) {
 		_m.Edges.namedFriends[name] = []*User{}
 	} else {
 		_m.Edges.namedFriends[name] = append(_m.Edges.namedFriends[name], edges...)
+	}
+}
+
+// NamedSentFriendRequests returns the SentFriendRequests named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (_m *User) NamedSentFriendRequests(name string) ([]*FriendRequest, error) {
+	if _m.Edges.namedSentFriendRequests == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := _m.Edges.namedSentFriendRequests[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (_m *User) appendNamedSentFriendRequests(name string, edges ...*FriendRequest) {
+	if _m.Edges.namedSentFriendRequests == nil {
+		_m.Edges.namedSentFriendRequests = make(map[string][]*FriendRequest)
+	}
+	if len(edges) == 0 {
+		_m.Edges.namedSentFriendRequests[name] = []*FriendRequest{}
+	} else {
+		_m.Edges.namedSentFriendRequests[name] = append(_m.Edges.namedSentFriendRequests[name], edges...)
+	}
+}
+
+// NamedReceivedFriendRequests returns the ReceivedFriendRequests named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (_m *User) NamedReceivedFriendRequests(name string) ([]*FriendRequest, error) {
+	if _m.Edges.namedReceivedFriendRequests == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := _m.Edges.namedReceivedFriendRequests[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (_m *User) appendNamedReceivedFriendRequests(name string, edges ...*FriendRequest) {
+	if _m.Edges.namedReceivedFriendRequests == nil {
+		_m.Edges.namedReceivedFriendRequests = make(map[string][]*FriendRequest)
+	}
+	if len(edges) == 0 {
+		_m.Edges.namedReceivedFriendRequests[name] = []*FriendRequest{}
+	} else {
+		_m.Edges.namedReceivedFriendRequests[name] = append(_m.Edges.namedReceivedFriendRequests[name], edges...)
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
@@ -86,6 +87,36 @@ func (_u *UserUpdate) AddFriends(v ...*User) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
+}
+
+// AddSentFriendRequestIDs adds the "sent_friend_requests" edge to the FriendRequest entity by IDs.
+func (_u *UserUpdate) AddSentFriendRequestIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddSentFriendRequestIDs(ids...)
+	return _u
+}
+
+// AddSentFriendRequests adds the "sent_friend_requests" edges to the FriendRequest entity.
+func (_u *UserUpdate) AddSentFriendRequests(v ...*FriendRequest) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSentFriendRequestIDs(ids...)
+}
+
+// AddReceivedFriendRequestIDs adds the "received_friend_requests" edge to the FriendRequest entity by IDs.
+func (_u *UserUpdate) AddReceivedFriendRequestIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddReceivedFriendRequestIDs(ids...)
+	return _u
+}
+
+// AddReceivedFriendRequests adds the "received_friend_requests" edges to the FriendRequest entity.
+func (_u *UserUpdate) AddReceivedFriendRequests(v ...*FriendRequest) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReceivedFriendRequestIDs(ids...)
 }
 
 // AddWonGameIDs adds the "won_games" edge to the Game entity by IDs.
@@ -193,6 +224,48 @@ func (_u *UserUpdate) RemoveFriends(v ...*User) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
+}
+
+// ClearSentFriendRequests clears all "sent_friend_requests" edges to the FriendRequest entity.
+func (_u *UserUpdate) ClearSentFriendRequests() *UserUpdate {
+	_u.mutation.ClearSentFriendRequests()
+	return _u
+}
+
+// RemoveSentFriendRequestIDs removes the "sent_friend_requests" edge to FriendRequest entities by IDs.
+func (_u *UserUpdate) RemoveSentFriendRequestIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveSentFriendRequestIDs(ids...)
+	return _u
+}
+
+// RemoveSentFriendRequests removes "sent_friend_requests" edges to FriendRequest entities.
+func (_u *UserUpdate) RemoveSentFriendRequests(v ...*FriendRequest) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSentFriendRequestIDs(ids...)
+}
+
+// ClearReceivedFriendRequests clears all "received_friend_requests" edges to the FriendRequest entity.
+func (_u *UserUpdate) ClearReceivedFriendRequests() *UserUpdate {
+	_u.mutation.ClearReceivedFriendRequests()
+	return _u
+}
+
+// RemoveReceivedFriendRequestIDs removes the "received_friend_requests" edge to FriendRequest entities by IDs.
+func (_u *UserUpdate) RemoveReceivedFriendRequestIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveReceivedFriendRequestIDs(ids...)
+	return _u
+}
+
+// RemoveReceivedFriendRequests removes "received_friend_requests" edges to FriendRequest entities.
+func (_u *UserUpdate) RemoveReceivedFriendRequests(v ...*FriendRequest) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReceivedFriendRequestIDs(ids...)
 }
 
 // ClearWonGames clears all "won_games" edges to the Game entity.
@@ -422,6 +495,96 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SentFriendRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.SentFriendRequestsTable,
+			Columns: []string{user.SentFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSentFriendRequestsIDs(); len(nodes) > 0 && !_u.mutation.SentFriendRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.SentFriendRequestsTable,
+			Columns: []string{user.SentFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SentFriendRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.SentFriendRequestsTable,
+			Columns: []string{user.SentFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReceivedFriendRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ReceivedFriendRequestsTable,
+			Columns: []string{user.ReceivedFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReceivedFriendRequestsIDs(); len(nodes) > 0 && !_u.mutation.ReceivedFriendRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ReceivedFriendRequestsTable,
+			Columns: []string{user.ReceivedFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReceivedFriendRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ReceivedFriendRequestsTable,
+			Columns: []string{user.ReceivedFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -687,6 +850,36 @@ func (_u *UserUpdateOne) AddFriends(v ...*User) *UserUpdateOne {
 	return _u.AddFriendIDs(ids...)
 }
 
+// AddSentFriendRequestIDs adds the "sent_friend_requests" edge to the FriendRequest entity by IDs.
+func (_u *UserUpdateOne) AddSentFriendRequestIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddSentFriendRequestIDs(ids...)
+	return _u
+}
+
+// AddSentFriendRequests adds the "sent_friend_requests" edges to the FriendRequest entity.
+func (_u *UserUpdateOne) AddSentFriendRequests(v ...*FriendRequest) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSentFriendRequestIDs(ids...)
+}
+
+// AddReceivedFriendRequestIDs adds the "received_friend_requests" edge to the FriendRequest entity by IDs.
+func (_u *UserUpdateOne) AddReceivedFriendRequestIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddReceivedFriendRequestIDs(ids...)
+	return _u
+}
+
+// AddReceivedFriendRequests adds the "received_friend_requests" edges to the FriendRequest entity.
+func (_u *UserUpdateOne) AddReceivedFriendRequests(v ...*FriendRequest) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReceivedFriendRequestIDs(ids...)
+}
+
 // AddWonGameIDs adds the "won_games" edge to the Game entity by IDs.
 func (_u *UserUpdateOne) AddWonGameIDs(ids ...int) *UserUpdateOne {
 	_u.mutation.AddWonGameIDs(ids...)
@@ -792,6 +985,48 @@ func (_u *UserUpdateOne) RemoveFriends(v ...*User) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
+}
+
+// ClearSentFriendRequests clears all "sent_friend_requests" edges to the FriendRequest entity.
+func (_u *UserUpdateOne) ClearSentFriendRequests() *UserUpdateOne {
+	_u.mutation.ClearSentFriendRequests()
+	return _u
+}
+
+// RemoveSentFriendRequestIDs removes the "sent_friend_requests" edge to FriendRequest entities by IDs.
+func (_u *UserUpdateOne) RemoveSentFriendRequestIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveSentFriendRequestIDs(ids...)
+	return _u
+}
+
+// RemoveSentFriendRequests removes "sent_friend_requests" edges to FriendRequest entities.
+func (_u *UserUpdateOne) RemoveSentFriendRequests(v ...*FriendRequest) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSentFriendRequestIDs(ids...)
+}
+
+// ClearReceivedFriendRequests clears all "received_friend_requests" edges to the FriendRequest entity.
+func (_u *UserUpdateOne) ClearReceivedFriendRequests() *UserUpdateOne {
+	_u.mutation.ClearReceivedFriendRequests()
+	return _u
+}
+
+// RemoveReceivedFriendRequestIDs removes the "received_friend_requests" edge to FriendRequest entities by IDs.
+func (_u *UserUpdateOne) RemoveReceivedFriendRequestIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveReceivedFriendRequestIDs(ids...)
+	return _u
+}
+
+// RemoveReceivedFriendRequests removes "received_friend_requests" edges to FriendRequest entities.
+func (_u *UserUpdateOne) RemoveReceivedFriendRequests(v ...*FriendRequest) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReceivedFriendRequestIDs(ids...)
 }
 
 // ClearWonGames clears all "won_games" edges to the Game entity.
@@ -1051,6 +1286,96 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SentFriendRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.SentFriendRequestsTable,
+			Columns: []string{user.SentFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSentFriendRequestsIDs(); len(nodes) > 0 && !_u.mutation.SentFriendRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.SentFriendRequestsTable,
+			Columns: []string{user.SentFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SentFriendRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.SentFriendRequestsTable,
+			Columns: []string{user.SentFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReceivedFriendRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ReceivedFriendRequestsTable,
+			Columns: []string{user.ReceivedFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReceivedFriendRequestsIDs(); len(nodes) > 0 && !_u.mutation.ReceivedFriendRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ReceivedFriendRequestsTable,
+			Columns: []string{user.ReceivedFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReceivedFriendRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ReceivedFriendRequestsTable,
+			Columns: []string{user.ReceivedFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

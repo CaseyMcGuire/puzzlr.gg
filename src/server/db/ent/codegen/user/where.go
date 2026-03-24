@@ -239,6 +239,52 @@ func HasFriendsWith(preds ...predicate.User) predicate.User {
 	})
 }
 
+// HasSentFriendRequests applies the HasEdge predicate on the "sent_friend_requests" edge.
+func HasSentFriendRequests() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, SentFriendRequestsTable, SentFriendRequestsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSentFriendRequestsWith applies the HasEdge predicate on the "sent_friend_requests" edge with a given conditions (other predicates).
+func HasSentFriendRequestsWith(preds ...predicate.FriendRequest) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newSentFriendRequestsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasReceivedFriendRequests applies the HasEdge predicate on the "received_friend_requests" edge.
+func HasReceivedFriendRequests() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, ReceivedFriendRequestsTable, ReceivedFriendRequestsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasReceivedFriendRequestsWith applies the HasEdge predicate on the "received_friend_requests" edge with a given conditions (other predicates).
+func HasReceivedFriendRequestsWith(preds ...predicate.FriendRequest) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newReceivedFriendRequestsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasWonGames applies the HasEdge predicate on the "won_games" edge.
 func HasWonGames() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

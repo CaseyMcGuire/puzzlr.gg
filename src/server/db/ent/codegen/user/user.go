@@ -3,6 +3,7 @@
 package user
 
 import (
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -20,6 +21,10 @@ const (
 	EdgeGames = "games"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
+	// EdgeSentFriendRequests holds the string denoting the sent_friend_requests edge name in mutations.
+	EdgeSentFriendRequests = "sent_friend_requests"
+	// EdgeReceivedFriendRequests holds the string denoting the received_friend_requests edge name in mutations.
+	EdgeReceivedFriendRequests = "received_friend_requests"
 	// EdgeWonGames holds the string denoting the won_games edge name in mutations.
 	EdgeWonGames = "won_games"
 	// EdgeCurrentTurnGames holds the string denoting the current_turn_games edge name in mutations.
@@ -37,6 +42,20 @@ const (
 	GamesInverseTable = "games"
 	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "friendships"
+	// SentFriendRequestsTable is the table that holds the sent_friend_requests relation/edge.
+	SentFriendRequestsTable = "friend_requests"
+	// SentFriendRequestsInverseTable is the table name for the FriendRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "friendrequest" package.
+	SentFriendRequestsInverseTable = "friend_requests"
+	// SentFriendRequestsColumn is the table column denoting the sent_friend_requests relation/edge.
+	SentFriendRequestsColumn = "requester_id"
+	// ReceivedFriendRequestsTable is the table that holds the received_friend_requests relation/edge.
+	ReceivedFriendRequestsTable = "friend_requests"
+	// ReceivedFriendRequestsInverseTable is the table name for the FriendRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "friendrequest" package.
+	ReceivedFriendRequestsInverseTable = "friend_requests"
+	// ReceivedFriendRequestsColumn is the table column denoting the received_friend_requests relation/edge.
+	ReceivedFriendRequestsColumn = "recipient_id"
 	// WonGamesTable is the table that holds the won_games relation/edge.
 	WonGamesTable = "games"
 	// WonGamesInverseTable is the table name for the Game entity.
@@ -93,7 +112,14 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "puzzlr.gg/src/server/db/ent/codegen/runtime"
 var (
+	Hooks  [2]ent.Hook
+	Policy ent.Policy
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
 	// HashedPasswordValidator is a validator for the "hashed_password" field. It is called by the builders before save.
@@ -143,6 +169,34 @@ func ByFriendsCount(opts ...sql.OrderTermOption) OrderOption {
 func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFriendsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySentFriendRequestsCount orders the results by sent_friend_requests count.
+func BySentFriendRequestsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSentFriendRequestsStep(), opts...)
+	}
+}
+
+// BySentFriendRequests orders the results by sent_friend_requests terms.
+func BySentFriendRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSentFriendRequestsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByReceivedFriendRequestsCount orders the results by received_friend_requests count.
+func ByReceivedFriendRequestsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newReceivedFriendRequestsStep(), opts...)
+	}
+}
+
+// ByReceivedFriendRequests orders the results by received_friend_requests terms.
+func ByReceivedFriendRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newReceivedFriendRequestsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -213,6 +267,20 @@ func newFriendsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(Table, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
+	)
+}
+func newSentFriendRequestsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SentFriendRequestsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, SentFriendRequestsTable, SentFriendRequestsColumn),
+	)
+}
+func newReceivedFriendRequestsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ReceivedFriendRequestsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, ReceivedFriendRequestsTable, ReceivedFriendRequestsColumn),
 	)
 }
 func newWonGamesStep() *sqlgraph.Step {

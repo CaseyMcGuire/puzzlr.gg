@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
@@ -62,6 +63,36 @@ func (_c *UserCreate) AddFriends(v ...*User) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddFriendIDs(ids...)
+}
+
+// AddSentFriendRequestIDs adds the "sent_friend_requests" edge to the FriendRequest entity by IDs.
+func (_c *UserCreate) AddSentFriendRequestIDs(ids ...int) *UserCreate {
+	_c.mutation.AddSentFriendRequestIDs(ids...)
+	return _c
+}
+
+// AddSentFriendRequests adds the "sent_friend_requests" edges to the FriendRequest entity.
+func (_c *UserCreate) AddSentFriendRequests(v ...*FriendRequest) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSentFriendRequestIDs(ids...)
+}
+
+// AddReceivedFriendRequestIDs adds the "received_friend_requests" edge to the FriendRequest entity by IDs.
+func (_c *UserCreate) AddReceivedFriendRequestIDs(ids ...int) *UserCreate {
+	_c.mutation.AddReceivedFriendRequestIDs(ids...)
+	return _c
+}
+
+// AddReceivedFriendRequests adds the "received_friend_requests" edges to the FriendRequest entity.
+func (_c *UserCreate) AddReceivedFriendRequests(v ...*FriendRequest) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddReceivedFriendRequestIDs(ids...)
 }
 
 // AddWonGameIDs adds the "won_games" edge to the Game entity by IDs.
@@ -233,6 +264,38 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SentFriendRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.SentFriendRequestsTable,
+			Columns: []string{user.SentFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ReceivedFriendRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ReceivedFriendRequestsTable,
+			Columns: []string{user.ReceivedFriendRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

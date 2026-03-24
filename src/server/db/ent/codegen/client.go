@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
@@ -26,6 +27,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// FriendRequest is the client for interacting with the FriendRequest builders.
+	FriendRequest *FriendRequestClient
 	// Friendship is the client for interacting with the Friendship builders.
 	Friendship *FriendshipClient
 	// Game is the client for interacting with the Game builders.
@@ -47,6 +50,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.FriendRequest = NewFriendRequestClient(c.config)
 	c.Friendship = NewFriendshipClient(c.config)
 	c.Game = NewGameClient(c.config)
 	c.GamePlayer = NewGamePlayerClient(c.config)
@@ -141,12 +145,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:        ctx,
-		config:     cfg,
-		Friendship: NewFriendshipClient(cfg),
-		Game:       NewGameClient(cfg),
-		GamePlayer: NewGamePlayerClient(cfg),
-		User:       NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		FriendRequest: NewFriendRequestClient(cfg),
+		Friendship:    NewFriendshipClient(cfg),
+		Game:          NewGameClient(cfg),
+		GamePlayer:    NewGamePlayerClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -164,19 +169,20 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:        ctx,
-		config:     cfg,
-		Friendship: NewFriendshipClient(cfg),
-		Game:       NewGameClient(cfg),
-		GamePlayer: NewGamePlayerClient(cfg),
-		User:       NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		FriendRequest: NewFriendRequestClient(cfg),
+		Friendship:    NewFriendshipClient(cfg),
+		Game:          NewGameClient(cfg),
+		GamePlayer:    NewGamePlayerClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Friendship.
+//		FriendRequest.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -198,6 +204,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.FriendRequest.Use(hooks...)
 	c.Friendship.Use(hooks...)
 	c.Game.Use(hooks...)
 	c.GamePlayer.Use(hooks...)
@@ -207,6 +214,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.FriendRequest.Intercept(interceptors...)
 	c.Friendship.Intercept(interceptors...)
 	c.Game.Intercept(interceptors...)
 	c.GamePlayer.Intercept(interceptors...)
@@ -216,6 +224,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *FriendRequestMutation:
+		return c.FriendRequest.mutate(ctx, m)
 	case *FriendshipMutation:
 		return c.Friendship.mutate(ctx, m)
 	case *GameMutation:
@@ -226,6 +236,172 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("codegen: unknown mutation type %T", m)
+	}
+}
+
+// FriendRequestClient is a client for the FriendRequest schema.
+type FriendRequestClient struct {
+	config
+}
+
+// NewFriendRequestClient returns a client for the FriendRequest from the given config.
+func NewFriendRequestClient(c config) *FriendRequestClient {
+	return &FriendRequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `friendrequest.Hooks(f(g(h())))`.
+func (c *FriendRequestClient) Use(hooks ...Hook) {
+	c.hooks.FriendRequest = append(c.hooks.FriendRequest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `friendrequest.Intercept(f(g(h())))`.
+func (c *FriendRequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FriendRequest = append(c.inters.FriendRequest, interceptors...)
+}
+
+// Create returns a builder for creating a FriendRequest entity.
+func (c *FriendRequestClient) Create() *FriendRequestCreate {
+	mutation := newFriendRequestMutation(c.config, OpCreate)
+	return &FriendRequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FriendRequest entities.
+func (c *FriendRequestClient) CreateBulk(builders ...*FriendRequestCreate) *FriendRequestCreateBulk {
+	return &FriendRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FriendRequestClient) MapCreateBulk(slice any, setFunc func(*FriendRequestCreate, int)) *FriendRequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FriendRequestCreateBulk{err: fmt.Errorf("calling to FriendRequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FriendRequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FriendRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FriendRequest.
+func (c *FriendRequestClient) Update() *FriendRequestUpdate {
+	mutation := newFriendRequestMutation(c.config, OpUpdate)
+	return &FriendRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FriendRequestClient) UpdateOne(_m *FriendRequest) *FriendRequestUpdateOne {
+	mutation := newFriendRequestMutation(c.config, OpUpdateOne, withFriendRequest(_m))
+	return &FriendRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FriendRequestClient) UpdateOneID(id int) *FriendRequestUpdateOne {
+	mutation := newFriendRequestMutation(c.config, OpUpdateOne, withFriendRequestID(id))
+	return &FriendRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FriendRequest.
+func (c *FriendRequestClient) Delete() *FriendRequestDelete {
+	mutation := newFriendRequestMutation(c.config, OpDelete)
+	return &FriendRequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FriendRequestClient) DeleteOne(_m *FriendRequest) *FriendRequestDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FriendRequestClient) DeleteOneID(id int) *FriendRequestDeleteOne {
+	builder := c.Delete().Where(friendrequest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FriendRequestDeleteOne{builder}
+}
+
+// Query returns a query builder for FriendRequest.
+func (c *FriendRequestClient) Query() *FriendRequestQuery {
+	return &FriendRequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFriendRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FriendRequest entity by its id.
+func (c *FriendRequestClient) Get(ctx context.Context, id int) (*FriendRequest, error) {
+	return c.Query().Where(friendrequest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FriendRequestClient) GetX(ctx context.Context, id int) *FriendRequest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRequester queries the requester edge of a FriendRequest.
+func (c *FriendRequestClient) QueryRequester(_m *FriendRequest) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(friendrequest.Table, friendrequest.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, friendrequest.RequesterTable, friendrequest.RequesterColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRecipient queries the recipient edge of a FriendRequest.
+func (c *FriendRequestClient) QueryRecipient(_m *FriendRequest) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(friendrequest.Table, friendrequest.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, friendrequest.RecipientTable, friendrequest.RecipientColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FriendRequestClient) Hooks() []Hook {
+	hooks := c.hooks.FriendRequest
+	return append(hooks[:len(hooks):len(hooks)], friendrequest.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *FriendRequestClient) Interceptors() []Interceptor {
+	return c.inters.FriendRequest
+}
+
+func (c *FriendRequestClient) mutate(ctx context.Context, m *FriendRequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FriendRequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FriendRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FriendRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FriendRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("codegen: unknown FriendRequest mutation op: %q", m.Op())
 	}
 }
 
@@ -371,7 +547,8 @@ func (c *FriendshipClient) QueryFriend(_m *Friendship) *UserQuery {
 
 // Hooks returns the client hooks.
 func (c *FriendshipClient) Hooks() []Hook {
-	return c.hooks.Friendship
+	hooks := c.hooks.Friendship
+	return append(hooks[:len(hooks):len(hooks)], friendship.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
@@ -898,6 +1075,38 @@ func (c *UserClient) QueryFriends(_m *User) *UserQuery {
 	return query
 }
 
+// QuerySentFriendRequests queries the sent_friend_requests edge of a User.
+func (c *UserClient) QuerySentFriendRequests(_m *User) *FriendRequestQuery {
+	query := (&FriendRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(friendrequest.Table, friendrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.SentFriendRequestsTable, user.SentFriendRequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReceivedFriendRequests queries the received_friend_requests edge of a User.
+func (c *UserClient) QueryReceivedFriendRequests(_m *User) *FriendRequestQuery {
+	query := (&FriendRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(friendrequest.Table, friendrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.ReceivedFriendRequestsTable, user.ReceivedFriendRequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryWonGames queries the won_games edge of a User.
 func (c *UserClient) QueryWonGames(_m *User) *GameQuery {
 	query := (&GameClient{config: c.config}).Query()
@@ -964,7 +1173,8 @@ func (c *UserClient) QueryFriendships(_m *User) *FriendshipQuery {
 
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
-	return c.hooks.User
+	hooks := c.hooks.User
+	return append(hooks[:len(hooks):len(hooks)], user.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
@@ -990,9 +1200,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Friendship, Game, GamePlayer, User []ent.Hook
+		FriendRequest, Friendship, Game, GamePlayer, User []ent.Hook
 	}
 	inters struct {
-		Friendship, Game, GamePlayer, User []ent.Interceptor
+		FriendRequest, Friendship, Game, GamePlayer, User []ent.Interceptor
 	}
 )

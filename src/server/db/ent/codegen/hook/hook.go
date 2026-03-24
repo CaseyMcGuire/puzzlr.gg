@@ -9,6 +9,18 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen"
 )
 
+// The FriendRequestFunc type is an adapter to allow the use of ordinary
+// function as FriendRequest mutator.
+type FriendRequestFunc func(context.Context, *codegen.FriendRequestMutation) (codegen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FriendRequestFunc) Mutate(ctx context.Context, m codegen.Mutation) (codegen.Value, error) {
+	if mv, ok := m.(*codegen.FriendRequestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *codegen.FriendRequestMutation", m)
+}
+
 // The FriendshipFunc type is an adapter to allow the use of ordinary
 // function as Friendship mutator.
 type FriendshipFunc func(context.Context, *codegen.FriendshipMutation) (codegen.Value, error)

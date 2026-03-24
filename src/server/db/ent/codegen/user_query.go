@@ -5,6 +5,7 @@ package codegen
 import (
 	"context"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"math"
 
@@ -12,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
@@ -22,24 +24,28 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx                       *QueryContext
-	order                     []user.OrderOption
-	inters                    []Interceptor
-	predicates                []predicate.User
-	withGames                 *GameQuery
-	withFriends               *UserQuery
-	withWonGames              *GameQuery
-	withCurrentTurnGames      *GameQuery
-	withGamePlayer            *GamePlayerQuery
-	withFriendships           *FriendshipQuery
-	modifiers                 []func(*sql.Selector)
-	loadTotal                 []func(context.Context, []*User) error
-	withNamedGames            map[string]*GameQuery
-	withNamedFriends          map[string]*UserQuery
-	withNamedWonGames         map[string]*GameQuery
-	withNamedCurrentTurnGames map[string]*GameQuery
-	withNamedGamePlayer       map[string]*GamePlayerQuery
-	withNamedFriendships      map[string]*FriendshipQuery
+	ctx                             *QueryContext
+	order                           []user.OrderOption
+	inters                          []Interceptor
+	predicates                      []predicate.User
+	withGames                       *GameQuery
+	withFriends                     *UserQuery
+	withSentFriendRequests          *FriendRequestQuery
+	withReceivedFriendRequests      *FriendRequestQuery
+	withWonGames                    *GameQuery
+	withCurrentTurnGames            *GameQuery
+	withGamePlayer                  *GamePlayerQuery
+	withFriendships                 *FriendshipQuery
+	modifiers                       []func(*sql.Selector)
+	loadTotal                       []func(context.Context, []*User) error
+	withNamedGames                  map[string]*GameQuery
+	withNamedFriends                map[string]*UserQuery
+	withNamedSentFriendRequests     map[string]*FriendRequestQuery
+	withNamedReceivedFriendRequests map[string]*FriendRequestQuery
+	withNamedWonGames               map[string]*GameQuery
+	withNamedCurrentTurnGames       map[string]*GameQuery
+	withNamedGamePlayer             map[string]*GamePlayerQuery
+	withNamedFriendships            map[string]*FriendshipQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -113,6 +119,50 @@ func (_q *UserQuery) QueryFriends() *UserQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySentFriendRequests chains the current query on the "sent_friend_requests" edge.
+func (_q *UserQuery) QuerySentFriendRequests() *FriendRequestQuery {
+	query := (&FriendRequestClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(friendrequest.Table, friendrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.SentFriendRequestsTable, user.SentFriendRequestsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryReceivedFriendRequests chains the current query on the "received_friend_requests" edge.
+func (_q *UserQuery) QueryReceivedFriendRequests() *FriendRequestQuery {
+	query := (&FriendRequestClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(friendrequest.Table, friendrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.ReceivedFriendRequestsTable, user.ReceivedFriendRequestsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -395,17 +445,19 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:               _q.config,
-		ctx:                  _q.ctx.Clone(),
-		order:                append([]user.OrderOption{}, _q.order...),
-		inters:               append([]Interceptor{}, _q.inters...),
-		predicates:           append([]predicate.User{}, _q.predicates...),
-		withGames:            _q.withGames.Clone(),
-		withFriends:          _q.withFriends.Clone(),
-		withWonGames:         _q.withWonGames.Clone(),
-		withCurrentTurnGames: _q.withCurrentTurnGames.Clone(),
-		withGamePlayer:       _q.withGamePlayer.Clone(),
-		withFriendships:      _q.withFriendships.Clone(),
+		config:                     _q.config,
+		ctx:                        _q.ctx.Clone(),
+		order:                      append([]user.OrderOption{}, _q.order...),
+		inters:                     append([]Interceptor{}, _q.inters...),
+		predicates:                 append([]predicate.User{}, _q.predicates...),
+		withGames:                  _q.withGames.Clone(),
+		withFriends:                _q.withFriends.Clone(),
+		withSentFriendRequests:     _q.withSentFriendRequests.Clone(),
+		withReceivedFriendRequests: _q.withReceivedFriendRequests.Clone(),
+		withWonGames:               _q.withWonGames.Clone(),
+		withCurrentTurnGames:       _q.withCurrentTurnGames.Clone(),
+		withGamePlayer:             _q.withGamePlayer.Clone(),
+		withFriendships:            _q.withFriendships.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -431,6 +483,28 @@ func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withFriends = query
+	return _q
+}
+
+// WithSentFriendRequests tells the query-builder to eager-load the nodes that are connected to
+// the "sent_friend_requests" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithSentFriendRequests(opts ...func(*FriendRequestQuery)) *UserQuery {
+	query := (&FriendRequestClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSentFriendRequests = query
+	return _q
+}
+
+// WithReceivedFriendRequests tells the query-builder to eager-load the nodes that are connected to
+// the "received_friend_requests" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithReceivedFriendRequests(opts ...func(*FriendRequestQuery)) *UserQuery {
+	query := (&FriendRequestClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withReceivedFriendRequests = query
 	return _q
 }
 
@@ -549,6 +623,12 @@ func (_q *UserQuery) prepareQuery(ctx context.Context) error {
 		}
 		_q.sql = prev
 	}
+	if user.Policy == nil {
+		return errors.New("codegen: uninitialized user.Policy (forgotten import codegen/runtime?)")
+	}
+	if err := user.Policy.EvalQuery(ctx, _q); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -556,9 +636,11 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [8]bool{
 			_q.withGames != nil,
 			_q.withFriends != nil,
+			_q.withSentFriendRequests != nil,
+			_q.withReceivedFriendRequests != nil,
 			_q.withWonGames != nil,
 			_q.withCurrentTurnGames != nil,
 			_q.withGamePlayer != nil,
@@ -597,6 +679,22 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadFriends(ctx, query, nodes,
 			func(n *User) { n.Edges.Friends = []*User{} },
 			func(n *User, e *User) { n.Edges.Friends = append(n.Edges.Friends, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSentFriendRequests; query != nil {
+		if err := _q.loadSentFriendRequests(ctx, query, nodes,
+			func(n *User) { n.Edges.SentFriendRequests = []*FriendRequest{} },
+			func(n *User, e *FriendRequest) { n.Edges.SentFriendRequests = append(n.Edges.SentFriendRequests, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withReceivedFriendRequests; query != nil {
+		if err := _q.loadReceivedFriendRequests(ctx, query, nodes,
+			func(n *User) { n.Edges.ReceivedFriendRequests = []*FriendRequest{} },
+			func(n *User, e *FriendRequest) {
+				n.Edges.ReceivedFriendRequests = append(n.Edges.ReceivedFriendRequests, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -639,6 +737,20 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadFriends(ctx, query, nodes,
 			func(n *User) { n.appendNamedFriends(name) },
 			func(n *User, e *User) { n.appendNamedFriends(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedSentFriendRequests {
+		if err := _q.loadSentFriendRequests(ctx, query, nodes,
+			func(n *User) { n.appendNamedSentFriendRequests(name) },
+			func(n *User, e *FriendRequest) { n.appendNamedSentFriendRequests(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedReceivedFriendRequests {
+		if err := _q.loadReceivedFriendRequests(ctx, query, nodes,
+			func(n *User) { n.appendNamedReceivedFriendRequests(name) },
+			func(n *User, e *FriendRequest) { n.appendNamedReceivedFriendRequests(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -797,6 +909,66 @@ func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 		for kn := range nodes {
 			assign(kn, n)
 		}
+	}
+	return nil
+}
+func (_q *UserQuery) loadSentFriendRequests(ctx context.Context, query *FriendRequestQuery, nodes []*User, init func(*User), assign func(*User, *FriendRequest)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(friendrequest.FieldRequesterID)
+	}
+	query.Where(predicate.FriendRequest(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SentFriendRequestsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RequesterID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "requester_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadReceivedFriendRequests(ctx context.Context, query *FriendRequestQuery, nodes []*User, init func(*User), assign func(*User, *FriendRequest)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(friendrequest.FieldRecipientID)
+	}
+	query.Where(predicate.FriendRequest(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ReceivedFriendRequestsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RecipientID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "recipient_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }
@@ -1032,6 +1204,34 @@ func (_q *UserQuery) WithNamedFriends(name string, opts ...func(*UserQuery)) *Us
 		_q.withNamedFriends = make(map[string]*UserQuery)
 	}
 	_q.withNamedFriends[name] = query
+	return _q
+}
+
+// WithNamedSentFriendRequests tells the query-builder to eager-load the nodes that are connected to the "sent_friend_requests"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithNamedSentFriendRequests(name string, opts ...func(*FriendRequestQuery)) *UserQuery {
+	query := (&FriendRequestClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedSentFriendRequests == nil {
+		_q.withNamedSentFriendRequests = make(map[string]*FriendRequestQuery)
+	}
+	_q.withNamedSentFriendRequests[name] = query
+	return _q
+}
+
+// WithNamedReceivedFriendRequests tells the query-builder to eager-load the nodes that are connected to the "received_friend_requests"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithNamedReceivedFriendRequests(name string, opts ...func(*FriendRequestQuery)) *UserQuery {
+	query := (&FriendRequestClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedReceivedFriendRequests == nil {
+		_q.withNamedReceivedFriendRequests = make(map[string]*FriendRequestQuery)
+	}
+	_q.withNamedReceivedFriendRequests[name] = query
 	return _q
 }
 

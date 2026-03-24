@@ -9,6 +9,46 @@ import (
 )
 
 var (
+	// FriendRequestsColumns holds the columns for the "friend_requests" table.
+	FriendRequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "requester_id", Type: field.TypeInt},
+		{Name: "recipient_id", Type: field.TypeInt},
+	}
+	// FriendRequestsTable holds the schema information for the "friend_requests" table.
+	FriendRequestsTable = &schema.Table{
+		Name:       "friend_requests",
+		Columns:    FriendRequestsColumns,
+		PrimaryKey: []*schema.Column{FriendRequestsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "friend_requests_users_requester",
+				Columns:    []*schema.Column{FriendRequestsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "friend_requests_users_recipient",
+				Columns:    []*schema.Column{FriendRequestsColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "friendrequest_requester_id_recipient_id",
+				Unique:  true,
+				Columns: []*schema.Column{FriendRequestsColumns[3], FriendRequestsColumns[4]},
+			},
+			{
+				Name:    "friendrequest_recipient_id_requester_id",
+				Unique:  false,
+				Columns: []*schema.Column{FriendRequestsColumns[4], FriendRequestsColumns[3]},
+			},
+		},
+	}
 	// FriendshipsColumns holds the columns for the "friendships" table.
 	FriendshipsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -134,6 +174,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		FriendRequestsTable,
 		FriendshipsTable,
 		GamesTable,
 		GamePlayersTable,
@@ -142,6 +183,11 @@ var (
 )
 
 func init() {
+	FriendRequestsTable.ForeignKeys[0].RefTable = UsersTable
+	FriendRequestsTable.ForeignKeys[1].RefTable = UsersTable
+	FriendRequestsTable.Annotation = &entsql.Annotation{
+		Check: "requester_id <> recipient_id",
+	}
 	FriendshipsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendshipsTable.ForeignKeys[1].RefTable = UsersTable
 	FriendshipsTable.Annotation = &entsql.Annotation{

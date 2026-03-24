@@ -3,18 +3,53 @@
 package runtime
 
 import (
+	"context"
 	"time"
 
+	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
+	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 	"puzzlr.gg/src/server/db/ent/schema"
+
+	"entgo.io/ent"
+	"entgo.io/ent/privacy"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	friendrequestMixin := schema.FriendRequest{}.Mixin()
+	friendrequest.Policy = privacy.NewPolicies(schema.FriendRequest{})
+	friendrequest.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := friendrequest.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	friendrequestHooks := schema.FriendRequest{}.Hooks()
+
+	friendrequest.Hooks[1] = friendrequestHooks[0]
+	friendrequestMixinFields0 := friendrequestMixin[0].Fields()
+	_ = friendrequestMixinFields0
+	friendrequestFields := schema.FriendRequest{}.Fields()
+	_ = friendrequestFields
+	// friendrequestDescCreateTime is the schema descriptor for create_time field.
+	friendrequestDescCreateTime := friendrequestMixinFields0[0].Descriptor()
+	// friendrequest.DefaultCreateTime holds the default value on creation for the create_time field.
+	friendrequest.DefaultCreateTime = friendrequestDescCreateTime.Default.(func() time.Time)
+	// friendrequestDescUpdateTime is the schema descriptor for update_time field.
+	friendrequestDescUpdateTime := friendrequestMixinFields0[1].Descriptor()
+	// friendrequest.DefaultUpdateTime holds the default value on creation for the update_time field.
+	friendrequest.DefaultUpdateTime = friendrequestDescUpdateTime.Default.(func() time.Time)
+	// friendrequest.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	friendrequest.UpdateDefaultUpdateTime = friendrequestDescUpdateTime.UpdateDefault.(func() time.Time)
+	friendshipHooks := schema.Friendship{}.Hooks()
+	friendship.Hooks[0] = friendshipHooks[0]
 	gameMixin := schema.Game{}.Mixin()
 	gameHooks := schema.Game{}.Hooks()
 	game.Hooks[0] = gameHooks[0]
@@ -45,6 +80,18 @@ func init() {
 	gameplayerDescMarker := gameplayerFields[2].Descriptor()
 	// gameplayer.MarkerValidator is a validator for the "marker" field. It is called by the builders before save.
 	gameplayer.MarkerValidator = gameplayerDescMarker.Validators[0].(func(string) error)
+	user.Policy = privacy.NewPolicies(schema.User{})
+	user.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := user.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	userHooks := schema.User{}.Hooks()
+
+	user.Hooks[1] = userHooks[0]
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescEmail is the schema descriptor for email field.
