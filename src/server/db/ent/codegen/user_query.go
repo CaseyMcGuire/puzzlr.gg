@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/predicate"
@@ -26,15 +27,19 @@ type UserQuery struct {
 	inters                    []Interceptor
 	predicates                []predicate.User
 	withGames                 *GameQuery
+	withFriends               *UserQuery
 	withWonGames              *GameQuery
 	withCurrentTurnGames      *GameQuery
 	withGamePlayer            *GamePlayerQuery
+	withFriendships           *FriendshipQuery
 	modifiers                 []func(*sql.Selector)
 	loadTotal                 []func(context.Context, []*User) error
 	withNamedGames            map[string]*GameQuery
+	withNamedFriends          map[string]*UserQuery
 	withNamedWonGames         map[string]*GameQuery
 	withNamedCurrentTurnGames map[string]*GameQuery
 	withNamedGamePlayer       map[string]*GamePlayerQuery
+	withNamedFriendships      map[string]*FriendshipQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,6 +91,28 @@ func (_q *UserQuery) QueryGames() *GameQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(game.Table, game.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.GamesTable, user.GamesPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFriends chains the current query on the "friends" edge.
+func (_q *UserQuery) QueryFriends() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -152,6 +179,28 @@ func (_q *UserQuery) QueryGamePlayer() *GamePlayerQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.GamePlayerTable, user.GamePlayerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFriendships chains the current query on the "friendships" edge.
+func (_q *UserQuery) QueryFriendships() *FriendshipQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(friendship.Table, friendship.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.FriendshipsTable, user.FriendshipsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -352,9 +401,11 @@ func (_q *UserQuery) Clone() *UserQuery {
 		inters:               append([]Interceptor{}, _q.inters...),
 		predicates:           append([]predicate.User{}, _q.predicates...),
 		withGames:            _q.withGames.Clone(),
+		withFriends:          _q.withFriends.Clone(),
 		withWonGames:         _q.withWonGames.Clone(),
 		withCurrentTurnGames: _q.withCurrentTurnGames.Clone(),
 		withGamePlayer:       _q.withGamePlayer.Clone(),
+		withFriendships:      _q.withFriendships.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -369,6 +420,17 @@ func (_q *UserQuery) WithGames(opts ...func(*GameQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withGames = query
+	return _q
+}
+
+// WithFriends tells the query-builder to eager-load the nodes that are connected to
+// the "friends" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withFriends = query
 	return _q
 }
 
@@ -402,6 +464,17 @@ func (_q *UserQuery) WithGamePlayer(opts ...func(*GamePlayerQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withGamePlayer = query
+	return _q
+}
+
+// WithFriendships tells the query-builder to eager-load the nodes that are connected to
+// the "friendships" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withFriendships = query
 	return _q
 }
 
@@ -483,11 +556,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [6]bool{
 			_q.withGames != nil,
+			_q.withFriends != nil,
 			_q.withWonGames != nil,
 			_q.withCurrentTurnGames != nil,
 			_q.withGamePlayer != nil,
+			_q.withFriendships != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -518,6 +593,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := _q.withFriends; query != nil {
+		if err := _q.loadFriends(ctx, query, nodes,
+			func(n *User) { n.Edges.Friends = []*User{} },
+			func(n *User, e *User) { n.Edges.Friends = append(n.Edges.Friends, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := _q.withWonGames; query != nil {
 		if err := _q.loadWonGames(ctx, query, nodes,
 			func(n *User) { n.Edges.WonGames = []*Game{} },
@@ -539,10 +621,24 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := _q.withFriendships; query != nil {
+		if err := _q.loadFriendships(ctx, query, nodes,
+			func(n *User) { n.Edges.Friendships = []*Friendship{} },
+			func(n *User, e *Friendship) { n.Edges.Friendships = append(n.Edges.Friendships, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for name, query := range _q.withNamedGames {
 		if err := _q.loadGames(ctx, query, nodes,
 			func(n *User) { n.appendNamedGames(name) },
 			func(n *User, e *Game) { n.appendNamedGames(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedFriends {
+		if err := _q.loadFriends(ctx, query, nodes,
+			func(n *User) { n.appendNamedFriends(name) },
+			func(n *User, e *User) { n.appendNamedFriends(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -564,6 +660,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadGamePlayer(ctx, query, nodes,
 			func(n *User) { n.appendNamedGamePlayer(name) },
 			func(n *User, e *GamePlayer) { n.appendNamedGamePlayer(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedFriendships {
+		if err := _q.loadFriendships(ctx, query, nodes,
+			func(n *User) { n.appendNamedFriendships(name) },
+			func(n *User, e *Friendship) { n.appendNamedFriendships(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -629,6 +732,67 @@ func (_q *UserQuery) loadGames(ctx context.Context, query *GameQuery, nodes []*U
 		nodes, ok := nids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected "games" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*User)
+	nids := make(map[int]map[*User]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(user.FriendsTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FriendsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(user.FriendsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(user.FriendsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)
@@ -713,6 +877,36 @@ func (_q *UserQuery) loadGamePlayer(ctx context.Context, query *GamePlayerQuery,
 	}
 	query.Where(predicate.GamePlayer(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.GamePlayerColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery, nodes []*User, init func(*User), assign func(*User, *Friendship)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(friendship.FieldUserID)
+	}
+	query.Where(predicate.Friendship(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.FriendshipsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -827,6 +1021,20 @@ func (_q *UserQuery) WithNamedGames(name string, opts ...func(*GameQuery)) *User
 	return _q
 }
 
+// WithNamedFriends tells the query-builder to eager-load the nodes that are connected to the "friends"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithNamedFriends(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedFriends == nil {
+		_q.withNamedFriends = make(map[string]*UserQuery)
+	}
+	_q.withNamedFriends[name] = query
+	return _q
+}
+
 // WithNamedWonGames tells the query-builder to eager-load the nodes that are connected to the "won_games"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithNamedWonGames(name string, opts ...func(*GameQuery)) *UserQuery {
@@ -866,6 +1074,20 @@ func (_q *UserQuery) WithNamedGamePlayer(name string, opts ...func(*GamePlayerQu
 		_q.withNamedGamePlayer = make(map[string]*GamePlayerQuery)
 	}
 	_q.withNamedGamePlayer[name] = query
+	return _q
+}
+
+// WithNamedFriendships tells the query-builder to eager-load the nodes that are connected to the "friendships"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithNamedFriendships(name string, opts ...func(*FriendshipQuery)) *UserQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedFriendships == nil {
+		_q.withNamedFriendships = make(map[string]*FriendshipQuery)
+	}
+	_q.withNamedFriendships[name] = query
 	return _q
 }
 

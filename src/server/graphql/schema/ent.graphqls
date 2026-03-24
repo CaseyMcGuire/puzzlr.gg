@@ -172,6 +172,7 @@ type User implements Node {
   id: ID!
   email: String!
   games: [Game!]
+  friends: [User!]
 }
 """
 UserWhereInput is used for filtering User objects.
@@ -213,4 +214,9 @@ input UserWhereInput {
   """
   hasGames: Boolean
   hasGamesWith: [GameWhereInput!]
+  """
+  friends edge predicates
+  """
+  hasFriends: Boolean
+  hasFriendsWith: [UserWhereInput!]
 }

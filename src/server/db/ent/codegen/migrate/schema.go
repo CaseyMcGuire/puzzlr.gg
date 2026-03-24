@@ -3,11 +3,45 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
+	// FriendshipsColumns holds the columns for the "friendships" table.
+	FriendshipsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "friend_id", Type: field.TypeInt},
+	}
+	// FriendshipsTable holds the schema information for the "friendships" table.
+	FriendshipsTable = &schema.Table{
+		Name:       "friendships",
+		Columns:    FriendshipsColumns,
+		PrimaryKey: []*schema.Column{FriendshipsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "friendships_users_user",
+				Columns:    []*schema.Column{FriendshipsColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "friendships_users_friend",
+				Columns:    []*schema.Column{FriendshipsColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "friendship_user_id_friend_id",
+				Unique:  true,
+				Columns: []*schema.Column{FriendshipsColumns[1], FriendshipsColumns[2]},
+			},
+		},
+	}
 	// GamesColumns holds the columns for the "games" table.
 	GamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -100,6 +134,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		FriendshipsTable,
 		GamesTable,
 		GamePlayersTable,
 		UsersTable,
@@ -107,6 +142,11 @@ var (
 )
 
 func init() {
+	FriendshipsTable.ForeignKeys[0].RefTable = UsersTable
+	FriendshipsTable.ForeignKeys[1].RefTable = UsersTable
+	FriendshipsTable.Annotation = &entsql.Annotation{
+		Check: "user_id <> friend_id",
+	}
 	GamesTable.ForeignKeys[0].RefTable = UsersTable
 	GamesTable.ForeignKeys[1].RefTable = UsersTable
 	GamePlayersTable.ForeignKeys[0].RefTable = UsersTable

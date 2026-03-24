@@ -47,3 +47,15 @@ func (_m *User) Games(ctx context.Context) (result []*Game, err error) {
 	}
 	return result, err
 }
+
+func (_m *User) Friends(ctx context.Context) (result []*User, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = _m.NamedFriends(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = _m.Edges.FriendsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = _m.QueryFriends().All(ctx)
+	}
+	return result, err
+}

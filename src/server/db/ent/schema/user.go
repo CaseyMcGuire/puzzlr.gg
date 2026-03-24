@@ -31,6 +31,8 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("games", Game.Type).
 			Through("game_player", GamePlayer.Type),
+		edge.To("friends", User.Type).
+			Through("friendships", Friendship.Type),
 		edge.To("won_games", Game.Type).
 			Annotations(entgql.Skip()),
 		edge.To("current_turn_games", Game.Type).

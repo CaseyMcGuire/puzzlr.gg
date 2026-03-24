@@ -98,9 +98,10 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email func(childComplexity int) int
-		Games func(childComplexity int) int
-		ID    func(childComplexity int) int
+		Email   func(childComplexity int) int
+		Friends func(childComplexity int) int
+		Games   func(childComplexity int) int
+		ID      func(childComplexity int) int
 	}
 }
 
@@ -345,6 +346,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.Email(childComplexity), true
+
+	case "User.friends":
+		if e.complexity.User.Friends == nil {
+			break
+		}
+
+		return e.complexity.User.Friends(childComplexity), true
 
 	case "User.games":
 		if e.complexity.User.Games == nil {
@@ -646,6 +654,7 @@ type User implements Node {
   id: ID!
   email: String!
   games: [Game!]
+  friends: [User!]
 }
 """
 UserWhereInput is used for filtering User objects.
@@ -687,6 +696,11 @@ input UserWhereInput {
   """
   hasGames: Boolean
   hasGamesWith: [GameWhereInput!]
+  """
+  friends edge predicates
+  """
+  hasFriends: Boolean
+  hasFriendsWith: [UserWhereInput!]
 }
 `, BuiltIn: false},
 	{Name: "../schema/mutations/create_game_mutation.graphqls", Input: `
@@ -749,6 +763,7 @@ type GameBoard {
 
 type GameBoardRow {
   elements: [String]!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

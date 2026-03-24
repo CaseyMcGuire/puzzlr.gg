@@ -356,6 +356,10 @@ type UserWhereInput struct {
 	// "games" edge predicates.
 	HasGames     *bool             `json:"hasGames,omitempty"`
 	HasGamesWith []*GameWhereInput `json:"hasGamesWith,omitempty"`
+
+	// "friends" edge predicates.
+	HasFriends     *bool             `json:"hasFriends,omitempty"`
+	HasFriendsWith []*UserWhereInput `json:"hasFriendsWith,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -549,6 +553,24 @@ func (i *UserWhereInput) P() (predicate.User, error) {
 			with = append(with, p)
 		}
 		predicates = append(predicates, user.HasGamesWith(with...))
+	}
+	if i.HasFriends != nil {
+		p := user.HasFriends()
+		if !*i.HasFriends {
+			p = user.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasFriendsWith) > 0 {
+		with := make([]predicate.User, 0, len(i.HasFriendsWith))
+		for _, w := range i.HasFriendsWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasFriendsWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, user.HasFriendsWith(with...))
 	}
 	switch len(predicates) {
 	case 0:
