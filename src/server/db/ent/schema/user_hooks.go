@@ -2,6 +2,7 @@ package schema
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent"
@@ -9,6 +10,8 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/hook"
 )
+
+var ErrFriendshipAcceptanceRequiresPendingIncomingRequest = errors.New("cannot create friendship without a pending incoming friend request")
 
 func ValidateFriendshipAcceptance(next ent.Mutator) ent.Mutator {
 	return hook.UserFunc(func(ctx context.Context, m *codegen.UserMutation) (ent.Value, error) {
@@ -42,7 +45,7 @@ func ValidateFriendshipAcceptance(next ent.Mutator) ent.Mutator {
 				return nil, err
 			}
 			if !pendingRequest {
-				return nil, fmt.Errorf("cannot create friendship without a pending incoming friend request")
+				return nil, ErrFriendshipAcceptanceRequiresPendingIncomingRequest
 			}
 		}
 

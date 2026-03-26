@@ -4,11 +4,12 @@ package resolvers_test
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"testing"
 
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
+	"puzzlr.gg/src/server/db/ent/schema"
 	"puzzlr.gg/src/server/reqctx"
 )
 
@@ -170,7 +171,7 @@ func TestFriendRequestRejectsExistingFriendship(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected friend request to existing friend to fail, got nil")
 	}
-	if !strings.Contains(err.Error(), "already your friend") {
+	if !errors.Is(err, schema.ErrFriendRequestAlreadyFriends) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -197,7 +198,7 @@ func TestFriendRequestRejectsReversePendingRequest(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected reverse pending friend request to fail, got nil")
 	}
-	if !strings.Contains(err.Error(), "pending request for you") {
+	if !errors.Is(err, schema.ErrFriendRequestReversePending) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -217,7 +218,7 @@ func TestFriendRequestCreateRequiresRequesterActor(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected friend request create with wrong actor to fail, got nil")
 	}
-	if !strings.Contains(err.Error(), "only the requester can create a friend request") {
+	if !errors.Is(err, schema.ErrOnlyRequesterCanCreateFriendRequest) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

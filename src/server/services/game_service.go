@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -18,6 +19,13 @@ type GameService struct {
 const (
 	TictactoeX = "X"
 	TictactoeO = "O"
+)
+
+var (
+	ErrInvalidMoveCoordinates = errors.New("invalid row or column")
+	ErrGameNotInProgress      = errors.New("game is not in progress")
+	ErrNotYourTurn            = errors.New("it is not your turn")
+	ErrCellAlreadyTaken       = errors.New("cell already taken")
 )
 
 func NewGameService(client *ent.Client) (*GameService, error) {
@@ -92,7 +100,7 @@ func (g *GameService) MakeTicTacToeMove(
 	col int,
 ) (*ent.Game, error) {
 	if row < 0 || row > 2 || col < 0 || col > 2 {
-		return nil, fmt.Errorf("invalid row or column")
+		return nil, ErrInvalidMoveCoordinates
 	}
 
 	tx, err := g.dbClient.Tx(ctx)
@@ -117,7 +125,7 @@ func (g *GameService) MakeTicTacToeMove(
 	}
 
 	if gameState.Status != game.StatusIN_PROGRESS {
-		return nil, fmt.Errorf("game is not in progress")
+		return nil, ErrGameNotInProgress
 	}
 
 	currentPlayer, err := gameState.CurrentTurn(ctx)
@@ -126,7 +134,7 @@ func (g *GameService) MakeTicTacToeMove(
 	}
 
 	if currentPlayer.ID != userID {
-		return nil, fmt.Errorf("it is not your turn")
+		return nil, ErrNotYourTurn
 	}
 
 	gp, err := tx.GamePlayer.Query().
@@ -145,7 +153,7 @@ func (g *GameService) MakeTicTacToeMove(
 	}
 
 	if gameState.Board[row][col] != "" {
-		return nil, fmt.Errorf("cell already taken")
+		return nil, ErrCellAlreadyTaken
 	}
 
 	gameState.Board[row][col] = gp.Marker

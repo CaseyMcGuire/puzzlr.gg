@@ -2,6 +2,7 @@ package schema
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 
@@ -12,6 +13,11 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/hook"
 	"puzzlr.gg/src/server/db/ent/codegen/predicate"
+)
+
+var (
+	ErrTicTacToeBoardMustHaveThreeRows       = errors.New("tic tac toe board must have exactly 3 rows")
+	ErrTicTacToeBoardRowMustHaveThreeColumns = errors.New("tic tac toe board row must have exactly 3 columns")
 )
 
 func ValidatePlayerCountOnCreate(next ent.Mutator) ent.Mutator {
@@ -147,11 +153,11 @@ func gameTypeFromMutation(ctx context.Context, m *codegen.GameMutation) (game.Ty
 
 func validateTicTacToeBoardShape(board [][]string) error {
 	if len(board) != 3 {
-		return fmt.Errorf("tic tac toe board must have exactly 3 rows")
+		return ErrTicTacToeBoardMustHaveThreeRows
 	}
 	for rowIndex, row := range board {
 		if len(row) != 3 {
-			return fmt.Errorf("tic tac toe board row %d must have exactly 3 columns", rowIndex)
+			return fmt.Errorf("%w: row %d", ErrTicTacToeBoardRowMustHaveThreeColumns, rowIndex)
 		}
 	}
 	return nil

@@ -4,11 +4,12 @@ package resolvers_test
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"testing"
 
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
+	"puzzlr.gg/src/server/db/ent/schema"
 	"puzzlr.gg/src/server/reqctx"
 )
 
@@ -97,7 +98,7 @@ func TestFriendshipAcceptanceRequiresPendingIncomingRequest(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected accepting without a request to fail, got nil")
 	}
-	if err.Error() != "cannot create friendship without a pending incoming friend request" {
+	if !errors.Is(err, schema.ErrFriendshipAcceptanceRequiresPendingIncomingRequest) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -123,7 +124,7 @@ func TestFriendshipAcceptanceRequiresRecipientActor(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected non-recipient acceptance to fail, got nil")
 	}
-	if err.Error() != "only the user can mutate their own record" {
+	if !errors.Is(err, schema.ErrOnlyUserCanMutateOwnRecord) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -142,7 +143,7 @@ func TestDirectFriendshipMutationIsRejected(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected direct friendship mutation to fail, got nil")
 	}
-	if !strings.Contains(err.Error(), "direct friendship mutation is forbidden") {
+	if !errors.Is(err, schema.ErrDirectFriendshipMutationForbidden) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

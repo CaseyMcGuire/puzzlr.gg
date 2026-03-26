@@ -2,12 +2,18 @@ package schema
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent"
 	entprivacy "entgo.io/ent/privacy"
 	"puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/reqctx"
+)
+
+var (
+	ErrBulkUserMutationForbidden  = errors.New("bulk user mutation is forbidden")
+	ErrOnlyUserCanMutateOwnRecord = errors.New("only the user can mutate their own record")
 )
 
 func (User) Policy() ent.Policy {
@@ -28,7 +34,7 @@ func authorizeUserMutation(ctx context.Context, m ent.Mutation) error {
 	}
 
 	if mutation.Op().Is(ent.OpUpdate | ent.OpDelete) {
-		return fmt.Errorf("bulk user mutation is forbidden")
+		return ErrBulkUserMutationForbidden
 	}
 
 	userID, ok := mutation.ID()
@@ -41,7 +47,7 @@ func authorizeUserMutation(ctx context.Context, m ent.Mutation) error {
 		return err
 	}
 	if actorID != userID {
-		return fmt.Errorf("only the user can mutate their own record")
+		return ErrOnlyUserCanMutateOwnRecord
 	}
 
 	return nil

@@ -4,9 +4,10 @@ package resolvers_test
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"testing"
 
+	"puzzlr.gg/src/server/db/ent/schema"
 	"puzzlr.gg/src/server/reqctx"
 )
 
@@ -36,7 +37,7 @@ func TestUserUpdateOneRejectsOtherActor(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected updating another user to fail, got nil")
 	}
-	if !strings.Contains(err.Error(), "only the user can mutate their own record") {
+	if !errors.Is(err, schema.ErrOnlyUserCanMutateOwnRecord) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -53,7 +54,7 @@ func TestUserDeleteOneRejectsOtherActor(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected deleting another user to fail, got nil")
 	}
-	if !strings.Contains(err.Error(), "only the user can mutate their own record") {
+	if !errors.Is(err, schema.ErrOnlyUserCanMutateOwnRecord) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -70,7 +71,7 @@ func TestUserBulkUpdateIsRejected(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected bulk update to fail, got nil")
 	}
-	if !strings.Contains(err.Error(), "bulk user mutation is forbidden") {
+	if !errors.Is(err, schema.ErrBulkUserMutationForbidden) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

@@ -4,7 +4,7 @@ package resolvers_test
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"testing"
 
 	ent "puzzlr.gg/src/server/db/ent/codegen"
@@ -12,6 +12,7 @@ import (
 	"puzzlr.gg/src/server/graphql/models"
 	"puzzlr.gg/src/server/graphql/resolvers"
 	"puzzlr.gg/src/server/reqctx"
+	"puzzlr.gg/src/server/services"
 )
 
 func TestMakeGameMoveResolverSuccess(t *testing.T) {
@@ -33,7 +34,7 @@ func TestMakeGameMoveResolverSuccess(t *testing.T) {
 		t.Fatal("makeGameMove returned nil game")
 	}
 
-	if got := updatedGame.Board[0][0]; got != "X" {
+	if got := updatedGame.Board[0][0]; got != services.TictactoeX {
 		t.Fatalf("expected X at [0][0], got %q", got)
 	}
 	if updatedGame.Status != game.StatusIN_PROGRESS {
@@ -64,7 +65,7 @@ func TestMakeGameMoveResolverRequiresUserInContext(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected missing user ID error, got nil")
 	}
-	if !strings.Contains(err.Error(), "no user ID in context") {
+	if !errors.Is(err, reqctx.ErrNoUserIDInContext) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -84,7 +85,7 @@ func TestMakeGameMoveResolverRejectsOutOfTurnMove(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected out-of-turn move error, got nil")
 	}
-	if !strings.Contains(err.Error(), "it is not your turn") {
+	if !errors.Is(err, services.ErrNotYourTurn) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -112,7 +113,7 @@ func TestMakeGameMoveResolverRejectsTakenCell(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected taken-cell error, got nil")
 	}
-	if !strings.Contains(err.Error(), "cell already taken") {
+	if !errors.Is(err, services.ErrCellAlreadyTaken) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

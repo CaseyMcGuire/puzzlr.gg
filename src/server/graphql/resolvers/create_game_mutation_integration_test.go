@@ -4,12 +4,13 @@ package resolvers_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"sync/atomic"
 	"testing"
 
 	ent "puzzlr.gg/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/graphql/models"
 	"puzzlr.gg/src/server/reqctx"
 )
@@ -23,7 +24,7 @@ func TestCreateGameResolverSuccess(t *testing.T) {
 	opponent := mustCreateUser(t, ctx)
 
 	resolver := newTestResolver()
-	game, err := resolver.Mutation().CreateGame(
+	createdGame, err := resolver.Mutation().CreateGame(
 		reqctx.WithUserID(ctx, actor.ID),
 		&models.CreateGameInput{
 			TicTacToeInput: &models.CreateTicTacToeInput{
@@ -34,18 +35,18 @@ func TestCreateGameResolverSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("createGame returned an error: %v", err)
 	}
-	if game == nil {
+	if createdGame == nil {
 		t.Fatal("createGame returned nil game")
 	}
 
-	if got := game.Type.String(); got != "TIC_TAC_TOE" {
-		t.Fatalf("unexpected game type: %s", got)
+	if createdGame.Type != game.TypeTIC_TAC_TOE {
+		t.Fatalf("unexpected game type: %s", createdGame.Type)
 	}
-	if len(game.Board) != 3 || len(game.Board[0]) != 3 || len(game.Board[1]) != 3 || len(game.Board[2]) != 3 {
-		t.Fatalf("unexpected board dimensions: %#v", game.Board)
+	if len(createdGame.Board) != 3 || len(createdGame.Board[0]) != 3 || len(createdGame.Board[1]) != 3 || len(createdGame.Board[2]) != 3 {
+		t.Fatalf("unexpected board dimensions: %#v", createdGame.Board)
 	}
 
-	playerCount, err := game.QueryUser().Count(ctx)
+	playerCount, err := createdGame.QueryUser().Count(ctx)
 	if err != nil {
 		t.Fatalf("querying players failed: %v", err)
 	}
@@ -69,7 +70,7 @@ func TestCreateGameResolverRequiresUserInContext(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected missing user ID error, got nil")
 	}
-	if !strings.Contains(err.Error(), "no user ID in context") {
+	if !errors.Is(err, reqctx.ErrNoUserIDInContext) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

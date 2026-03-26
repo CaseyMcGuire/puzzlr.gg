@@ -4,10 +4,11 @@ package resolvers_test
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"testing"
 
 	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/schema"
 )
 
 func TestGameCreateRejectsInvalidTicTacToeBoardShape(t *testing.T) {
@@ -25,7 +26,7 @@ func TestGameCreateRejectsInvalidTicTacToeBoardShape(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected create to fail for invalid board shape")
 	}
-	if !strings.Contains(err.Error(), "tic tac toe board row") {
+	if !errors.Is(err, schema.ErrTicTacToeBoardRowMustHaveThreeColumns) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -76,7 +77,7 @@ func TestGameUpdateRejectsInvalidTicTacToeBoardShape(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected update to fail for invalid board shape")
 	}
-	if !strings.Contains(err.Error(), "tic tac toe board must have exactly 3 rows") {
+	if !errors.Is(err, schema.ErrTicTacToeBoardMustHaveThreeRows) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

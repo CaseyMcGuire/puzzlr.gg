@@ -2,6 +2,7 @@ package schema
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent"
@@ -9,6 +10,8 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/reqctx"
 )
+
+var ErrOnlyRequesterCanCreateFriendRequest = errors.New("only the requester can create a friend request")
 
 func (FriendRequest) Policy() ent.Policy {
 	return entprivacy.Policy{
@@ -37,7 +40,7 @@ func authorizeFriendRequestCreate(ctx context.Context, m ent.Mutation) error {
 		return err
 	}
 	if actorID != requesterID {
-		return fmt.Errorf("only the requester can create a friend request")
+		return ErrOnlyRequesterCanCreateFriendRequest
 	}
 
 	return nil

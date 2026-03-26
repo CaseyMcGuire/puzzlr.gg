@@ -2,6 +2,7 @@ package schema
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent"
@@ -9,6 +10,11 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
 	"puzzlr.gg/src/server/db/ent/codegen/hook"
+)
+
+var (
+	ErrFriendRequestAlreadyFriends = errors.New("cannot request friendship with someone who is already your friend")
+	ErrFriendRequestReversePending = errors.New("cannot send a friend request to someone who already has a pending request for you")
 )
 
 func ValidateFriendRequestCreate(next ent.Mutator) ent.Mutator {
@@ -43,7 +49,7 @@ func ValidateFriendRequestCreate(next ent.Mutator) ent.Mutator {
 			return nil, err
 		}
 		if alreadyFriends {
-			return nil, fmt.Errorf("cannot request friendship with someone who is already your friend")
+			return nil, ErrFriendRequestAlreadyFriends
 		}
 
 		reversePending, err := client.FriendRequest.Query().
@@ -56,7 +62,7 @@ func ValidateFriendRequestCreate(next ent.Mutator) ent.Mutator {
 			return nil, err
 		}
 		if reversePending {
-			return nil, fmt.Errorf("cannot send a friend request to someone who already has a pending request for you")
+			return nil, ErrFriendRequestReversePending
 		}
 
 		return next.Mutate(ctx, m)
