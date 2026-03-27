@@ -84,6 +84,7 @@ type ComplexityRoot struct {
 		Node      func(childComplexity int, id int) int
 		Nodes     func(childComplexity int, ids []int) int
 		Sidebar   func(childComplexity int) int
+		User      func(childComplexity int, id int) int
 		Users     func(childComplexity int) int
 	}
 
@@ -304,6 +305,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Sidebar(childComplexity), true
+
+	case "Query.user":
+		if e.complexity.Query.User == nil {
+			break
+		}
+
+		args, err := ec.field_Query_user_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -738,6 +751,7 @@ input TicTacToeMoveInput {
 extend type Query {
   gameboard: GameBoard
   sidebar: SidebarFolder
+  user(id: ID!): User
 }
 
 union SidebarItem = SidebarFolder | SidebarLink

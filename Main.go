@@ -87,6 +87,7 @@ func main() {
 
 	r.Get("/", renderReactPage("Puzzlr"))
 	r.Get("/tictactoe", renderReactPage("Tic Tac Toe"))
+	r.Get("/user/{id}", renderReactPage("User Profile"))
 
 	srv, err := build.CreateGraphqlServer(dbClient)
 	if err != nil {

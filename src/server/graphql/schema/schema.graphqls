@@ -3,6 +3,7 @@ scalar Time
 extend type Query {
   gameboard: GameBoard
   sidebar: SidebarFolder
+  user(id: ID!): User
 }
 
 union SidebarItem = SidebarFolder | SidebarLink

@@ -7,6 +7,7 @@ import {RelayConfig} from "relay/RelayConfig";
 import {Suspense} from "react";
 import IndexPage from "pages/IndexPage/IndexPage";
 import TicTacToeIndexPage from "pages/TicTacToeIndexPage/TicTacToeIndexPage";
+import UserProfilePage from "pages/UserProfilePage/UserProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
   {
     path: '/tictactoe',
     element: <TicTacToeIndexPage />
+  },
+  {
+    path: '/user/:id',
+    element: <UserProfilePage />
   },
   {
     path: '/login',

@@ -13,7 +13,9 @@ const styles = stylex.create({
     flexDirection: 'row'
   },
   sidebarPageContents: {
-    marginLeft: SidebarStyles.sidebarWidth
+    marginLeft: SidebarStyles.sidebarWidth,
+    height: '100%',
+    width: '100%',
   }
 })
 

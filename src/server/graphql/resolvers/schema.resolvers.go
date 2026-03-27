@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 
+	"puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/graphql/models"
 )
 
@@ -31,4 +32,16 @@ func (r *queryResolver) Sidebar(ctx context.Context) (*models.SidebarFolder, err
 			},
 		},
 	}, nil
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id int) (*codegen.User, error) {
+	user, err := r.Ent.User.Get(ctx, id)
+	if err != nil {
+		if codegen.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
 }
