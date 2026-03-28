@@ -25,17 +25,19 @@ func (f *FriendshipService) CreateFriendRequest(ctx context.Context, requestorID
 	return f.dbClient.FriendRequest.Create().SetRequesterID(requestorID).SetRecipientID(recipientID).Save(ctx)
 }
 
-func (f *FriendshipService) AcceptFriendRequest(ctx context.Context, recipientID int, senderID int) (*ent.User, error) {
+func (f *FriendshipService) RespondToFriendRequest(ctx context.Context, recipientID int, senderID int, accept bool) (*ent.User, error) {
 	tx, err := f.dbClient.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add friendship by updating user (triggers ValidateFriendshipAcceptance hook)
-	_, err = tx.User.UpdateOneID(recipientID).AddFriendIDs(senderID).Save(ctx)
-	if err != nil {
-		_ = tx.Rollback()
-		return nil, err
+	if accept {
+		// Add friendship by updating user (triggers ValidateFriendshipAcceptance hook)
+		_, err = tx.User.UpdateOneID(recipientID).AddFriendIDs(senderID).Save(ctx)
+		if err != nil {
+			_ = tx.Rollback()
+			return nil, err
+		}
 	}
 
 	// Delete the friend request

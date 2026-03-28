@@ -12,19 +12,19 @@ import (
 	"puzzlr.gg/src/server/reqctx"
 )
 
-// AcceptFriendRequest is the resolver for the acceptFriendRequest field.
-func (r *mutationResolver) AcceptFriendRequest(ctx context.Context, input models.AcceptFriendRequestInput) (models.AcceptFriendRequestResult, error) {
+// RespondToFriendRequest is the resolver for the respondToFriendRequest field.
+func (r *mutationResolver) RespondToFriendRequest(ctx context.Context, input models.RespondToFriendRequestInput) (models.RespondToFriendRequestResult, error) {
 	userID, err := reqctx.UserIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	friend, err := r.FriendshipService.AcceptFriendRequest(ctx, userID, input.SenderID)
+	sender, err := r.FriendshipService.RespondToFriendRequest(ctx, userID, input.SenderID, input.Accept)
 	if err != nil {
 		return nil, err
 	}
 
-	return &models.AcceptFriendRequestSuccess{
-		Friend: friend,
+	return &models.RespondToFriendRequestSuccess{
+		Sender: sender,
 	}, nil
 }

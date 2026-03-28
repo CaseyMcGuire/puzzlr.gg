@@ -43,14 +43,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	AcceptFriendRequestError struct {
-		Message func(childComplexity int) int
-	}
-
-	AcceptFriendRequestSuccess struct {
-		Friend func(childComplexity int) int
-	}
-
 	Game struct {
 		Board       func(childComplexity int) int
 		CreateTime  func(childComplexity int) int
@@ -77,10 +69,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AcceptFriendRequest func(childComplexity int, input models.AcceptFriendRequestInput) int
-		CreateGame          func(childComplexity int, input *models.CreateGameInput) int
-		MakeGameMove        func(childComplexity int, input models.MakeGameMoveInput) int
-		SendFriendRequest   func(childComplexity int, input models.SendFriendRequestInput) int
+		CreateGame             func(childComplexity int, input *models.CreateGameInput) int
+		MakeGameMove           func(childComplexity int, input models.MakeGameMoveInput) int
+		RespondToFriendRequest func(childComplexity int, input models.RespondToFriendRequestInput) int
+		SendFriendRequest      func(childComplexity int, input models.SendFriendRequestInput) int
 	}
 
 	PageInfo struct {
@@ -98,6 +90,14 @@ type ComplexityRoot struct {
 		User      func(childComplexity int, id int) int
 		Users     func(childComplexity int) int
 		Viewer    func(childComplexity int) int
+	}
+
+	RespondToFriendRequestError struct {
+		Message func(childComplexity int) int
+	}
+
+	RespondToFriendRequestSuccess struct {
+		Sender func(childComplexity int) int
 	}
 
 	SendFriendRequestError struct {
@@ -145,20 +145,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "AcceptFriendRequestError.message":
-		if e.complexity.AcceptFriendRequestError.Message == nil {
-			break
-		}
-
-		return e.complexity.AcceptFriendRequestError.Message(childComplexity), true
-
-	case "AcceptFriendRequestSuccess.friend":
-		if e.complexity.AcceptFriendRequestSuccess.Friend == nil {
-			break
-		}
-
-		return e.complexity.AcceptFriendRequestSuccess.Friend(childComplexity), true
 
 	case "Game.board":
 		if e.complexity.Game.Board == nil {
@@ -251,18 +237,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Link.Href(childComplexity), true
 
-	case "Mutation.acceptFriendRequest":
-		if e.complexity.Mutation.AcceptFriendRequest == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_acceptFriendRequest_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.AcceptFriendRequest(childComplexity, args["input"].(models.AcceptFriendRequestInput)), true
-
 	case "Mutation.createGame":
 		if e.complexity.Mutation.CreateGame == nil {
 			break
@@ -286,6 +260,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.MakeGameMove(childComplexity, args["input"].(models.MakeGameMoveInput)), true
+
+	case "Mutation.respondToFriendRequest":
+		if e.complexity.Mutation.RespondToFriendRequest == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_respondToFriendRequest_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RespondToFriendRequest(childComplexity, args["input"].(models.RespondToFriendRequestInput)), true
 
 	case "Mutation.sendFriendRequest":
 		if e.complexity.Mutation.SendFriendRequest == nil {
@@ -391,6 +377,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Viewer(childComplexity), true
 
+	case "RespondToFriendRequestError.message":
+		if e.complexity.RespondToFriendRequestError.Message == nil {
+			break
+		}
+
+		return e.complexity.RespondToFriendRequestError.Message(childComplexity), true
+
+	case "RespondToFriendRequestSuccess.sender":
+		if e.complexity.RespondToFriendRequestSuccess.Sender == nil {
+			break
+		}
+
+		return e.complexity.RespondToFriendRequestSuccess.Sender(childComplexity), true
+
 	case "SendFriendRequestError.message":
 		if e.complexity.SendFriendRequestError.Message == nil {
 			break
@@ -476,12 +476,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputAcceptFriendRequestInput,
 		ec.unmarshalInputCreateGameInput,
 		ec.unmarshalInputCreateTicTacToeInput,
 		ec.unmarshalInputGameMoveInput,
 		ec.unmarshalInputGameWhereInput,
 		ec.unmarshalInputMakeGameMoveInput,
+		ec.unmarshalInputRespondToFriendRequestInput,
 		ec.unmarshalInputSendFriendRequestInput,
 		ec.unmarshalInputTicTacToeMoveInput,
 		ec.unmarshalInputUserWhereInput,
@@ -805,23 +805,6 @@ input UserWhereInput {
   hasFriendsWith: [UserWhereInput!]
 }
 `, BuiltIn: false},
-	{Name: "../schema/mutations/accept_friend_request_mutation.graphqls", Input: `input AcceptFriendRequestInput {
-  senderID: ID!
-}
-
-type AcceptFriendRequestSuccess {
-  friend: User!
-}
-
-type AcceptFriendRequestError {
-  message: String!
-}
-
-union AcceptFriendRequestResult = AcceptFriendRequestSuccess | AcceptFriendRequestError
-
-extend type Mutation {
-  acceptFriendRequest(input: AcceptFriendRequestInput!): AcceptFriendRequestResult!
-}`, BuiltIn: false},
 	{Name: "../schema/mutations/create_game_mutation.graphqls", Input: `
 type Mutation {
     createGame(input: CreateGameInput): Game
@@ -851,6 +834,24 @@ input GameMoveInput @oneOf {
 input TicTacToeMoveInput {
     row: Int!
     col: Int!
+}`, BuiltIn: false},
+	{Name: "../schema/mutations/respond_to_friend_request_mutation.graphqls", Input: `input RespondToFriendRequestInput {
+  senderID: ID!
+  accept: Boolean!
+}
+
+type RespondToFriendRequestSuccess {
+  sender: User!
+}
+
+type RespondToFriendRequestError {
+  message: String!
+}
+
+union RespondToFriendRequestResult = RespondToFriendRequestSuccess | RespondToFriendRequestError
+
+extend type Mutation {
+  respondToFriendRequest(input: RespondToFriendRequestInput!): RespondToFriendRequestResult!
 }`, BuiltIn: false},
 	{Name: "../schema/mutations/send_friend_request_mutation.graphqls", Input: `input SendFriendRequestInput {
   recipientID: ID!

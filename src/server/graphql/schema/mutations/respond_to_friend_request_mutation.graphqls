@@ -1,0 +1,18 @@
+input RespondToFriendRequestInput {
+  senderID: ID!
+  accept: Boolean!
+}
+
+type RespondToFriendRequestSuccess {
+  sender: User!
+}
+
+type RespondToFriendRequestError {
+  message: String!
+}
+
+union RespondToFriendRequestResult = RespondToFriendRequestSuccess | RespondToFriendRequestError
+
+extend type Mutation {
+  respondToFriendRequest(input: RespondToFriendRequestInput!): RespondToFriendRequestResult!
+}

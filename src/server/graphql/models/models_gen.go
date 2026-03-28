@@ -11,8 +11,8 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen"
 )
 
-type AcceptFriendRequestResult interface {
-	IsAcceptFriendRequestResult()
+type RespondToFriendRequestResult interface {
+	IsRespondToFriendRequestResult()
 }
 
 type SendFriendRequestResult interface {
@@ -22,22 +22,6 @@ type SendFriendRequestResult interface {
 type SidebarItem interface {
 	IsSidebarItem()
 }
-
-type AcceptFriendRequestError struct {
-	Message string `json:"message"`
-}
-
-func (AcceptFriendRequestError) IsAcceptFriendRequestResult() {}
-
-type AcceptFriendRequestInput struct {
-	SenderID int `json:"senderID"`
-}
-
-type AcceptFriendRequestSuccess struct {
-	Friend *codegen.User `json:"friend"`
-}
-
-func (AcceptFriendRequestSuccess) IsAcceptFriendRequestResult() {}
 
 type CreateGameInput struct {
 	TicTacToeInput *CreateTicTacToeInput `json:"ticTacToeInput"`
@@ -68,6 +52,23 @@ type MakeGameMoveInput struct {
 	GameID int            `json:"gameId"`
 	Move   *GameMoveInput `json:"move"`
 }
+
+type RespondToFriendRequestError struct {
+	Message string `json:"message"`
+}
+
+func (RespondToFriendRequestError) IsRespondToFriendRequestResult() {}
+
+type RespondToFriendRequestInput struct {
+	SenderID int  `json:"senderID"`
+	Accept   bool `json:"accept"`
+}
+
+type RespondToFriendRequestSuccess struct {
+	Sender *codegen.User `json:"sender"`
+}
+
+func (RespondToFriendRequestSuccess) IsRespondToFriendRequestResult() {}
 
 type SendFriendRequestError struct {
 	Message string `json:"message"`

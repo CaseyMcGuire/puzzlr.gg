@@ -28,12 +28,12 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _AcceptFriendRequestError_message(ctx context.Context, field graphql.CollectedField, obj *models.AcceptFriendRequestError) (ret graphql.Marshaler) {
+func (ec *executionContext) _RespondToFriendRequestError_message(ctx context.Context, field graphql.CollectedField, obj *models.RespondToFriendRequestError) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_AcceptFriendRequestError_message,
+		ec.fieldContext_RespondToFriendRequestError_message,
 		func(ctx context.Context) (any, error) {
 			return obj.Message, nil
 		},
@@ -44,9 +44,9 @@ func (ec *executionContext) _AcceptFriendRequestError_message(ctx context.Contex
 	)
 }
 
-func (ec *executionContext) fieldContext_AcceptFriendRequestError_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RespondToFriendRequestError_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "AcceptFriendRequestError",
+		Object:     "RespondToFriendRequestError",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -57,14 +57,14 @@ func (ec *executionContext) fieldContext_AcceptFriendRequestError_message(_ cont
 	return fc, nil
 }
 
-func (ec *executionContext) _AcceptFriendRequestSuccess_friend(ctx context.Context, field graphql.CollectedField, obj *models.AcceptFriendRequestSuccess) (ret graphql.Marshaler) {
+func (ec *executionContext) _RespondToFriendRequestSuccess_sender(ctx context.Context, field graphql.CollectedField, obj *models.RespondToFriendRequestSuccess) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_AcceptFriendRequestSuccess_friend,
+		ec.fieldContext_RespondToFriendRequestSuccess_sender,
 		func(ctx context.Context) (any, error) {
-			return obj.Friend, nil
+			return obj.Sender, nil
 		},
 		nil,
 		ec.marshalNUser2ᚖpuzzlrᚗggᚋsrcᚋserverᚋdbᚋentᚋcodegenᚐUser,
@@ -73,9 +73,9 @@ func (ec *executionContext) _AcceptFriendRequestSuccess_friend(ctx context.Conte
 	)
 }
 
-func (ec *executionContext) fieldContext_AcceptFriendRequestSuccess_friend(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RespondToFriendRequestSuccess_sender(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "AcceptFriendRequestSuccess",
+		Object:     "RespondToFriendRequestSuccess",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -102,14 +102,14 @@ func (ec *executionContext) fieldContext_AcceptFriendRequestSuccess_friend(_ con
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAcceptFriendRequestInput(ctx context.Context, obj any) (models.AcceptFriendRequestInput, error) {
-	var it models.AcceptFriendRequestInput
+func (ec *executionContext) unmarshalInputRespondToFriendRequestInput(ctx context.Context, obj any) (models.RespondToFriendRequestInput, error) {
+	var it models.RespondToFriendRequestInput
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"senderID"}
+	fieldsInOrder := [...]string{"senderID", "accept"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -123,6 +123,13 @@ func (ec *executionContext) unmarshalInputAcceptFriendRequestInput(ctx context.C
 				return it, err
 			}
 			it.SenderID = data
+		case "accept":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accept"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Accept = data
 		}
 	}
 
@@ -133,29 +140,29 @@ func (ec *executionContext) unmarshalInputAcceptFriendRequestInput(ctx context.C
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _AcceptFriendRequestResult(ctx context.Context, sel ast.SelectionSet, obj models.AcceptFriendRequestResult) graphql.Marshaler {
+func (ec *executionContext) _RespondToFriendRequestResult(ctx context.Context, sel ast.SelectionSet, obj models.RespondToFriendRequestResult) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case models.AcceptFriendRequestSuccess:
-		return ec._AcceptFriendRequestSuccess(ctx, sel, &obj)
-	case *models.AcceptFriendRequestSuccess:
+	case models.RespondToFriendRequestSuccess:
+		return ec._RespondToFriendRequestSuccess(ctx, sel, &obj)
+	case *models.RespondToFriendRequestSuccess:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AcceptFriendRequestSuccess(ctx, sel, obj)
-	case models.AcceptFriendRequestError:
-		return ec._AcceptFriendRequestError(ctx, sel, &obj)
-	case *models.AcceptFriendRequestError:
+		return ec._RespondToFriendRequestSuccess(ctx, sel, obj)
+	case models.RespondToFriendRequestError:
+		return ec._RespondToFriendRequestError(ctx, sel, &obj)
+	case *models.RespondToFriendRequestError:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._AcceptFriendRequestError(ctx, sel, obj)
+		return ec._RespondToFriendRequestError(ctx, sel, obj)
 	default:
 		if typedObj, ok := obj.(graphql.Marshaler); ok {
 			return typedObj
 		} else {
-			panic(fmt.Errorf("unexpected type %T; non-generated variants of AcceptFriendRequestResult must implement graphql.Marshaler", obj))
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of RespondToFriendRequestResult must implement graphql.Marshaler", obj))
 		}
 	}
 }
@@ -164,19 +171,19 @@ func (ec *executionContext) _AcceptFriendRequestResult(ctx context.Context, sel 
 
 // region    **************************** object.gotpl ****************************
 
-var acceptFriendRequestErrorImplementors = []string{"AcceptFriendRequestError", "AcceptFriendRequestResult"}
+var respondToFriendRequestErrorImplementors = []string{"RespondToFriendRequestError", "RespondToFriendRequestResult"}
 
-func (ec *executionContext) _AcceptFriendRequestError(ctx context.Context, sel ast.SelectionSet, obj *models.AcceptFriendRequestError) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, acceptFriendRequestErrorImplementors)
+func (ec *executionContext) _RespondToFriendRequestError(ctx context.Context, sel ast.SelectionSet, obj *models.RespondToFriendRequestError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, respondToFriendRequestErrorImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("AcceptFriendRequestError")
+			out.Values[i] = graphql.MarshalString("RespondToFriendRequestError")
 		case "message":
-			out.Values[i] = ec._AcceptFriendRequestError_message(ctx, field, obj)
+			out.Values[i] = ec._RespondToFriendRequestError_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -203,19 +210,19 @@ func (ec *executionContext) _AcceptFriendRequestError(ctx context.Context, sel a
 	return out
 }
 
-var acceptFriendRequestSuccessImplementors = []string{"AcceptFriendRequestSuccess", "AcceptFriendRequestResult"}
+var respondToFriendRequestSuccessImplementors = []string{"RespondToFriendRequestSuccess", "RespondToFriendRequestResult"}
 
-func (ec *executionContext) _AcceptFriendRequestSuccess(ctx context.Context, sel ast.SelectionSet, obj *models.AcceptFriendRequestSuccess) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, acceptFriendRequestSuccessImplementors)
+func (ec *executionContext) _RespondToFriendRequestSuccess(ctx context.Context, sel ast.SelectionSet, obj *models.RespondToFriendRequestSuccess) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, respondToFriendRequestSuccessImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("AcceptFriendRequestSuccess")
-		case "friend":
-			out.Values[i] = ec._AcceptFriendRequestSuccess_friend(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("RespondToFriendRequestSuccess")
+		case "sender":
+			out.Values[i] = ec._RespondToFriendRequestSuccess_sender(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -246,19 +253,19 @@ func (ec *executionContext) _AcceptFriendRequestSuccess(ctx context.Context, sel
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAcceptFriendRequestInput2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐAcceptFriendRequestInput(ctx context.Context, v any) (models.AcceptFriendRequestInput, error) {
-	res, err := ec.unmarshalInputAcceptFriendRequestInput(ctx, v)
+func (ec *executionContext) unmarshalNRespondToFriendRequestInput2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐRespondToFriendRequestInput(ctx context.Context, v any) (models.RespondToFriendRequestInput, error) {
+	res, err := ec.unmarshalInputRespondToFriendRequestInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNAcceptFriendRequestResult2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐAcceptFriendRequestResult(ctx context.Context, sel ast.SelectionSet, v models.AcceptFriendRequestResult) graphql.Marshaler {
+func (ec *executionContext) marshalNRespondToFriendRequestResult2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐRespondToFriendRequestResult(ctx context.Context, sel ast.SelectionSet, v models.RespondToFriendRequestResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._AcceptFriendRequestResult(ctx, sel, v)
+	return ec._RespondToFriendRequestResult(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************
