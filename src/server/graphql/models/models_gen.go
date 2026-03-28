@@ -11,6 +11,10 @@ import (
 	"puzzlr.gg/src/server/db/ent/codegen"
 )
 
+type AcceptFriendRequestResult interface {
+	IsAcceptFriendRequestResult()
+}
+
 type SendFriendRequestResult interface {
 	IsSendFriendRequestResult()
 }
@@ -18,6 +22,22 @@ type SendFriendRequestResult interface {
 type SidebarItem interface {
 	IsSidebarItem()
 }
+
+type AcceptFriendRequestError struct {
+	Message string `json:"message"`
+}
+
+func (AcceptFriendRequestError) IsAcceptFriendRequestResult() {}
+
+type AcceptFriendRequestInput struct {
+	SenderID int `json:"senderID"`
+}
+
+type AcceptFriendRequestSuccess struct {
+	Friend *codegen.User `json:"friend"`
+}
+
+func (AcceptFriendRequestSuccess) IsAcceptFriendRequestResult() {}
 
 type CreateGameInput struct {
 	TicTacToeInput *CreateTicTacToeInput `json:"ticTacToeInput"`

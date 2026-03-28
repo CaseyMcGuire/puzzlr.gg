@@ -25,6 +25,36 @@ func (f *FriendshipService) CreateFriendRequest(ctx context.Context, requestorID
 	return f.dbClient.FriendRequest.Create().SetRequesterID(requestorID).SetRecipientID(recipientID).Save(ctx)
 }
 
+func (f *FriendshipService) AcceptFriendRequest(ctx context.Context, recipientID int, senderID int) (*ent.User, error) {
+	tx, err := f.dbClient.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add friendship by updating user (triggers ValidateFriendshipAcceptance hook)
+	_, err = tx.User.UpdateOneID(recipientID).AddFriendIDs(senderID).Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	// Delete the friend request
+	_, err = tx.FriendRequest.Delete().Where(
+		friendrequest.RequesterIDEQ(senderID),
+		friendrequest.RecipientIDEQ(recipientID),
+	).Exec(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return f.dbClient.User.Get(ctx, senderID)
+}
+
 func (f *FriendshipService) GetViewerFriendshipStatus(ctx context.Context, viewerID int, targetUserID int) (models.ViewerFriendshipStatus, error) {
 	areFriends, err := f.dbClient.Friendship.Query().
 		Where(

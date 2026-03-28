@@ -7,6 +7,7 @@ import (
 	"errors"
 	"testing"
 
+	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/schema"
 	"puzzlr.gg/src/server/reqctx"

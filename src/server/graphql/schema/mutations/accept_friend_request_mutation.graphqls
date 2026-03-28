@@ -1,0 +1,17 @@
+input AcceptFriendRequestInput {
+  senderID: ID!
+}
+
+type AcceptFriendRequestSuccess {
+  friend: User!
+}
+
+type AcceptFriendRequestError {
+  message: String!
+}
+
+union AcceptFriendRequestResult = AcceptFriendRequestSuccess | AcceptFriendRequestError
+
+extend type Mutation {
+  acceptFriendRequest(input: AcceptFriendRequestInput!): AcceptFriendRequestResult!
+}
