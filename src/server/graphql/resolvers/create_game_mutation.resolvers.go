@@ -18,11 +18,11 @@ import (
 // CreateGame is the resolver for the createGame field.
 func (r *mutationResolver) CreateGame(ctx context.Context, input *models.CreateGameInput) (*codegen.Game, error) {
 	if input.TicTacToeInput != nil {
-		userId, err := reqctx.UserIDFromContext(ctx)
+		userID, err := reqctx.UserIDFromContext(ctx)
 		if err != nil {
 			return nil, err
 		}
-		return r.GameService.CreateTicTacToeGame(ctx, userId, input.TicTacToeInput.OpponentID)
+		return r.GameService.CreateTicTacToeGame(ctx, userID, input.TicTacToeInput.OpponentID)
 	}
 	return nil, fmt.Errorf("unsupported game type")
 }

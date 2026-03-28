@@ -2,6 +2,14 @@
 
 package models
 
+import (
+	"puzzlr.gg/src/server/db/ent/codegen"
+)
+
+type SendFriendRequestResult interface {
+	IsSendFriendRequestResult()
+}
+
 type SidebarItem interface {
 	IsSidebarItem()
 }
@@ -35,6 +43,22 @@ type MakeGameMoveInput struct {
 	GameID int            `json:"gameId"`
 	Move   *GameMoveInput `json:"move"`
 }
+
+type SendFriendRequestError struct {
+	Message string `json:"message"`
+}
+
+func (SendFriendRequestError) IsSendFriendRequestResult() {}
+
+type SendFriendRequestInput struct {
+	RecipientID int `json:"recipientID"`
+}
+
+type SendFriendRequestSuccess struct {
+	Recipient *codegen.User `json:"recipient"`
+}
+
+func (SendFriendRequestSuccess) IsSendFriendRequestResult() {}
 
 type SidebarFolder struct {
 	Name     string        `json:"name"`

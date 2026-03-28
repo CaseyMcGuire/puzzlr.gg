@@ -1,5 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import {graphql, useLazyLoadQuery} from "react-relay";
+import UserProfileAddFriendButton from "pages/UserProfilePage/UserProfileAddFriendButton";
 import UserProfileFriendsSection from "pages/UserProfilePage/UserProfileFriendsSection";
 import UserProfileGamesSection from "pages/UserProfilePage/UserProfileGamesSection";
 import UserProfileHero from "pages/UserProfilePage/UserProfileHero";
@@ -28,6 +29,9 @@ type Props = {
 export default function UserProfilePageContents({userID}: Props) {
   const query = useLazyLoadQuery<UserProfilePageContentsQuery>(graphql`
     query UserProfilePageContentsQuery($id: ID!) {
+      viewer {
+        id
+      }
       user(id: $id) {
         id
         email
@@ -40,6 +44,7 @@ export default function UserProfilePageContents({userID}: Props) {
     id: String(userID),
   });
 
+  const viewer = query.viewer;
   const user = query.user;
 
   if (!user) {
@@ -58,6 +63,11 @@ export default function UserProfilePageContents({userID}: Props) {
       <UserProfileHero
         title={user.email}
         subtitle={`User ID ${user.id}`}
+        actions={
+          viewer && viewer.id !== user.id ? (
+            <UserProfileAddFriendButton recipientID={user.id} />
+          ) : undefined
+        }
       />
       <UserProfileStats user={user} />
 

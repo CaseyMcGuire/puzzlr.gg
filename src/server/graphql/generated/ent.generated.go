@@ -30,6 +30,7 @@ type QueryResolver interface {
 	Gameboard(ctx context.Context) (*models.GameBoard, error)
 	Sidebar(ctx context.Context) (*models.SidebarFolder, error)
 	User(ctx context.Context, id int) (*codegen.User, error)
+	Viewer(ctx context.Context) (*codegen.User, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -735,6 +736,45 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_viewer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_viewer,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Viewer(ctx)
+		},
+		nil,
+		ec.marshalOUser2ᚖpuzzlrᚗggᚋsrcᚋserverᚋdbᚋentᚋcodegenᚐUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_viewer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "games":
+				return ec.fieldContext_User_games(ctx, field)
+			case "friends":
+				return ec.fieldContext_User_friends(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -1923,6 +1963,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_user(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "viewer":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_viewer(ctx, field)
 				return res
 			}
 

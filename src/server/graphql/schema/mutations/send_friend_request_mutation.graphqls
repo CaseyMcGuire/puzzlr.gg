@@ -1,0 +1,17 @@
+input SendFriendRequestInput {
+  recipientID: ID!
+}
+
+type SendFriendRequestSuccess {
+  recipient: User!
+}
+
+type SendFriendRequestError {
+  message: String!
+}
+
+union SendFriendRequestResult = SendFriendRequestSuccess | SendFriendRequestError
+
+extend type Mutation {
+  sendFriendRequest(input: SendFriendRequestInput!): SendFriendRequestResult!
+}

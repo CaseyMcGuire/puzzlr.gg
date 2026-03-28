@@ -3,7 +3,15 @@ scalar Time
 extend type Query {
   gameboard: GameBoard
   sidebar: SidebarFolder
+  """
+  Returns the requested user, or null if no user exists with that ID.
+  """
   user(id: ID!): User
+  """
+  Returns the authenticated user for the current request.
+  Returns null for anonymous requests on pages where authentication is optional.
+  """
+  viewer: User
 }
 
 union SidebarItem = SidebarFolder | SidebarLink

@@ -25,7 +25,8 @@ func (r *mutationResolver) MakeGameMove(ctx context.Context, input models.MakeGa
 		return r.GameService.MakeTicTacToeMove(
 			ctx,
 			input.GameID,
-			userID, input.Move.TicTacToeMove.Row,
+			userID,
+			input.Move.TicTacToeMove.Row,
 			input.Move.TicTacToeMove.Col,
 		)
 	}

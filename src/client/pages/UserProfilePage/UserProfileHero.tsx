@@ -1,4 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
+import {ReactNode} from "react";
 
 const styles = stylex.create({
   hero: {
@@ -12,6 +13,13 @@ const styles = stylex.create({
     borderRadius: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #eef4ff 100%)",
     padding: "28px",
+  },
+  heroHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: "16px",
+    flexWrap: "wrap",
   },
   eyebrow: {
     margin: 0,
@@ -32,17 +40,26 @@ const styles = stylex.create({
     color: "#4b5563",
     fontSize: "1rem",
   },
+  actions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "flex-start",
+  },
 });
 
 type Props = {
   title: string;
   subtitle: string;
+  actions?: ReactNode;
 };
 
-export default function UserProfileHero({title, subtitle}: Props) {
+export default function UserProfileHero({title, subtitle, actions}: Props) {
   return (
     <div sx={styles.hero}>
-      <p sx={styles.eyebrow}>User profile</p>
+      <div sx={styles.heroHeader}>
+        <p sx={styles.eyebrow}>User profile</p>
+        {actions ? <div sx={styles.actions}>{actions}</div> : null}
+      </div>
       <h1 sx={styles.title}>{title}</h1>
       <p sx={styles.subtitle}>{subtitle}</p>
     </div>

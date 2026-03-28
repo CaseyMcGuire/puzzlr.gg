@@ -24,11 +24,17 @@ func CreateGraphqlServer(entClient *ent.Client) (*handler.Server, error) {
 		return nil, err
 	}
 
+	friendshipService, err := services.NewFriendshipService(entClient)
+	if err != nil {
+		return nil, err
+	}
+
 	srv := handler.New(graphql.NewExecutableSchema(
 		graphql.Config{
 			Resolvers: &resolvers.Resolver{
-				Ent:         entClient,
-				GameService: gameService,
+				Ent:               entClient,
+				GameService:       gameService,
+				FriendshipService: friendshipService,
 			}},
 	))
 

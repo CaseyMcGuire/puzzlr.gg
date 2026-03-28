@@ -11,6 +11,7 @@ import (
 
 	"puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/graphql/models"
+	"puzzlr.gg/src/server/reqctx"
 )
 
 // Gameboard is the resolver for the gameboard field.
@@ -37,6 +38,23 @@ func (r *queryResolver) Sidebar(ctx context.Context) (*models.SidebarFolder, err
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id int) (*codegen.User, error) {
 	user, err := r.Ent.User.Get(ctx, id)
+	if err != nil {
+		if codegen.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
+}
+
+// Viewer is the resolver for the viewer field.
+func (r *queryResolver) Viewer(ctx context.Context) (*codegen.User, error) {
+	userID, err := reqctx.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	user, err := r.Ent.User.Get(ctx, userID)
 	if err != nil {
 		if codegen.IsNotFound(err) {
 			return nil, nil

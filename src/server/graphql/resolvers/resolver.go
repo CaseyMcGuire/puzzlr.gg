@@ -10,6 +10,7 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Ent         *ent.Client
-	GameService *services.GameService
+	Ent               *ent.Client
+	GameService       *services.GameService
+	FriendshipService *services.FriendshipService
 }

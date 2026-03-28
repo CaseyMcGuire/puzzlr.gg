@@ -13,6 +13,8 @@ import (
 )
 
 var (
+	ErrFriendRequestSelfRequest    = errors.New("cannot send a friend request to yourself")
+	ErrFriendRequestAlreadyPending = errors.New("cannot send a duplicate pending friend request")
 	ErrFriendRequestAlreadyFriends = errors.New("cannot request friendship with someone who is already your friend")
 	ErrFriendRequestReversePending = errors.New("cannot send a friend request to someone who already has a pending request for you")
 )
@@ -30,6 +32,23 @@ func ValidateFriendRequestCreate(next ent.Mutator) ent.Mutator {
 		}
 
 		client := m.Client()
+
+		if requesterID == recipientID {
+			return nil, ErrFriendRequestSelfRequest
+		}
+
+		alreadyPending, err := client.FriendRequest.Query().
+			Where(
+				friendrequest.RequesterIDEQ(requesterID),
+				friendrequest.RecipientIDEQ(recipientID),
+			).
+			Exist(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if alreadyPending {
+			return nil, ErrFriendRequestAlreadyPending
+		}
 
 		alreadyFriends, err := client.Friendship.Query().
 			Where(

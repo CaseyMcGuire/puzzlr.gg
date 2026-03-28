@@ -7,7 +7,6 @@ import (
 	"errors"
 	"testing"
 
-	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/schema"
 	"puzzlr.gg/src/server/reqctx"
@@ -109,8 +108,8 @@ func TestFriendRequestRejectsSelfRequest(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected self-request to fail, got nil")
 	}
-	if !ent.IsConstraintError(err) {
-		t.Fatalf("expected constraint error, got: %v", err)
+	if !errors.Is(err, schema.ErrFriendRequestSelfRequest) {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
@@ -137,8 +136,8 @@ func TestFriendRequestRejectsDuplicateDirectedRequest(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected duplicate friend request to fail, got nil")
 	}
-	if !ent.IsConstraintError(err) {
-		t.Fatalf("expected constraint error, got: %v", err)
+	if !errors.Is(err, schema.ErrFriendRequestAlreadyPending) {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 

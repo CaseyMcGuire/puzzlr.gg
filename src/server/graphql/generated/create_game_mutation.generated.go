@@ -4,6 +4,7 @@ package graphql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"sync/atomic"
@@ -19,6 +20,7 @@ import (
 type MutationResolver interface {
 	CreateGame(ctx context.Context, input *models.CreateGameInput) (*codegen.Game, error)
 	MakeGameMove(ctx context.Context, input models.MakeGameMoveInput) (*codegen.Game, error)
+	SendFriendRequest(ctx context.Context, input models.SendFriendRequestInput) (models.SendFriendRequestResult, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -40,6 +42,17 @@ func (ec *executionContext) field_Mutation_makeGameMove_args(ctx context.Context
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNMakeGameMoveInput2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐMakeGameMoveInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_sendFriendRequest_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSendFriendRequestInput2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐSendFriendRequestInput)
 	if err != nil {
 		return nil, err
 	}
@@ -177,6 +190,47 @@ func (ec *executionContext) fieldContext_Mutation_makeGameMove(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_sendFriendRequest(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_sendFriendRequest,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SendFriendRequest(ctx, fc.Args["input"].(models.SendFriendRequestInput))
+		},
+		nil,
+		ec.marshalNSendFriendRequestResult2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐSendFriendRequestResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_sendFriendRequest(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type SendFriendRequestResult does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_sendFriendRequest_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -270,6 +324,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_makeGameMove(ctx, field)
 			})
+		case "sendFriendRequest":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_sendFriendRequest(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

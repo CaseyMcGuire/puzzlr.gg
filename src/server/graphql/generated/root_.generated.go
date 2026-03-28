@@ -68,8 +68,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateGame   func(childComplexity int, input *models.CreateGameInput) int
-		MakeGameMove func(childComplexity int, input models.MakeGameMoveInput) int
+		CreateGame        func(childComplexity int, input *models.CreateGameInput) int
+		MakeGameMove      func(childComplexity int, input models.MakeGameMoveInput) int
+		SendFriendRequest func(childComplexity int, input models.SendFriendRequestInput) int
 	}
 
 	PageInfo struct {
@@ -86,6 +87,15 @@ type ComplexityRoot struct {
 		Sidebar   func(childComplexity int) int
 		User      func(childComplexity int, id int) int
 		Users     func(childComplexity int) int
+		Viewer    func(childComplexity int) int
+	}
+
+	SendFriendRequestError struct {
+		Message func(childComplexity int) int
+	}
+
+	SendFriendRequestSuccess struct {
+		Recipient func(childComplexity int) int
 	}
 
 	SidebarFolder struct {
@@ -240,6 +250,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.MakeGameMove(childComplexity, args["input"].(models.MakeGameMoveInput)), true
 
+	case "Mutation.sendFriendRequest":
+		if e.complexity.Mutation.SendFriendRequest == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_sendFriendRequest_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SendFriendRequest(childComplexity, args["input"].(models.SendFriendRequestInput)), true
+
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
 			break
@@ -325,6 +347,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Users(childComplexity), true
 
+	case "Query.viewer":
+		if e.complexity.Query.Viewer == nil {
+			break
+		}
+
+		return e.complexity.Query.Viewer(childComplexity), true
+
+	case "SendFriendRequestError.message":
+		if e.complexity.SendFriendRequestError.Message == nil {
+			break
+		}
+
+		return e.complexity.SendFriendRequestError.Message(childComplexity), true
+
+	case "SendFriendRequestSuccess.recipient":
+		if e.complexity.SendFriendRequestSuccess.Recipient == nil {
+			break
+		}
+
+		return e.complexity.SendFriendRequestSuccess.Recipient(childComplexity), true
+
 	case "SidebarFolder.children":
 		if e.complexity.SidebarFolder.Children == nil {
 			break
@@ -394,6 +437,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputGameMoveInput,
 		ec.unmarshalInputGameWhereInput,
 		ec.unmarshalInputMakeGameMoveInput,
+		ec.unmarshalInputSendFriendRequestInput,
 		ec.unmarshalInputTicTacToeMoveInput,
 		ec.unmarshalInputUserWhereInput,
 	)
@@ -746,12 +790,38 @@ input TicTacToeMoveInput {
     row: Int!
     col: Int!
 }`, BuiltIn: false},
+	{Name: "../schema/mutations/send_friend_request_mutation.graphqls", Input: `input SendFriendRequestInput {
+  recipientID: ID!
+}
+
+type SendFriendRequestSuccess {
+  recipient: User!
+}
+
+type SendFriendRequestError {
+  message: String!
+}
+
+union SendFriendRequestResult = SendFriendRequestSuccess | SendFriendRequestError
+
+extend type Mutation {
+  sendFriendRequest(input: SendFriendRequestInput!): SendFriendRequestResult!
+}
+`, BuiltIn: false},
 	{Name: "../schema/schema.graphqls", Input: `scalar Time
 
 extend type Query {
   gameboard: GameBoard
   sidebar: SidebarFolder
+  """
+  Returns the requested user, or null if no user exists with that ID.
+  """
   user(id: ID!): User
+  """
+  Returns the authenticated user for the current request.
+  Returns null for anonymous requests on pages where authentication is optional.
+  """
+  viewer: User
 }
 
 union SidebarItem = SidebarFolder | SidebarLink
