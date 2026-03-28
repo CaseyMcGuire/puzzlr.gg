@@ -89,6 +89,8 @@ func (ec *executionContext) fieldContext_SendFriendRequestSuccess_recipient(_ co
 				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "viewerFriendshipStatus":
+				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},

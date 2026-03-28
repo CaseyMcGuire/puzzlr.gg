@@ -31,8 +31,8 @@ func TestSendFriendRequestResolverSuccess(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected success result, got %T", result)
 	}
-	if success.Message != "Friend request sent." {
-		t.Fatalf("unexpected success message: %q", success.Message)
+	if success.Recipient.ID != recipient.ID {
+		t.Fatalf("expected recipient ID %d, got %d", recipient.ID, success.Recipient.ID)
 	}
 
 	requests, err := integrationClient.FriendRequest.

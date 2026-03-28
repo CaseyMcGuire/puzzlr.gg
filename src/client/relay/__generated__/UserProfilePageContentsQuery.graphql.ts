@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<17560edea1275b57a43d789bda80abd5>>
+ * @generated SignedSource<<ff50c6e42ce63e4bff821ac40df4521d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,6 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
+export type ViewerFriendshipStatus = "FRIENDS" | "NOT_APPLICABLE" | "NOT_FRIENDS" | "NOT_LOGGED_IN" | "REQUEST_RECEIVED" | "REQUEST_SENT" | "%future added value";
 export type UserProfilePageContentsQuery$variables = {
   id: string;
 };
@@ -17,10 +18,8 @@ export type UserProfilePageContentsQuery$data = {
   readonly user: {
     readonly email: string;
     readonly id: string;
+    readonly viewerFriendshipStatus: ViewerFriendshipStatus;
     readonly " $fragmentSpreads": FragmentRefs<"UserProfileFriendsSection_user" | "UserProfileGamesSection_user" | "UserProfileStats_user">;
-  } | null | undefined;
-  readonly viewer: {
-    readonly id: string;
   } | null | undefined;
 };
 export type UserProfilePageContentsQuery = {
@@ -36,43 +35,40 @@ var v0 = [
     "name": "id"
   }
 ],
-v1 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "id",
-  "storageKey": null
-},
-v2 = [
-  (v1/*: any*/)
-],
-v3 = {
-  "alias": null,
-  "args": null,
-  "concreteType": "User",
-  "kind": "LinkedField",
-  "name": "viewer",
-  "plural": false,
-  "selections": (v2/*: any*/),
-  "storageKey": null
-},
-v4 = [
+v1 = [
   {
     "kind": "Variable",
     "name": "id",
     "variableName": "id"
   }
 ],
-v5 = {
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+},
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "email",
   "storageKey": null
 },
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "viewerFriendshipStatus",
+  "storageKey": null
+},
+v5 = [
+  (v2/*: any*/),
+  (v3/*: any*/)
+],
 v6 = [
-  (v1/*: any*/),
-  (v5/*: any*/)
+  (v2/*: any*/)
 ];
 return {
   "fragment": {
@@ -81,17 +77,17 @@ return {
     "metadata": null,
     "name": "UserProfilePageContentsQuery",
     "selections": [
-      (v3/*: any*/),
       {
         "alias": null,
-        "args": (v4/*: any*/),
+        "args": (v1/*: any*/),
         "concreteType": "User",
         "kind": "LinkedField",
         "name": "user",
         "plural": false,
         "selections": [
-          (v1/*: any*/),
-          (v5/*: any*/),
+          (v2/*: any*/),
+          (v3/*: any*/),
+          (v4/*: any*/),
           {
             "args": null,
             "kind": "FragmentSpread",
@@ -120,17 +116,17 @@ return {
     "kind": "Operation",
     "name": "UserProfilePageContentsQuery",
     "selections": [
-      (v3/*: any*/),
       {
         "alias": null,
-        "args": (v4/*: any*/),
+        "args": (v1/*: any*/),
         "concreteType": "User",
         "kind": "LinkedField",
         "name": "user",
         "plural": false,
         "selections": [
-          (v1/*: any*/),
-          (v5/*: any*/),
+          (v2/*: any*/),
+          (v3/*: any*/),
+          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -138,7 +134,7 @@ return {
             "kind": "LinkedField",
             "name": "friends",
             "plural": true,
-            "selections": (v6/*: any*/),
+            "selections": (v5/*: any*/),
             "storageKey": null
           },
           {
@@ -156,10 +152,10 @@ return {
                 "kind": "LinkedField",
                 "name": "winner",
                 "plural": false,
-                "selections": (v2/*: any*/),
+                "selections": (v6/*: any*/),
                 "storageKey": null
               },
-              (v1/*: any*/),
+              (v2/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -181,7 +177,7 @@ return {
                 "kind": "LinkedField",
                 "name": "currentTurn",
                 "plural": false,
-                "selections": (v2/*: any*/),
+                "selections": (v6/*: any*/),
                 "storageKey": null
               },
               {
@@ -191,7 +187,7 @@ return {
                 "kind": "LinkedField",
                 "name": "user",
                 "plural": true,
-                "selections": (v6/*: any*/),
+                "selections": (v5/*: any*/),
                 "storageKey": null
               }
             ],
@@ -203,16 +199,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "dec9fc5ce7de55e3188b8c703ec3e0e1",
+    "cacheID": "171b6a59a9035a66a5e226670fe25875",
     "id": null,
     "metadata": {},
     "name": "UserProfilePageContentsQuery",
     "operationKind": "query",
-    "text": "query UserProfilePageContentsQuery(\n  $id: ID!\n) {\n  viewer {\n    id\n  }\n  user(id: $id) {\n    id\n    email\n    ...UserProfileFriendsSection_user\n    ...UserProfileStats_user\n    ...UserProfileGamesSection_user\n  }\n}\n\nfragment UserProfileFriendsSection_user on User {\n  friends {\n    id\n    email\n  }\n}\n\nfragment UserProfileGamesSection_user on User {\n  id\n  games {\n    id\n    type\n    status\n    winner {\n      id\n    }\n    currentTurn {\n      id\n    }\n    user {\n      id\n      email\n    }\n  }\n}\n\nfragment UserProfileStats_user on User {\n  id\n  friends {\n    id\n  }\n  games {\n    winner {\n      id\n    }\n    id\n  }\n}\n"
+    "text": "query UserProfilePageContentsQuery(\n  $id: ID!\n) {\n  user(id: $id) {\n    id\n    email\n    viewerFriendshipStatus\n    ...UserProfileFriendsSection_user\n    ...UserProfileStats_user\n    ...UserProfileGamesSection_user\n  }\n}\n\nfragment UserProfileFriendsSection_user on User {\n  friends {\n    id\n    email\n  }\n}\n\nfragment UserProfileGamesSection_user on User {\n  id\n  games {\n    id\n    type\n    status\n    winner {\n      id\n    }\n    currentTurn {\n      id\n    }\n    user {\n      id\n      email\n    }\n  }\n}\n\nfragment UserProfileStats_user on User {\n  id\n  friends {\n    id\n  }\n  games {\n    winner {\n      id\n    }\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6375f7c3deb5baca48e615b7be821be2";
+(node as any).hash = "85215a5dc4dbc3886aa3cbd152b5015d";
 
 export default node;

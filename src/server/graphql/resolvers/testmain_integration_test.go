@@ -128,8 +128,14 @@ func newTestResolver() *resolvers.Resolver {
 		panic(err)
 	}
 
+	friendshipService, err := services.NewFriendshipService(integrationClient)
+	if err != nil {
+		panic(err)
+	}
+
 	return &resolvers.Resolver{
-		Ent:         integrationClient,
-		GameService: gameService,
+		Ent:               integrationClient,
+		GameService:       gameService,
+		FriendshipService: friendshipService,
 	}
 }

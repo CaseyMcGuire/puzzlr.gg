@@ -53,5 +53,9 @@ func (r *Resolver) Game() graphql1.GameResolver { return &gameResolver{r} }
 // Query returns graphql1.QueryResolver implementation.
 func (r *Resolver) Query() graphql1.QueryResolver { return &queryResolver{r} }
 
+// User returns graphql1.UserResolver implementation.
+func (r *Resolver) User() graphql1.UserResolver { return &userResolver{r} }
+
 type gameResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type userResolver struct{ *Resolver }

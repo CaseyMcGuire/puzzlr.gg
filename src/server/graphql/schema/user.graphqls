@@ -1,0 +1,12 @@
+enum ViewerFriendshipStatus {
+  FRIENDS
+  REQUEST_SENT
+  REQUEST_RECEIVED
+  NOT_FRIENDS
+  NOT_LOGGED_IN
+  NOT_APPLICABLE
+}
+
+extend type User {
+  viewerFriendshipStatus: ViewerFriendshipStatus! @goField(forceResolver: true)
+}

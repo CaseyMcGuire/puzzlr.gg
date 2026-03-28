@@ -32,6 +32,9 @@ type QueryResolver interface {
 	User(ctx context.Context, id int) (*codegen.User, error)
 	Viewer(ctx context.Context) (*codegen.User, error)
 }
+type UserResolver interface {
+	ViewerFriendshipStatus(ctx context.Context, obj *codegen.User) (models.ViewerFriendshipStatus, error)
+}
 
 // endregion ************************** generated!.gotpl **************************
 
@@ -299,6 +302,8 @@ func (ec *executionContext) fieldContext_Game_user(_ context.Context, field grap
 				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "viewerFriendshipStatus":
+				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -338,6 +343,8 @@ func (ec *executionContext) fieldContext_Game_winner(_ context.Context, field gr
 				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "viewerFriendshipStatus":
+				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -377,6 +384,8 @@ func (ec *executionContext) fieldContext_Game_currentTurn(_ context.Context, fie
 				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "viewerFriendshipStatus":
+				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -614,6 +623,8 @@ func (ec *executionContext) fieldContext_Query_users(_ context.Context, field gr
 				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "viewerFriendshipStatus":
+				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -722,6 +733,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "viewerFriendshipStatus":
+				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -772,6 +785,8 @@ func (ec *executionContext) fieldContext_Query_viewer(_ context.Context, field g
 				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "viewerFriendshipStatus":
+				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1026,8 +1041,39 @@ func (ec *executionContext) fieldContext_User_friends(_ context.Context, field g
 				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "viewerFriendshipStatus":
+				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_viewerFriendshipStatus(ctx context.Context, field graphql.CollectedField, obj *codegen.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_viewerFriendshipStatus,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.User().ViewerFriendshipStatus(ctx, obj)
+		},
+		nil,
+		ec.marshalNViewerFriendshipStatus2puzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐViewerFriendshipStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_viewerFriendshipStatus(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ViewerFriendshipStatus does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2086,6 +2132,42 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._User_friends(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "viewerFriendshipStatus":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_viewerFriendshipStatus(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 

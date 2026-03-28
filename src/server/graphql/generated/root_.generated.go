@@ -36,6 +36,7 @@ type ResolverRoot interface {
 	Game() GameResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	User() UserResolver
 }
 
 type DirectiveRoot struct {
@@ -109,10 +110,11 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email   func(childComplexity int) int
-		Friends func(childComplexity int) int
-		Games   func(childComplexity int) int
-		ID      func(childComplexity int) int
+		Email                  func(childComplexity int) int
+		Friends                func(childComplexity int) int
+		Games                  func(childComplexity int) int
+		ID                     func(childComplexity int) int
+		ViewerFriendshipStatus func(childComplexity int) int
 	}
 }
 
@@ -423,6 +425,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.ID(childComplexity), true
+
+	case "User.viewerFriendshipStatus":
+		if e.complexity.User.ViewerFriendshipStatus == nil {
+			break
+		}
+
+		return e.complexity.User.ViewerFriendshipStatus(childComplexity), true
 
 	}
 	return 0, false
@@ -849,5 +858,17 @@ type GameBoardRow {
   elements: [String]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/user.graphqls", Input: `enum ViewerFriendshipStatus {
+  FRIENDS
+  REQUEST_SENT
+  REQUEST_RECEIVED
+  NOT_FRIENDS
+  NOT_LOGGED_IN
+  NOT_APPLICABLE
+}
+
+extend type User {
+  viewerFriendshipStatus: ViewerFriendshipStatus! @goField(forceResolver: true)
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

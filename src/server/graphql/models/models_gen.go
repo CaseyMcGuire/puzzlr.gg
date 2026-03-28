@@ -3,6 +3,11 @@
 package models
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+
 	"puzzlr.gg/src/server/db/ent/codegen"
 )
 
@@ -77,4 +82,67 @@ func (SidebarLink) IsSidebarItem() {}
 type TicTacToeMoveInput struct {
 	Row int `json:"row"`
 	Col int `json:"col"`
+}
+
+type ViewerFriendshipStatus string
+
+const (
+	ViewerFriendshipStatusFriends         ViewerFriendshipStatus = "FRIENDS"
+	ViewerFriendshipStatusRequestSent     ViewerFriendshipStatus = "REQUEST_SENT"
+	ViewerFriendshipStatusRequestReceived ViewerFriendshipStatus = "REQUEST_RECEIVED"
+	ViewerFriendshipStatusNotFriends      ViewerFriendshipStatus = "NOT_FRIENDS"
+	ViewerFriendshipStatusNotLoggedIn     ViewerFriendshipStatus = "NOT_LOGGED_IN"
+	ViewerFriendshipStatusNotApplicable   ViewerFriendshipStatus = "NOT_APPLICABLE"
+)
+
+var AllViewerFriendshipStatus = []ViewerFriendshipStatus{
+	ViewerFriendshipStatusFriends,
+	ViewerFriendshipStatusRequestSent,
+	ViewerFriendshipStatusRequestReceived,
+	ViewerFriendshipStatusNotFriends,
+	ViewerFriendshipStatusNotLoggedIn,
+	ViewerFriendshipStatusNotApplicable,
+}
+
+func (e ViewerFriendshipStatus) IsValid() bool {
+	switch e {
+	case ViewerFriendshipStatusFriends, ViewerFriendshipStatusRequestSent, ViewerFriendshipStatusRequestReceived, ViewerFriendshipStatusNotFriends, ViewerFriendshipStatusNotLoggedIn, ViewerFriendshipStatusNotApplicable:
+		return true
+	}
+	return false
+}
+
+func (e ViewerFriendshipStatus) String() string {
+	return string(e)
+}
+
+func (e *ViewerFriendshipStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ViewerFriendshipStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ViewerFriendshipStatus", str)
+	}
+	return nil
+}
+
+func (e ViewerFriendshipStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ViewerFriendshipStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ViewerFriendshipStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
