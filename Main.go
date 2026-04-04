@@ -13,6 +13,7 @@ import (
 	"puzzlr.gg/src/server/db"
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/middleware"
+	"puzzlr.gg/src/server/routes"
 	"puzzlr.gg/src/server/session"
 	"puzzlr.gg/src/server/util"
 	"puzzlr.gg/src/server/views"
@@ -85,9 +86,9 @@ func main() {
 		}
 	}
 
-	r.Get("/", renderReactPage("Puzzlr"))
-	r.Get("/tictactoe", renderReactPage("Tic Tac Toe"))
-	r.Get("/user/{id}", renderReactPage("User Profile"))
+	r.Get(routes.PageRoutes[routes.Home].Path, renderReactPage("Puzzlr"))
+	r.Get(routes.PageRoutes[routes.TicTacToeIndex].Path, renderReactPage("Tic Tac Toe"))
+	r.Get(routes.PageRoutes[routes.UserProfile].Path, renderReactPage("User Profile"))
 
 	srv, err := build.CreateGraphqlServer(dbClient)
 	if err != nil {
@@ -104,9 +105,9 @@ func main() {
 		r.Handle("/graphql_playground", playground.Handler("GraphQL playground", "/graphql"))
 	})
 
-	r.Get("/login", sessionController.HandleLoginGet)
+	r.Get(routes.PageRoutes[routes.Login].Path, sessionController.HandleLoginGet)
 	r.Post("/session/create", sessionController.HandleLoginPost)
-	r.Get("/register", userController.HandleRegisterGet)
+	r.Get(routes.PageRoutes[routes.Register].Path, userController.HandleRegisterGet)
 	r.Post("/user/create", userController.HandleRegisterPost)
 
 	fmt.Printf("Starting server...")

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	ent "puzzlr.gg/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/routes"
 	"puzzlr.gg/src/server/services"
 	"puzzlr.gg/src/server/session"
 	"puzzlr.gg/src/server/views"
@@ -16,7 +17,7 @@ type SessionController struct {
 }
 
 func (sc *SessionController) HandleLoginGet(w http.ResponseWriter, r *http.Request) {
-	if sc.sessionManager.RedirectIfAuthenticated(w, r, "/") {
+	if sc.sessionManager.RedirectIfAuthenticated(w, r, routes.PageRoutes[routes.Home].Path) {
 		return
 	}
 	err := views.ReactPage("Login", "index").Render(w)
@@ -26,7 +27,7 @@ func (sc *SessionController) HandleLoginGet(w http.ResponseWriter, r *http.Reque
 }
 
 func (sc *SessionController) HandleLoginPost(w http.ResponseWriter, r *http.Request) {
-	if sc.sessionManager.RedirectIfAuthenticated(w, r, "/") {
+	if sc.sessionManager.RedirectIfAuthenticated(w, r, routes.PageRoutes[routes.Home].Path) {
 		return
 	}
 
@@ -43,9 +44,9 @@ func (sc *SessionController) HandleLoginPost(w http.ResponseWriter, r *http.Requ
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, routes.PageRoutes[routes.Home].Path, http.StatusSeeOther)
 	} else {
-		http.Redirect(w, r, "/login?no_such_user=true", http.StatusFound)
+		http.Redirect(w, r, routes.PageRoutes[routes.Login].Path+"?no_such_user=true", http.StatusFound)
 	}
 }
 
@@ -54,7 +55,7 @@ func (sc *SessionController) HandleLogout(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, routes.PageRoutes[routes.Home].Path, http.StatusFound)
 }
 
 func NewSessionController(

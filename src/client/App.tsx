@@ -8,26 +8,27 @@ import {Suspense} from "react";
 import IndexPage from "pages/IndexPage/IndexPage";
 import TicTacToeIndexPage from "pages/TicTacToeIndexPage/TicTacToeIndexPage";
 import UserProfilePage from "pages/UserProfilePage/UserProfilePage";
+import {routes} from "routes.generated";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: routes.Home.path,
     element: <IndexPage />
   },
   {
-    path: '/tictactoe',
+    path: routes.TicTacToeIndex.path,
     element: <TicTacToeIndexPage />
   },
   {
-    path: '/user/:id',
+    path: routes.UserProfile.path,
     element: <UserProfilePage />
   },
   {
-    path: '/login',
+    path: routes.Login.path,
     element: <LoginPage />
   },
   {
-    path: '/register',
+    path: routes.Register.path,
     element: <RegisterPage />
   }
 ])

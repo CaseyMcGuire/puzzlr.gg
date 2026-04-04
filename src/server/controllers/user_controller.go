@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	ent "puzzlr.gg/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/routes"
 	"puzzlr.gg/src/server/services"
 	"puzzlr.gg/src/server/session"
 	"puzzlr.gg/src/server/views"
@@ -16,7 +17,7 @@ type UserController struct {
 }
 
 func (u *UserController) HandleRegisterGet(w http.ResponseWriter, r *http.Request) {
-	if u.sessionManager.RedirectIfAuthenticated(w, r, "/") {
+	if u.sessionManager.RedirectIfAuthenticated(w, r, routes.PageRoutes[routes.Home].Path) {
 		return
 	}
 	err := views.ReactPage("Register", "index").Render(w)
@@ -26,7 +27,7 @@ func (u *UserController) HandleRegisterGet(w http.ResponseWriter, r *http.Reques
 }
 
 func (u *UserController) HandleRegisterPost(w http.ResponseWriter, r *http.Request) {
-	if u.sessionManager.RedirectIfAuthenticated(w, r, "/") {
+	if u.sessionManager.RedirectIfAuthenticated(w, r, routes.PageRoutes[routes.Home].Path) {
 		return
 	}
 
@@ -36,13 +37,13 @@ func (u *UserController) HandleRegisterPost(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else if exists {
-		http.Redirect(w, r, "/register?error=username_already_taken", http.StatusSeeOther)
+		http.Redirect(w, r, routes.PageRoutes[routes.Register].Path+"?error=username_already_taken", http.StatusSeeOther)
 	} else {
 		_, err := u.userService.CreateUser(r.Context(), email, password)
 		if err != nil {
 			http.Error(w, "Something went wrong. Please try again", http.StatusInternalServerError)
 		} else {
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, routes.PageRoutes[routes.Login].Path, http.StatusFound)
 		}
 	}
 }
