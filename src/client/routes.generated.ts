@@ -2,18 +2,6 @@
 // Run `go run bin/generate_client_routes.go` to regenerate
 
 export const routes = {
-  Home: {
-    path: "/",
-    build: () => "/",
-  },
-  TicTacToeIndex: {
-    path: "/tictactoe",
-    build: () => "/tictactoe",
-  },
-  UserProfile: {
-    path: "/user/:id",
-    build: (id: string) => `/user/${id}`,
-  },
   Login: {
     path: "/login",
     build: () => "/login",
@@ -21,5 +9,17 @@ export const routes = {
   Register: {
     path: "/register",
     build: () => "/register",
+  },
+  Home: {
+    path: "/",
+    build: () => "/",
+  },
+  TicTacToeIndex: {
+    path: "/game/tictactoe",
+    build: () => "/game/tictactoe",
+  },
+  UserProfile: {
+    path: "/user/:id",
+    build: (id: string) => `/user/${id}`,
   },
 } as const;

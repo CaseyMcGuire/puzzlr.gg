@@ -17,7 +17,7 @@ type Route struct {
 
 var PageRoutes = map[RouteName]Route{
 	Home:           {Path: "/", Name: Home},
-	TicTacToeIndex: {Path: "/tictactoe", Name: TicTacToeIndex},
+	TicTacToeIndex: {Path: "/game/tictactoe", Name: TicTacToeIndex},
 	UserProfile:    {Path: "/user/{id}", Name: UserProfile},
 	Login:          {Path: "/login", Name: Login},
 	Register:       {Path: "/register", Name: Register},
