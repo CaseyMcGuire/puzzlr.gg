@@ -27,20 +27,6 @@ func (_u *GamePlayerUpdate) Where(ps ...predicate.GamePlayer) *GamePlayerUpdate 
 	return _u
 }
 
-// SetMarker sets the "marker" field.
-func (_u *GamePlayerUpdate) SetMarker(v string) *GamePlayerUpdate {
-	_u.mutation.SetMarker(v)
-	return _u
-}
-
-// SetNillableMarker sets the "marker" field if the given value is not nil.
-func (_u *GamePlayerUpdate) SetNillableMarker(v *string) *GamePlayerUpdate {
-	if v != nil {
-		_u.SetMarker(*v)
-	}
-	return _u
-}
-
 // Mutation returns the GamePlayerMutation object of the builder.
 func (_u *GamePlayerUpdate) Mutation() *GamePlayerMutation {
 	return _u.mutation
@@ -75,14 +61,6 @@ func (_u *GamePlayerUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *GamePlayerUpdate) check() error {
-	if v, ok := _u.mutation.Marker(); ok {
-		if err := gameplayer.MarkerValidator(v); err != nil {
-			return &ValidationError{Name: "marker", err: fmt.Errorf(`codegen: validator failed for field "GamePlayer.marker": %w`, err)}
-		}
-	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`codegen: clearing a required unique edge "GamePlayer.user"`)
-	}
 	if _u.mutation.GameCleared() && len(_u.mutation.GameIDs()) > 0 {
 		return errors.New(`codegen: clearing a required unique edge "GamePlayer.game"`)
 	}
@@ -100,9 +78,6 @@ func (_u *GamePlayerUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := _u.mutation.Marker(); ok {
-		_spec.SetField(gameplayer.FieldMarker, field.TypeString, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -122,20 +97,6 @@ type GamePlayerUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *GamePlayerMutation
-}
-
-// SetMarker sets the "marker" field.
-func (_u *GamePlayerUpdateOne) SetMarker(v string) *GamePlayerUpdateOne {
-	_u.mutation.SetMarker(v)
-	return _u
-}
-
-// SetNillableMarker sets the "marker" field if the given value is not nil.
-func (_u *GamePlayerUpdateOne) SetNillableMarker(v *string) *GamePlayerUpdateOne {
-	if v != nil {
-		_u.SetMarker(*v)
-	}
-	return _u
 }
 
 // Mutation returns the GamePlayerMutation object of the builder.
@@ -185,14 +146,6 @@ func (_u *GamePlayerUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *GamePlayerUpdateOne) check() error {
-	if v, ok := _u.mutation.Marker(); ok {
-		if err := gameplayer.MarkerValidator(v); err != nil {
-			return &ValidationError{Name: "marker", err: fmt.Errorf(`codegen: validator failed for field "GamePlayer.marker": %w`, err)}
-		}
-	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`codegen: clearing a required unique edge "GamePlayer.user"`)
-	}
 	if _u.mutation.GameCleared() && len(_u.mutation.GameIDs()) > 0 {
 		return errors.New(`codegen: clearing a required unique edge "GamePlayer.game"`)
 	}
@@ -227,9 +180,6 @@ func (_u *GamePlayerUpdateOne) sqlSave(ctx context.Context) (_node *GamePlayer, 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := _u.mutation.Marker(); ok {
-		_spec.SetField(gameplayer.FieldMarker, field.TypeString, value)
 	}
 	_node = &GamePlayer{config: _u.config}
 	_spec.Assign = _node.assignValues

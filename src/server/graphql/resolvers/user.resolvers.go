@@ -9,9 +9,22 @@ import (
 	"context"
 
 	"puzzlr.gg/src/server/db/ent/codegen"
+	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/graphql/models"
 	"puzzlr.gg/src/server/reqctx"
 )
+
+// Games is the resolver for the games field.
+func (r *userResolver) Games(ctx context.Context, obj *codegen.User) ([]*codegen.Game, error) {
+	return r.Ent.Game.Query().
+		Where(
+			game.HasPlayersWith(
+				gameplayer.UserID(obj.ID),
+			),
+		).
+		All(ctx)
+}
 
 // ViewerFriendshipStatus is the resolver for the viewerFriendshipStatus field.
 func (r *userResolver) ViewerFriendshipStatus(ctx context.Context, obj *codegen.User) (models.ViewerFriendshipStatus, error) {

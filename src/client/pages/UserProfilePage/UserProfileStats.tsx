@@ -24,15 +24,17 @@ export default function UserProfileStats({user}: Props) {
         id
       }
       games {
-        winner {
-          id
+        winnerPlayer {
+          user {
+            id
+          }
         }
       }
     }
   `, user);
   const friends = data.friends ?? [];
   const games = data.games ?? [];
-  const wins = games.filter(game => game.winner?.id === data.id).length;
+  const wins = games.filter(game => game.winnerPlayer?.user?.id === data.id).length;
 
   return (
     <div sx={styles.statsGrid}>

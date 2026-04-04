@@ -33,6 +33,18 @@ func (Game) Fields() []ent.Field {
 			Annotations(
 				entgql.Skip(),
 			),
+		field.Int("winner_player_id").
+			Optional().
+			Nillable().
+			Annotations(
+				entgql.Skip(),
+			),
+		field.Int("current_turn_player_id").
+			Optional().
+			Nillable().
+			Annotations(
+				entgql.Skip(),
+			),
 		field.Enum("status").
 			Values("PENDING", "IN_PROGRESS", "WON", "DRAW").
 			Default("PENDING").
@@ -45,24 +57,19 @@ func (Game) Fields() []ent.Field {
 // Edges of the Game.
 func (Game) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).
-			Ref("games").
-			Through("game_player", GamePlayer.Type),
-		edge.From("winner", User.Type).
-			Ref("won_games").
+		edge.From("players", GamePlayer.Type).
+			Ref("game"),
+		edge.To("winner_player", GamePlayer.Type).
+			Field("winner_player_id").
 			Unique(),
-		edge.From("current_turn", User.Type).
-			Ref("current_turn_games").
+		edge.To("current_turn_player", GamePlayer.Type).
+			Field("current_turn_player_id").
 			Unique(),
 	}
 }
 
 func (Game) Hooks() []ent.Hook {
 	return []ent.Hook{
-		hook.On(
-			ValidatePlayerCountOnCreate,
-			ent.OpCreate,
-		),
 		hook.On(
 			ValidateBoardShapeForType,
 			ent.OpCreate|ent.OpUpdateOne,
@@ -72,11 +79,11 @@ func (Game) Hooks() []ent.Hook {
 			ent.OpUpdate|ent.OpDelete,
 		),
 		hook.On(
-			ValidatePlayerCountOnUpdate,
+			ValidateStatusOnUpdate,
 			ent.OpUpdateOne,
 		),
 		hook.On(
-			ValidateStatusOnUpdate,
+			ValidateReferencedPlayersBelongToGame,
 			ent.OpUpdateOne,
 		),
 	}

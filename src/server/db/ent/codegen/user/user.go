@@ -17,29 +17,25 @@ const (
 	FieldEmail = "email"
 	// FieldHashedPassword holds the string denoting the hashed_password field in the database.
 	FieldHashedPassword = "hashed_password"
-	// EdgeGames holds the string denoting the games edge name in mutations.
-	EdgeGames = "games"
+	// EdgeGamePlayers holds the string denoting the game_players edge name in mutations.
+	EdgeGamePlayers = "game_players"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
 	// EdgeSentFriendRequests holds the string denoting the sent_friend_requests edge name in mutations.
 	EdgeSentFriendRequests = "sent_friend_requests"
 	// EdgeReceivedFriendRequests holds the string denoting the received_friend_requests edge name in mutations.
 	EdgeReceivedFriendRequests = "received_friend_requests"
-	// EdgeWonGames holds the string denoting the won_games edge name in mutations.
-	EdgeWonGames = "won_games"
-	// EdgeCurrentTurnGames holds the string denoting the current_turn_games edge name in mutations.
-	EdgeCurrentTurnGames = "current_turn_games"
-	// EdgeGamePlayer holds the string denoting the game_player edge name in mutations.
-	EdgeGamePlayer = "game_player"
 	// EdgeFriendships holds the string denoting the friendships edge name in mutations.
 	EdgeFriendships = "friendships"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// GamesTable is the table that holds the games relation/edge. The primary key declared below.
-	GamesTable = "game_players"
-	// GamesInverseTable is the table name for the Game entity.
-	// It exists in this package in order to avoid circular dependency with the "game" package.
-	GamesInverseTable = "games"
+	// GamePlayersTable is the table that holds the game_players relation/edge.
+	GamePlayersTable = "game_players"
+	// GamePlayersInverseTable is the table name for the GamePlayer entity.
+	// It exists in this package in order to avoid circular dependency with the "gameplayer" package.
+	GamePlayersInverseTable = "game_players"
+	// GamePlayersColumn is the table column denoting the game_players relation/edge.
+	GamePlayersColumn = "user_id"
 	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "friendships"
 	// SentFriendRequestsTable is the table that holds the sent_friend_requests relation/edge.
@@ -56,27 +52,6 @@ const (
 	ReceivedFriendRequestsInverseTable = "friend_requests"
 	// ReceivedFriendRequestsColumn is the table column denoting the received_friend_requests relation/edge.
 	ReceivedFriendRequestsColumn = "recipient_id"
-	// WonGamesTable is the table that holds the won_games relation/edge.
-	WonGamesTable = "games"
-	// WonGamesInverseTable is the table name for the Game entity.
-	// It exists in this package in order to avoid circular dependency with the "game" package.
-	WonGamesInverseTable = "games"
-	// WonGamesColumn is the table column denoting the won_games relation/edge.
-	WonGamesColumn = "user_won_games"
-	// CurrentTurnGamesTable is the table that holds the current_turn_games relation/edge.
-	CurrentTurnGamesTable = "games"
-	// CurrentTurnGamesInverseTable is the table name for the Game entity.
-	// It exists in this package in order to avoid circular dependency with the "game" package.
-	CurrentTurnGamesInverseTable = "games"
-	// CurrentTurnGamesColumn is the table column denoting the current_turn_games relation/edge.
-	CurrentTurnGamesColumn = "user_current_turn_games"
-	// GamePlayerTable is the table that holds the game_player relation/edge.
-	GamePlayerTable = "game_players"
-	// GamePlayerInverseTable is the table name for the GamePlayer entity.
-	// It exists in this package in order to avoid circular dependency with the "gameplayer" package.
-	GamePlayerInverseTable = "game_players"
-	// GamePlayerColumn is the table column denoting the game_player relation/edge.
-	GamePlayerColumn = "user_id"
 	// FriendshipsTable is the table that holds the friendships relation/edge.
 	FriendshipsTable = "friendships"
 	// FriendshipsInverseTable is the table name for the Friendship entity.
@@ -94,9 +69,6 @@ var Columns = []string{
 }
 
 var (
-	// GamesPrimaryKey and GamesColumn2 are the table columns denoting the
-	// primary key for the games relation (M2M).
-	GamesPrimaryKey = []string{"user_id", "game_id"}
 	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
 	// primary key for the friends relation (M2M).
 	FriendsPrimaryKey = []string{"user_id", "friend_id"}
@@ -144,17 +116,17 @@ func ByHashedPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHashedPassword, opts...).ToFunc()
 }
 
-// ByGamesCount orders the results by games count.
-func ByGamesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByGamePlayersCount orders the results by game_players count.
+func ByGamePlayersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newGamesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newGamePlayersStep(), opts...)
 	}
 }
 
-// ByGames orders the results by games terms.
-func ByGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByGamePlayers orders the results by game_players terms.
+func ByGamePlayers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newGamePlayersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -200,48 +172,6 @@ func ByReceivedFriendRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderO
 	}
 }
 
-// ByWonGamesCount orders the results by won_games count.
-func ByWonGamesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newWonGamesStep(), opts...)
-	}
-}
-
-// ByWonGames orders the results by won_games terms.
-func ByWonGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newWonGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByCurrentTurnGamesCount orders the results by current_turn_games count.
-func ByCurrentTurnGamesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newCurrentTurnGamesStep(), opts...)
-	}
-}
-
-// ByCurrentTurnGames orders the results by current_turn_games terms.
-func ByCurrentTurnGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCurrentTurnGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByGamePlayerCount orders the results by game_player count.
-func ByGamePlayerCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newGamePlayerStep(), opts...)
-	}
-}
-
-// ByGamePlayer orders the results by game_player terms.
-func ByGamePlayer(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGamePlayerStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByFriendshipsCount orders the results by friendships count.
 func ByFriendshipsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -255,11 +185,11 @@ func ByFriendships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newFriendshipsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newGamesStep() *sqlgraph.Step {
+func newGamePlayersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(GamesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, GamesTable, GamesPrimaryKey...),
+		sqlgraph.To(GamePlayersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, GamePlayersTable, GamePlayersColumn),
 	)
 }
 func newFriendsStep() *sqlgraph.Step {
@@ -281,27 +211,6 @@ func newReceivedFriendRequestsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ReceivedFriendRequestsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, ReceivedFriendRequestsTable, ReceivedFriendRequestsColumn),
-	)
-}
-func newWonGamesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WonGamesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, WonGamesTable, WonGamesColumn),
-	)
-}
-func newCurrentTurnGamesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(CurrentTurnGamesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, CurrentTurnGamesTable, CurrentTurnGamesColumn),
-	)
-}
-func newGamePlayerStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(GamePlayerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, GamePlayerTable, GamePlayerColumn),
 	)
 }
 func newFriendshipsStep() *sqlgraph.Step {

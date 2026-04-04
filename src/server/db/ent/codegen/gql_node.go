@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/semaphore"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
@@ -28,6 +29,11 @@ var gameImplementors = []string{"Game", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*Game) IsNode() {}
+
+var gameplayerImplementors = []string{"GamePlayer", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*GamePlayer) IsNode() {}
 
 var userImplementors = []string{"User", "Node"}
 
@@ -97,6 +103,15 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			Where(game.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, gameImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
+	case gameplayer.Table:
+		query := c.GamePlayer.Query().
+			Where(gameplayer.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, gameplayerImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -187,6 +202,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.Game.Query().
 			Where(game.IDIn(ids...))
 		query, err := query.CollectFields(ctx, gameImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case gameplayer.Table:
+		query := c.GamePlayer.Query().
+			Where(gameplayer.IDIn(ids...))
+		query, err := query.CollectFields(ctx, gameplayerImplementors...)
 		if err != nil {
 			return nil, err
 		}

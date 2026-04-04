@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<376dd785695456fb410525a68b54dcc6>>
+ * @generated SignedSource<<9ecdc67be3668e856ea44be855d43259>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,7 +14,7 @@ export type IndexPageQuery$data = {
   readonly users: ReadonlyArray<{
     readonly games: ReadonlyArray<{
       readonly id: string;
-    }> | null | undefined;
+    }>;
   }>;
 };
 export type IndexPageQuery = {

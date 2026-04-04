@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a1f76c2757e5c0ae1ba93221987187d8>>
+ * @generated SignedSource<<849d2768b0ded96758ddbc9766d975fb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,25 +9,39 @@
 // @ts-nocheck
 
 import { ReaderFragment } from 'relay-runtime';
+export type GamePlayerKind = "AI" | "HUMAN" | "%future added value";
 export type GameStatus = "DRAW" | "IN_PROGRESS" | "PENDING" | "WON" | "%future added value";
 export type GameType = "TIC_TAC_TOE" | "%future added value";
 import { FragmentRefs } from "relay-runtime";
 export type UserProfileGamesSection_user$data = {
   readonly games: ReadonlyArray<{
-    readonly currentTurn: {
+    readonly currentTurnPlayer: {
       readonly id: string;
+      readonly kind: GamePlayerKind;
+      readonly user: {
+        readonly id: string;
+      } | null | undefined;
     } | null | undefined;
     readonly id: string;
+    readonly players: ReadonlyArray<{
+      readonly id: string;
+      readonly kind: GamePlayerKind;
+      readonly marker: string;
+      readonly user: {
+        readonly email: string;
+        readonly id: string;
+      } | null | undefined;
+    }> | null | undefined;
     readonly status: GameStatus;
     readonly type: GameType;
-    readonly user: ReadonlyArray<{
-      readonly email: string;
+    readonly winnerPlayer: {
       readonly id: string;
-    }> | null | undefined;
-    readonly winner: {
-      readonly id: string;
+      readonly kind: GamePlayerKind;
+      readonly user: {
+        readonly id: string;
+      } | null | undefined;
     } | null | undefined;
-  }> | null | undefined;
+  }>;
   readonly id: string;
   readonly " $fragmentType": "UserProfileGamesSection_user";
 };
@@ -44,8 +58,28 @@ var v0 = {
   "name": "id",
   "storageKey": null
 },
-v1 = [
-  (v0/*: any*/)
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "kind",
+  "storageKey": null
+},
+v2 = [
+  (v0/*: any*/),
+  (v1/*: any*/),
+  {
+    "alias": null,
+    "args": null,
+    "concreteType": "User",
+    "kind": "LinkedField",
+    "name": "user",
+    "plural": false,
+    "selections": [
+      (v0/*: any*/)
+    ],
+    "storageKey": null
+  }
 ];
 return {
   "argumentDefinitions": [],
@@ -80,37 +114,57 @@ return {
         {
           "alias": null,
           "args": null,
-          "concreteType": "User",
+          "concreteType": "GamePlayer",
           "kind": "LinkedField",
-          "name": "winner",
+          "name": "winnerPlayer",
           "plural": false,
-          "selections": (v1/*: any*/),
+          "selections": (v2/*: any*/),
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
-          "concreteType": "User",
+          "concreteType": "GamePlayer",
           "kind": "LinkedField",
-          "name": "currentTurn",
+          "name": "currentTurnPlayer",
           "plural": false,
-          "selections": (v1/*: any*/),
+          "selections": (v2/*: any*/),
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
-          "concreteType": "User",
+          "concreteType": "GamePlayer",
           "kind": "LinkedField",
-          "name": "user",
+          "name": "players",
           "plural": true,
           "selections": [
             (v0/*: any*/),
+            (v1/*: any*/),
             {
               "alias": null,
               "args": null,
               "kind": "ScalarField",
-              "name": "email",
+              "name": "marker",
+              "storageKey": null
+            },
+            {
+              "alias": null,
+              "args": null,
+              "concreteType": "User",
+              "kind": "LinkedField",
+              "name": "user",
+              "plural": false,
+              "selections": [
+                (v0/*: any*/),
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "email",
+                  "storageKey": null
+                }
+              ],
               "storageKey": null
             }
           ],
@@ -125,6 +179,6 @@ return {
 };
 })();
 
-(node as any).hash = "2469cee25b2d949f01e7e45124e1f007";
+(node as any).hash = "898bef36d8b2682fcd2957fb8866bd98";
 
 export default node;

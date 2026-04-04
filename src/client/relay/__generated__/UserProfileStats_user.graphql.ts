@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7e27625732634ddcf712d3e37b9a80cb>>
+ * @generated SignedSource<<47f38aca6e586d58dbc41dd37a623934>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,10 +15,12 @@ export type UserProfileStats_user$data = {
     readonly id: string;
   }> | null | undefined;
   readonly games: ReadonlyArray<{
-    readonly winner: {
-      readonly id: string;
+    readonly winnerPlayer: {
+      readonly user: {
+        readonly id: string;
+      } | null | undefined;
     } | null | undefined;
-  }> | null | undefined;
+  }>;
   readonly id: string;
   readonly " $fragmentType": "UserProfileStats_user";
 };
@@ -66,11 +68,22 @@ return {
         {
           "alias": null,
           "args": null,
-          "concreteType": "User",
+          "concreteType": "GamePlayer",
           "kind": "LinkedField",
-          "name": "winner",
+          "name": "winnerPlayer",
           "plural": false,
-          "selections": (v1/*: any*/),
+          "selections": [
+            {
+              "alias": null,
+              "args": null,
+              "concreteType": "User",
+              "kind": "LinkedField",
+              "name": "user",
+              "plural": false,
+              "selections": (v1/*: any*/),
+              "storageKey": null
+            }
+          ],
           "storageKey": null
         }
       ],
@@ -82,6 +95,6 @@ return {
 };
 })();
 
-(node as any).hash = "06e1fa4b4aa9c24eef9b1561dbb2ff83";
+(node as any).hash = "bd591652d43b136e64607faf791f9cbd";
 
 export default node;

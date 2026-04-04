@@ -193,21 +193,21 @@ func HashedPasswordContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldHashedPassword, v))
 }
 
-// HasGames applies the HasEdge predicate on the "games" edge.
-func HasGames() predicate.User {
+// HasGamePlayers applies the HasEdge predicate on the "game_players" edge.
+func HasGamePlayers() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, GamesTable, GamesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, GamePlayersTable, GamePlayersColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasGamesWith applies the HasEdge predicate on the "games" edge with a given conditions (other predicates).
-func HasGamesWith(preds ...predicate.Game) predicate.User {
+// HasGamePlayersWith applies the HasEdge predicate on the "game_players" edge with a given conditions (other predicates).
+func HasGamePlayersWith(preds ...predicate.GamePlayer) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newGamesStep()
+		step := newGamePlayersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -277,75 +277,6 @@ func HasReceivedFriendRequests() predicate.User {
 func HasReceivedFriendRequestsWith(preds ...predicate.FriendRequest) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newReceivedFriendRequestsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasWonGames applies the HasEdge predicate on the "won_games" edge.
-func HasWonGames() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WonGamesTable, WonGamesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasWonGamesWith applies the HasEdge predicate on the "won_games" edge with a given conditions (other predicates).
-func HasWonGamesWith(preds ...predicate.Game) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newWonGamesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasCurrentTurnGames applies the HasEdge predicate on the "current_turn_games" edge.
-func HasCurrentTurnGames() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, CurrentTurnGamesTable, CurrentTurnGamesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasCurrentTurnGamesWith applies the HasEdge predicate on the "current_turn_games" edge with a given conditions (other predicates).
-func HasCurrentTurnGamesWith(preds ...predicate.Game) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newCurrentTurnGamesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasGamePlayer applies the HasEdge predicate on the "game_player" edge.
-func HasGamePlayer() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, GamePlayerTable, GamePlayerColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGamePlayerWith applies the HasEdge predicate on the "game_player" edge with a given conditions (other predicates).
-func HasGamePlayerWith(preds ...predicate.GamePlayer) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newGamePlayerStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -23,12 +23,17 @@ type SidebarItem interface {
 	IsSidebarItem()
 }
 
+type AIOpponentInput struct {
+	Difficulty *string `json:"difficulty,omitempty"`
+}
+
 type CreateGameInput struct {
 	TicTacToeInput *CreateTicTacToeInput `json:"ticTacToeInput"`
 }
 
 type CreateTicTacToeInput struct {
-	OpponentID int `json:"opponentId"`
+	HumanOpponent *HumanOpponentInput `json:"humanOpponent"`
+	AiOpponent    *AIOpponentInput    `json:"aiOpponent"`
 }
 
 type GameBoard struct {
@@ -41,6 +46,10 @@ type GameBoardRow struct {
 
 type GameMoveInput struct {
 	TicTacToeMove *TicTacToeMoveInput `json:"ticTacToeMove"`
+}
+
+type HumanOpponentInput struct {
+	OpponentID int `json:"opponentId"`
 }
 
 type Link struct {

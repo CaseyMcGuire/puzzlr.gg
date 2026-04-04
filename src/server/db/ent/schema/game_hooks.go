@@ -20,28 +20,6 @@ var (
 	ErrTicTacToeBoardRowMustHaveThreeColumns = errors.New("tic tac toe board row must have exactly 3 columns")
 )
 
-func ValidatePlayerCountOnCreate(next ent.Mutator) ent.Mutator {
-	return hook.GameFunc(func(ctx context.Context, m *codegen.GameMutation) (ent.Value, error) {
-		addedUserIDs := m.UserIDs()
-		removedUserIDs := m.RemovedUserIDs()
-		if len(addedUserIDs) > 0 || len(removedUserIDs) > 0 || m.UserCleared() {
-			return nil, fmt.Errorf("direct game-user edge mutation is forbidden; create GamePlayer rows with marker instead")
-		}
-		return next.Mutate(ctx, m)
-	})
-}
-
-func ValidatePlayerCountOnUpdate(next ent.Mutator) ent.Mutator {
-	return hook.GameFunc(func(ctx context.Context, m *codegen.GameMutation) (ent.Value, error) {
-		addedUserIDs := m.UserIDs()
-		removedUserIDs := m.RemovedUserIDs()
-		if len(addedUserIDs) > 0 || len(removedUserIDs) > 0 || m.UserCleared() {
-			return nil, fmt.Errorf("cannot change players in a game")
-		}
-		return next.Mutate(ctx, m)
-	})
-}
-
 func ValidateStatusOnUpdate(next ent.Mutator) ent.Mutator {
 	return hook.GameFunc(func(ctx context.Context, m *codegen.GameMutation) (ent.Value, error) {
 		newStatus, ok := m.Status()
@@ -81,6 +59,38 @@ func ValidateBoardShapeForType(next ent.Mutator) ent.Mutator {
 		switch gameType {
 		case game.TypeTIC_TAC_TOE:
 			if err := validateTicTacToeBoardShape(board); err != nil {
+				return nil, err
+			}
+		}
+
+		return next.Mutate(ctx, m)
+	})
+}
+
+func ValidateReferencedPlayersBelongToGame(next ent.Mutator) ent.Mutator {
+	return hook.GameFunc(func(ctx context.Context, m *codegen.GameMutation) (ent.Value, error) {
+		if !m.Op().Is(ent.OpUpdateOne) {
+			return next.Mutate(ctx, m)
+		}
+
+		gameID, ok := m.ID()
+		if !ok {
+			return nil, fmt.Errorf("missing id for %s (only UpdateOne/DeleteOne supported)", m.Op())
+		}
+
+		tx, err := m.Tx()
+		if err != nil {
+			return nil, fmt.Errorf("game mutation must run in transaction: %w", err)
+		}
+
+		if playerID, ok := m.WinnerPlayerID(); ok {
+			if err := validateReferencedPlayerBelongsToGame(ctx, tx, playerID, gameID, "winner_player"); err != nil {
+				return nil, err
+			}
+		}
+
+		if playerID, ok := m.CurrentTurnPlayerID(); ok {
+			if err := validateReferencedPlayerBelongsToGame(ctx, tx, playerID, gameID, "current_turn_player"); err != nil {
 				return nil, err
 			}
 		}
@@ -192,4 +202,20 @@ func validatePlayerCountForMutation(ctx context.Context, m *codegen.GameMutation
 	}
 
 	return validatePlayerCount(numPlayers, gameState.Type)
+}
+
+func validateReferencedPlayerBelongsToGame(ctx context.Context, tx *codegen.Tx, playerID int, gameID int, edgeName string) error {
+	exists, err := tx.GamePlayer.Query().
+		Where(
+			gameplayer.ID(playerID),
+			gameplayer.GameID(gameID),
+		).
+		Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("%s must reference a player in the same game", edgeName)
+	}
+	return nil
 }

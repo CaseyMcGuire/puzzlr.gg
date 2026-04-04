@@ -679,63 +679,47 @@ func (c *GameClient) GetX(ctx context.Context, id int) *Game {
 	return obj
 }
 
-// QueryUser queries the user edge of a Game.
-func (c *GameClient) QueryUser(_m *Game) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(game.Table, game.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, game.UserTable, game.UserPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryWinner queries the winner edge of a Game.
-func (c *GameClient) QueryWinner(_m *Game) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(game.Table, game.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, game.WinnerTable, game.WinnerColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryCurrentTurn queries the current_turn edge of a Game.
-func (c *GameClient) QueryCurrentTurn(_m *Game) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(game.Table, game.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, game.CurrentTurnTable, game.CurrentTurnColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryGamePlayer queries the game_player edge of a Game.
-func (c *GameClient) QueryGamePlayer(_m *Game) *GamePlayerQuery {
+// QueryPlayers queries the players edge of a Game.
+func (c *GameClient) QueryPlayers(_m *Game) *GamePlayerQuery {
 	query := (&GamePlayerClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(game.Table, game.FieldID, id),
 			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, game.GamePlayerTable, game.GamePlayerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, game.PlayersTable, game.PlayersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWinnerPlayer queries the winner_player edge of a Game.
+func (c *GameClient) QueryWinnerPlayer(_m *Game) *GamePlayerQuery {
+	query := (&GamePlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(game.Table, game.FieldID, id),
+			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, game.WinnerPlayerTable, game.WinnerPlayerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCurrentTurnPlayer queries the current_turn_player edge of a Game.
+func (c *GameClient) QueryCurrentTurnPlayer(_m *Game) *GamePlayerQuery {
+	query := (&GamePlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(game.Table, game.FieldID, id),
+			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, game.CurrentTurnPlayerTable, game.CurrentTurnPlayerColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1043,15 +1027,15 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	return obj
 }
 
-// QueryGames queries the games edge of a User.
-func (c *UserClient) QueryGames(_m *User) *GameQuery {
-	query := (&GameClient{config: c.config}).Query()
+// QueryGamePlayers queries the game_players edge of a User.
+func (c *UserClient) QueryGamePlayers(_m *User) *GamePlayerQuery {
+	query := (&GamePlayerClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(game.Table, game.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.GamesTable, user.GamesPrimaryKey...),
+			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.GamePlayersTable, user.GamePlayersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1100,54 +1084,6 @@ func (c *UserClient) QueryReceivedFriendRequests(_m *User) *FriendRequestQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(friendrequest.Table, friendrequest.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.ReceivedFriendRequestsTable, user.ReceivedFriendRequestsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryWonGames queries the won_games edge of a User.
-func (c *UserClient) QueryWonGames(_m *User) *GameQuery {
-	query := (&GameClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(game.Table, game.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.WonGamesTable, user.WonGamesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryCurrentTurnGames queries the current_turn_games edge of a User.
-func (c *UserClient) QueryCurrentTurnGames(_m *User) *GameQuery {
-	query := (&GameClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(game.Table, game.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.CurrentTurnGamesTable, user.CurrentTurnGamesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryGamePlayer queries the game_player edge of a User.
-func (c *UserClient) QueryGamePlayer(_m *User) *GamePlayerQuery {
-	query := (&GamePlayerClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(gameplayer.Table, gameplayer.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.GamePlayerTable, user.GamePlayerColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

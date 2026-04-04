@@ -11,8 +11,10 @@ import (
 
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/graphql/models"
 	"puzzlr.gg/src/server/reqctx"
+	"puzzlr.gg/src/server/services"
 )
 
 var uniqueUserCounter int64
@@ -28,7 +30,9 @@ func TestCreateGameResolverSuccess(t *testing.T) {
 		reqctx.WithUserID(ctx, actor.ID),
 		&models.CreateGameInput{
 			TicTacToeInput: &models.CreateTicTacToeInput{
-				OpponentID: opponent.ID,
+				HumanOpponent: &models.HumanOpponentInput{
+					OpponentID: opponent.ID,
+				},
 			},
 		},
 	)
@@ -46,12 +50,52 @@ func TestCreateGameResolverSuccess(t *testing.T) {
 		t.Fatalf("unexpected board dimensions: %#v", createdGame.Board)
 	}
 
-	playerCount, err := createdGame.QueryUser().Count(ctx)
+	playerCount, err := createdGame.QueryPlayers().Count(ctx)
 	if err != nil {
 		t.Fatalf("querying players failed: %v", err)
 	}
 	if playerCount != 2 {
 		t.Fatalf("expected 2 players, got %d", playerCount)
+	}
+}
+
+func TestCreateGameResolverSupportsAIOpponent(t *testing.T) {
+	ctx := context.Background()
+
+	actor := mustCreateUser(t, ctx)
+
+	resolver := newTestResolver()
+	createdGame, err := resolver.Mutation().CreateGame(
+		reqctx.WithUserID(ctx, actor.ID),
+		&models.CreateGameInput{
+			TicTacToeInput: &models.CreateTicTacToeInput{
+				AiOpponent: &models.AIOpponentInput{},
+			},
+		},
+	)
+	if err != nil {
+		t.Fatalf("createGame returned an error: %v", err)
+	}
+	if createdGame == nil {
+		t.Fatal("createGame returned nil game")
+	}
+
+	players, err := createdGame.QueryPlayers().All(ctx)
+	if err != nil {
+		t.Fatalf("querying players failed: %v", err)
+	}
+	if len(players) != 2 {
+		t.Fatalf("expected 2 players, got %d", len(players))
+	}
+
+	var aiPlayers int
+	for _, player := range players {
+		if player.Kind == gameplayer.KindAI {
+			aiPlayers++
+		}
+	}
+	if aiPlayers != 1 {
+		t.Fatalf("expected 1 ai player, got %d", aiPlayers)
 	}
 }
 
@@ -63,7 +107,9 @@ func TestCreateGameResolverRequiresUserInContext(t *testing.T) {
 		ctx,
 		&models.CreateGameInput{
 			TicTacToeInput: &models.CreateTicTacToeInput{
-				OpponentID: opponent.ID,
+				HumanOpponent: &models.HumanOpponentInput{
+					OpponentID: opponent.ID,
+				},
 			},
 		},
 	)

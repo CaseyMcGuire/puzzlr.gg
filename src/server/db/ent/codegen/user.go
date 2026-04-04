@@ -28,45 +28,36 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Games holds the value of the games edge.
-	Games []*Game `json:"games,omitempty"`
+	// GamePlayers holds the value of the game_players edge.
+	GamePlayers []*GamePlayer `json:"game_players,omitempty"`
 	// Friends holds the value of the friends edge.
 	Friends []*User `json:"friends,omitempty"`
 	// SentFriendRequests holds the value of the sent_friend_requests edge.
 	SentFriendRequests []*FriendRequest `json:"sent_friend_requests,omitempty"`
 	// ReceivedFriendRequests holds the value of the received_friend_requests edge.
 	ReceivedFriendRequests []*FriendRequest `json:"received_friend_requests,omitempty"`
-	// WonGames holds the value of the won_games edge.
-	WonGames []*Game `json:"won_games,omitempty"`
-	// CurrentTurnGames holds the value of the current_turn_games edge.
-	CurrentTurnGames []*Game `json:"current_turn_games,omitempty"`
-	// GamePlayer holds the value of the game_player edge.
-	GamePlayer []*GamePlayer `json:"game_player,omitempty"`
 	// Friendships holds the value of the friendships edge.
 	Friendships []*Friendship `json:"friendships,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [5]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
+	totalCount [1]map[string]int
 
-	namedGames                  map[string][]*Game
+	namedGamePlayers            map[string][]*GamePlayer
 	namedFriends                map[string][]*User
 	namedSentFriendRequests     map[string][]*FriendRequest
 	namedReceivedFriendRequests map[string][]*FriendRequest
-	namedWonGames               map[string][]*Game
-	namedCurrentTurnGames       map[string][]*Game
-	namedGamePlayer             map[string][]*GamePlayer
 	namedFriendships            map[string][]*Friendship
 }
 
-// GamesOrErr returns the Games value or an error if the edge
+// GamePlayersOrErr returns the GamePlayers value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) GamesOrErr() ([]*Game, error) {
+func (e UserEdges) GamePlayersOrErr() ([]*GamePlayer, error) {
 	if e.loadedTypes[0] {
-		return e.Games, nil
+		return e.GamePlayers, nil
 	}
-	return nil, &NotLoadedError{edge: "games"}
+	return nil, &NotLoadedError{edge: "game_players"}
 }
 
 // FriendsOrErr returns the Friends value or an error if the edge
@@ -96,37 +87,10 @@ func (e UserEdges) ReceivedFriendRequestsOrErr() ([]*FriendRequest, error) {
 	return nil, &NotLoadedError{edge: "received_friend_requests"}
 }
 
-// WonGamesOrErr returns the WonGames value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) WonGamesOrErr() ([]*Game, error) {
-	if e.loadedTypes[4] {
-		return e.WonGames, nil
-	}
-	return nil, &NotLoadedError{edge: "won_games"}
-}
-
-// CurrentTurnGamesOrErr returns the CurrentTurnGames value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) CurrentTurnGamesOrErr() ([]*Game, error) {
-	if e.loadedTypes[5] {
-		return e.CurrentTurnGames, nil
-	}
-	return nil, &NotLoadedError{edge: "current_turn_games"}
-}
-
-// GamePlayerOrErr returns the GamePlayer value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) GamePlayerOrErr() ([]*GamePlayer, error) {
-	if e.loadedTypes[6] {
-		return e.GamePlayer, nil
-	}
-	return nil, &NotLoadedError{edge: "game_player"}
-}
-
 // FriendshipsOrErr returns the Friendships value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FriendshipsOrErr() ([]*Friendship, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[4] {
 		return e.Friendships, nil
 	}
 	return nil, &NotLoadedError{edge: "friendships"}
@@ -187,9 +151,9 @@ func (_m *User) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryGames queries the "games" edge of the User entity.
-func (_m *User) QueryGames() *GameQuery {
-	return NewUserClient(_m.config).QueryGames(_m)
+// QueryGamePlayers queries the "game_players" edge of the User entity.
+func (_m *User) QueryGamePlayers() *GamePlayerQuery {
+	return NewUserClient(_m.config).QueryGamePlayers(_m)
 }
 
 // QueryFriends queries the "friends" edge of the User entity.
@@ -205,21 +169,6 @@ func (_m *User) QuerySentFriendRequests() *FriendRequestQuery {
 // QueryReceivedFriendRequests queries the "received_friend_requests" edge of the User entity.
 func (_m *User) QueryReceivedFriendRequests() *FriendRequestQuery {
 	return NewUserClient(_m.config).QueryReceivedFriendRequests(_m)
-}
-
-// QueryWonGames queries the "won_games" edge of the User entity.
-func (_m *User) QueryWonGames() *GameQuery {
-	return NewUserClient(_m.config).QueryWonGames(_m)
-}
-
-// QueryCurrentTurnGames queries the "current_turn_games" edge of the User entity.
-func (_m *User) QueryCurrentTurnGames() *GameQuery {
-	return NewUserClient(_m.config).QueryCurrentTurnGames(_m)
-}
-
-// QueryGamePlayer queries the "game_player" edge of the User entity.
-func (_m *User) QueryGamePlayer() *GamePlayerQuery {
-	return NewUserClient(_m.config).QueryGamePlayer(_m)
 }
 
 // QueryFriendships queries the "friendships" edge of the User entity.
@@ -258,27 +207,27 @@ func (_m *User) String() string {
 	return builder.String()
 }
 
-// NamedGames returns the Games named value or an error if the edge was not
+// NamedGamePlayers returns the GamePlayers named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (_m *User) NamedGames(name string) ([]*Game, error) {
-	if _m.Edges.namedGames == nil {
+func (_m *User) NamedGamePlayers(name string) ([]*GamePlayer, error) {
+	if _m.Edges.namedGamePlayers == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := _m.Edges.namedGames[name]
+	nodes, ok := _m.Edges.namedGamePlayers[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (_m *User) appendNamedGames(name string, edges ...*Game) {
-	if _m.Edges.namedGames == nil {
-		_m.Edges.namedGames = make(map[string][]*Game)
+func (_m *User) appendNamedGamePlayers(name string, edges ...*GamePlayer) {
+	if _m.Edges.namedGamePlayers == nil {
+		_m.Edges.namedGamePlayers = make(map[string][]*GamePlayer)
 	}
 	if len(edges) == 0 {
-		_m.Edges.namedGames[name] = []*Game{}
+		_m.Edges.namedGamePlayers[name] = []*GamePlayer{}
 	} else {
-		_m.Edges.namedGames[name] = append(_m.Edges.namedGames[name], edges...)
+		_m.Edges.namedGamePlayers[name] = append(_m.Edges.namedGamePlayers[name], edges...)
 	}
 }
 
@@ -351,78 +300,6 @@ func (_m *User) appendNamedReceivedFriendRequests(name string, edges ...*FriendR
 		_m.Edges.namedReceivedFriendRequests[name] = []*FriendRequest{}
 	} else {
 		_m.Edges.namedReceivedFriendRequests[name] = append(_m.Edges.namedReceivedFriendRequests[name], edges...)
-	}
-}
-
-// NamedWonGames returns the WonGames named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (_m *User) NamedWonGames(name string) ([]*Game, error) {
-	if _m.Edges.namedWonGames == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := _m.Edges.namedWonGames[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (_m *User) appendNamedWonGames(name string, edges ...*Game) {
-	if _m.Edges.namedWonGames == nil {
-		_m.Edges.namedWonGames = make(map[string][]*Game)
-	}
-	if len(edges) == 0 {
-		_m.Edges.namedWonGames[name] = []*Game{}
-	} else {
-		_m.Edges.namedWonGames[name] = append(_m.Edges.namedWonGames[name], edges...)
-	}
-}
-
-// NamedCurrentTurnGames returns the CurrentTurnGames named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (_m *User) NamedCurrentTurnGames(name string) ([]*Game, error) {
-	if _m.Edges.namedCurrentTurnGames == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := _m.Edges.namedCurrentTurnGames[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (_m *User) appendNamedCurrentTurnGames(name string, edges ...*Game) {
-	if _m.Edges.namedCurrentTurnGames == nil {
-		_m.Edges.namedCurrentTurnGames = make(map[string][]*Game)
-	}
-	if len(edges) == 0 {
-		_m.Edges.namedCurrentTurnGames[name] = []*Game{}
-	} else {
-		_m.Edges.namedCurrentTurnGames[name] = append(_m.Edges.namedCurrentTurnGames[name], edges...)
-	}
-}
-
-// NamedGamePlayer returns the GamePlayer named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (_m *User) NamedGamePlayer(name string) ([]*GamePlayer, error) {
-	if _m.Edges.namedGamePlayer == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := _m.Edges.namedGamePlayer[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (_m *User) appendNamedGamePlayer(name string, edges ...*GamePlayer) {
-	if _m.Edges.namedGamePlayer == nil {
-		_m.Edges.namedGamePlayer = make(map[string][]*GamePlayer)
-	}
-	if len(edges) == 0 {
-		_m.Edges.namedGamePlayer[name] = []*GamePlayer{}
-	} else {
-		_m.Edges.namedGamePlayer[name] = append(_m.Edges.namedGamePlayer[name], edges...)
 	}
 }
 

@@ -3,7 +3,6 @@ package schema
 import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
-	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -19,10 +18,25 @@ type GamePlayer struct {
 func (GamePlayer) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("user_id").
-			Immutable(),
+			Optional().
+			Nillable().
+			Immutable().
+			Annotations(
+				entgql.Skip(),
+			),
 		field.Int("game_id").
-			Immutable(),
+			Immutable().
+			Annotations(
+				entgql.Skip(),
+			),
+		field.Enum("kind").
+			Values("HUMAN", "AI").
+			Immutable().
+			Annotations(
+				entgql.Type("GamePlayerKind"),
+			),
 		field.String("marker").
+			Immutable().
 			NotEmpty(),
 	}
 }
@@ -33,13 +47,15 @@ func (GamePlayer) Edges() []ent.Edge {
 		edge.To("user", User.Type).
 			Unique().
 			Immutable().
-			Required().
 			Field("user_id"),
 		edge.To("game", Game.Type).
 			Unique().
 			Immutable().
 			Required().
-			Field("game_id"),
+			Field("game_id").
+			Annotations(
+				entgql.Skip(),
+			),
 	}
 }
 
@@ -54,6 +70,10 @@ func (GamePlayer) Indexes() []ent.Index {
 func (GamePlayer) Hooks() []ent.Hook {
 	return []ent.Hook{
 		hook.On(
+			ValidateGamePlayerIdentity,
+			ent.OpCreate,
+		),
+		hook.On(
 			RejectPlayerMutationUnlessPending,
 			ent.OpCreate|ent.OpUpdateOne|ent.OpDeleteOne,
 		),
@@ -61,11 +81,5 @@ func (GamePlayer) Hooks() []ent.Hook {
 			RejectBulkGamePlayerMutation,
 			ent.OpUpdate|ent.OpDelete,
 		),
-	}
-}
-
-func (GamePlayer) Annotations() []schema.Annotation {
-	return []schema.Annotation{
-		entgql.Skip(),
 	}
 }

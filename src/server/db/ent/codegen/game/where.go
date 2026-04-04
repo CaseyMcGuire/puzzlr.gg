@@ -65,6 +65,16 @@ func UpdateTime(v time.Time) predicate.Game {
 	return predicate.Game(sql.FieldEQ(FieldUpdateTime, v))
 }
 
+// WinnerPlayerID applies equality check predicate on the "winner_player_id" field. It's identical to WinnerPlayerIDEQ.
+func WinnerPlayerID(v int) predicate.Game {
+	return predicate.Game(sql.FieldEQ(FieldWinnerPlayerID, v))
+}
+
+// CurrentTurnPlayerID applies equality check predicate on the "current_turn_player_id" field. It's identical to CurrentTurnPlayerIDEQ.
+func CurrentTurnPlayerID(v int) predicate.Game {
+	return predicate.Game(sql.FieldEQ(FieldCurrentTurnPlayerID, v))
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Game {
 	return predicate.Game(sql.FieldEQ(FieldCreateTime, v))
@@ -175,6 +185,66 @@ func MetadataNotNil() predicate.Game {
 	return predicate.Game(sql.FieldNotNull(FieldMetadata))
 }
 
+// WinnerPlayerIDEQ applies the EQ predicate on the "winner_player_id" field.
+func WinnerPlayerIDEQ(v int) predicate.Game {
+	return predicate.Game(sql.FieldEQ(FieldWinnerPlayerID, v))
+}
+
+// WinnerPlayerIDNEQ applies the NEQ predicate on the "winner_player_id" field.
+func WinnerPlayerIDNEQ(v int) predicate.Game {
+	return predicate.Game(sql.FieldNEQ(FieldWinnerPlayerID, v))
+}
+
+// WinnerPlayerIDIn applies the In predicate on the "winner_player_id" field.
+func WinnerPlayerIDIn(vs ...int) predicate.Game {
+	return predicate.Game(sql.FieldIn(FieldWinnerPlayerID, vs...))
+}
+
+// WinnerPlayerIDNotIn applies the NotIn predicate on the "winner_player_id" field.
+func WinnerPlayerIDNotIn(vs ...int) predicate.Game {
+	return predicate.Game(sql.FieldNotIn(FieldWinnerPlayerID, vs...))
+}
+
+// WinnerPlayerIDIsNil applies the IsNil predicate on the "winner_player_id" field.
+func WinnerPlayerIDIsNil() predicate.Game {
+	return predicate.Game(sql.FieldIsNull(FieldWinnerPlayerID))
+}
+
+// WinnerPlayerIDNotNil applies the NotNil predicate on the "winner_player_id" field.
+func WinnerPlayerIDNotNil() predicate.Game {
+	return predicate.Game(sql.FieldNotNull(FieldWinnerPlayerID))
+}
+
+// CurrentTurnPlayerIDEQ applies the EQ predicate on the "current_turn_player_id" field.
+func CurrentTurnPlayerIDEQ(v int) predicate.Game {
+	return predicate.Game(sql.FieldEQ(FieldCurrentTurnPlayerID, v))
+}
+
+// CurrentTurnPlayerIDNEQ applies the NEQ predicate on the "current_turn_player_id" field.
+func CurrentTurnPlayerIDNEQ(v int) predicate.Game {
+	return predicate.Game(sql.FieldNEQ(FieldCurrentTurnPlayerID, v))
+}
+
+// CurrentTurnPlayerIDIn applies the In predicate on the "current_turn_player_id" field.
+func CurrentTurnPlayerIDIn(vs ...int) predicate.Game {
+	return predicate.Game(sql.FieldIn(FieldCurrentTurnPlayerID, vs...))
+}
+
+// CurrentTurnPlayerIDNotIn applies the NotIn predicate on the "current_turn_player_id" field.
+func CurrentTurnPlayerIDNotIn(vs ...int) predicate.Game {
+	return predicate.Game(sql.FieldNotIn(FieldCurrentTurnPlayerID, vs...))
+}
+
+// CurrentTurnPlayerIDIsNil applies the IsNil predicate on the "current_turn_player_id" field.
+func CurrentTurnPlayerIDIsNil() predicate.Game {
+	return predicate.Game(sql.FieldIsNull(FieldCurrentTurnPlayerID))
+}
+
+// CurrentTurnPlayerIDNotNil applies the NotNil predicate on the "current_turn_player_id" field.
+func CurrentTurnPlayerIDNotNil() predicate.Game {
+	return predicate.Game(sql.FieldNotNull(FieldCurrentTurnPlayerID))
+}
+
 // StatusEQ applies the EQ predicate on the "status" field.
 func StatusEQ(v Status) predicate.Game {
 	return predicate.Game(sql.FieldEQ(FieldStatus, v))
@@ -195,21 +265,21 @@ func StatusNotIn(vs ...Status) predicate.Game {
 	return predicate.Game(sql.FieldNotIn(FieldStatus, vs...))
 }
 
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.Game {
+// HasPlayers applies the HasEdge predicate on the "players" edge.
+func HasPlayers() predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, PlayersTable, PlayersColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.Game {
+// HasPlayersWith applies the HasEdge predicate on the "players" edge with a given conditions (other predicates).
+func HasPlayersWith(preds ...predicate.GamePlayer) predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
-		step := newUserStep()
+		step := newPlayersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -218,21 +288,21 @@ func HasUserWith(preds ...predicate.User) predicate.Game {
 	})
 }
 
-// HasWinner applies the HasEdge predicate on the "winner" edge.
-func HasWinner() predicate.Game {
+// HasWinnerPlayer applies the HasEdge predicate on the "winner_player" edge.
+func HasWinnerPlayer() predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, WinnerTable, WinnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, WinnerPlayerTable, WinnerPlayerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasWinnerWith applies the HasEdge predicate on the "winner" edge with a given conditions (other predicates).
-func HasWinnerWith(preds ...predicate.User) predicate.Game {
+// HasWinnerPlayerWith applies the HasEdge predicate on the "winner_player" edge with a given conditions (other predicates).
+func HasWinnerPlayerWith(preds ...predicate.GamePlayer) predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
-		step := newWinnerStep()
+		step := newWinnerPlayerStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -241,44 +311,21 @@ func HasWinnerWith(preds ...predicate.User) predicate.Game {
 	})
 }
 
-// HasCurrentTurn applies the HasEdge predicate on the "current_turn" edge.
-func HasCurrentTurn() predicate.Game {
+// HasCurrentTurnPlayer applies the HasEdge predicate on the "current_turn_player" edge.
+func HasCurrentTurnPlayer() predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, CurrentTurnTable, CurrentTurnColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, CurrentTurnPlayerTable, CurrentTurnPlayerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasCurrentTurnWith applies the HasEdge predicate on the "current_turn" edge with a given conditions (other predicates).
-func HasCurrentTurnWith(preds ...predicate.User) predicate.Game {
+// HasCurrentTurnPlayerWith applies the HasEdge predicate on the "current_turn_player" edge with a given conditions (other predicates).
+func HasCurrentTurnPlayerWith(preds ...predicate.GamePlayer) predicate.Game {
 	return predicate.Game(func(s *sql.Selector) {
-		step := newCurrentTurnStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasGamePlayer applies the HasEdge predicate on the "game_player" edge.
-func HasGamePlayer() predicate.Game {
-	return predicate.Game(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, GamePlayerTable, GamePlayerColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGamePlayerWith applies the HasEdge predicate on the "game_player" edge with a given conditions (other predicates).
-func HasGamePlayerWith(preds ...predicate.GamePlayer) predicate.Game {
-	return predicate.Game(func(s *sql.Selector) {
-		step := newGamePlayerStep()
+		step := newCurrentTurnPlayerStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

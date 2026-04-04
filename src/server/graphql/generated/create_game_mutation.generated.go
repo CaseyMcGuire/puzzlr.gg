@@ -117,12 +117,12 @@ func (ec *executionContext) fieldContext_Mutation_createGame(ctx context.Context
 				return ec.fieldContext_Game_board(ctx, field)
 			case "status":
 				return ec.fieldContext_Game_status(ctx, field)
-			case "user":
-				return ec.fieldContext_Game_user(ctx, field)
-			case "winner":
-				return ec.fieldContext_Game_winner(ctx, field)
-			case "currentTurn":
-				return ec.fieldContext_Game_currentTurn(ctx, field)
+			case "players":
+				return ec.fieldContext_Game_players(ctx, field)
+			case "winnerPlayer":
+				return ec.fieldContext_Game_winnerPlayer(ctx, field)
+			case "currentTurnPlayer":
+				return ec.fieldContext_Game_currentTurnPlayer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Game", field.Name)
 		},
@@ -178,12 +178,12 @@ func (ec *executionContext) fieldContext_Mutation_makeGameMove(ctx context.Conte
 				return ec.fieldContext_Game_board(ctx, field)
 			case "status":
 				return ec.fieldContext_Game_status(ctx, field)
-			case "user":
-				return ec.fieldContext_Game_user(ctx, field)
-			case "winner":
-				return ec.fieldContext_Game_winner(ctx, field)
-			case "currentTurn":
-				return ec.fieldContext_Game_currentTurn(ctx, field)
+			case "players":
+				return ec.fieldContext_Game_players(ctx, field)
+			case "winnerPlayer":
+				return ec.fieldContext_Game_winnerPlayer(ctx, field)
+			case "currentTurnPlayer":
+				return ec.fieldContext_Game_currentTurnPlayer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Game", field.Name)
 		},
@@ -288,6 +288,33 @@ func (ec *executionContext) fieldContext_Mutation_sendFriendRequest(ctx context.
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAIOpponentInput(ctx context.Context, obj any) (models.AIOpponentInput, error) {
+	var it models.AIOpponentInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"difficulty"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "difficulty":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("difficulty"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Difficulty = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateGameInput(ctx context.Context, obj any) (models.CreateGameInput, error) {
 	var it models.CreateGameInput
 	asMap := map[string]any{}
@@ -317,6 +344,40 @@ func (ec *executionContext) unmarshalInputCreateGameInput(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputCreateTicTacToeInput(ctx context.Context, obj any) (models.CreateTicTacToeInput, error) {
 	var it models.CreateTicTacToeInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"humanOpponent", "aiOpponent"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "humanOpponent":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("humanOpponent"))
+			data, err := ec.unmarshalNHumanOpponentInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐHumanOpponentInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HumanOpponent = data
+		case "aiOpponent":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("aiOpponent"))
+			data, err := ec.unmarshalNAIOpponentInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐAIOpponentInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AiOpponent = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputHumanOpponentInput(ctx context.Context, obj any) (models.HumanOpponentInput, error) {
+	var it models.HumanOpponentInput
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -418,8 +479,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNAIOpponentInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐAIOpponentInput(ctx context.Context, v any) (*models.AIOpponentInput, error) {
+	res, err := ec.unmarshalInputAIOpponentInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateTicTacToeInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐCreateTicTacToeInput(ctx context.Context, v any) (*models.CreateTicTacToeInput, error) {
 	res, err := ec.unmarshalInputCreateTicTacToeInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNHumanOpponentInput2ᚖpuzzlrᚗggᚋsrcᚋserverᚋgraphqlᚋmodelsᚐHumanOpponentInput(ctx context.Context, v any) (*models.HumanOpponentInput, error) {
+	res, err := ec.unmarshalInputHumanOpponentInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

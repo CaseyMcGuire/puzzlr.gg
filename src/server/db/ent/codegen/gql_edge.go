@@ -8,44 +8,40 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func (_m *Game) User(ctx context.Context) (result []*User, err error) {
+func (_m *Game) Players(ctx context.Context) (result []*GamePlayer, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = _m.NamedUser(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = _m.NamedPlayers(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = _m.Edges.UserOrErr()
+		result, err = _m.Edges.PlayersOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = _m.QueryUser().All(ctx)
+		result, err = _m.QueryPlayers().All(ctx)
 	}
 	return result, err
 }
 
-func (_m *Game) Winner(ctx context.Context) (*User, error) {
-	result, err := _m.Edges.WinnerOrErr()
+func (_m *Game) WinnerPlayer(ctx context.Context) (*GamePlayer, error) {
+	result, err := _m.Edges.WinnerPlayerOrErr()
 	if IsNotLoaded(err) {
-		result, err = _m.QueryWinner().Only(ctx)
+		result, err = _m.QueryWinnerPlayer().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (_m *Game) CurrentTurn(ctx context.Context) (*User, error) {
-	result, err := _m.Edges.CurrentTurnOrErr()
+func (_m *Game) CurrentTurnPlayer(ctx context.Context) (*GamePlayer, error) {
+	result, err := _m.Edges.CurrentTurnPlayerOrErr()
 	if IsNotLoaded(err) {
-		result, err = _m.QueryCurrentTurn().Only(ctx)
+		result, err = _m.QueryCurrentTurnPlayer().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
 
-func (_m *User) Games(ctx context.Context) (result []*Game, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = _m.NamedGames(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = _m.Edges.GamesOrErr()
-	}
+func (_m *GamePlayer) User(ctx context.Context) (*User, error) {
+	result, err := _m.Edges.UserOrErr()
 	if IsNotLoaded(err) {
-		result, err = _m.QueryGames().All(ctx)
+		result, err = _m.QueryUser().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
 }
 
 func (_m *User) Friends(ctx context.Context) (result []*User, err error) {

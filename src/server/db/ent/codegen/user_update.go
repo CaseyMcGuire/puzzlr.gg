@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
-	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/predicate"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
@@ -59,19 +58,19 @@ func (_u *UserUpdate) SetNillableHashedPassword(v *string) *UserUpdate {
 	return _u
 }
 
-// AddGameIDs adds the "games" edge to the Game entity by IDs.
-func (_u *UserUpdate) AddGameIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddGameIDs(ids...)
+// AddGamePlayerIDs adds the "game_players" edge to the GamePlayer entity by IDs.
+func (_u *UserUpdate) AddGamePlayerIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddGamePlayerIDs(ids...)
 	return _u
 }
 
-// AddGames adds the "games" edges to the Game entity.
-func (_u *UserUpdate) AddGames(v ...*Game) *UserUpdate {
+// AddGamePlayers adds the "game_players" edges to the GamePlayer entity.
+func (_u *UserUpdate) AddGamePlayers(v ...*GamePlayer) *UserUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddGameIDs(ids...)
+	return _u.AddGamePlayerIDs(ids...)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
@@ -119,51 +118,6 @@ func (_u *UserUpdate) AddReceivedFriendRequests(v ...*FriendRequest) *UserUpdate
 	return _u.AddReceivedFriendRequestIDs(ids...)
 }
 
-// AddWonGameIDs adds the "won_games" edge to the Game entity by IDs.
-func (_u *UserUpdate) AddWonGameIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddWonGameIDs(ids...)
-	return _u
-}
-
-// AddWonGames adds the "won_games" edges to the Game entity.
-func (_u *UserUpdate) AddWonGames(v ...*Game) *UserUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddWonGameIDs(ids...)
-}
-
-// AddCurrentTurnGameIDs adds the "current_turn_games" edge to the Game entity by IDs.
-func (_u *UserUpdate) AddCurrentTurnGameIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddCurrentTurnGameIDs(ids...)
-	return _u
-}
-
-// AddCurrentTurnGames adds the "current_turn_games" edges to the Game entity.
-func (_u *UserUpdate) AddCurrentTurnGames(v ...*Game) *UserUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddCurrentTurnGameIDs(ids...)
-}
-
-// AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
-func (_u *UserUpdate) AddGamePlayerIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddGamePlayerIDs(ids...)
-	return _u
-}
-
-// AddGamePlayer adds the "game_player" edges to the GamePlayer entity.
-func (_u *UserUpdate) AddGamePlayer(v ...*GamePlayer) *UserUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddGamePlayerIDs(ids...)
-}
-
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
 func (_u *UserUpdate) AddFriendshipIDs(ids ...int) *UserUpdate {
 	_u.mutation.AddFriendshipIDs(ids...)
@@ -184,25 +138,25 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
 }
 
-// ClearGames clears all "games" edges to the Game entity.
-func (_u *UserUpdate) ClearGames() *UserUpdate {
-	_u.mutation.ClearGames()
+// ClearGamePlayers clears all "game_players" edges to the GamePlayer entity.
+func (_u *UserUpdate) ClearGamePlayers() *UserUpdate {
+	_u.mutation.ClearGamePlayers()
 	return _u
 }
 
-// RemoveGameIDs removes the "games" edge to Game entities by IDs.
-func (_u *UserUpdate) RemoveGameIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveGameIDs(ids...)
+// RemoveGamePlayerIDs removes the "game_players" edge to GamePlayer entities by IDs.
+func (_u *UserUpdate) RemoveGamePlayerIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveGamePlayerIDs(ids...)
 	return _u
 }
 
-// RemoveGames removes "games" edges to Game entities.
-func (_u *UserUpdate) RemoveGames(v ...*Game) *UserUpdate {
+// RemoveGamePlayers removes "game_players" edges to GamePlayer entities.
+func (_u *UserUpdate) RemoveGamePlayers(v ...*GamePlayer) *UserUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveGameIDs(ids...)
+	return _u.RemoveGamePlayerIDs(ids...)
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
@@ -266,69 +220,6 @@ func (_u *UserUpdate) RemoveReceivedFriendRequests(v ...*FriendRequest) *UserUpd
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveReceivedFriendRequestIDs(ids...)
-}
-
-// ClearWonGames clears all "won_games" edges to the Game entity.
-func (_u *UserUpdate) ClearWonGames() *UserUpdate {
-	_u.mutation.ClearWonGames()
-	return _u
-}
-
-// RemoveWonGameIDs removes the "won_games" edge to Game entities by IDs.
-func (_u *UserUpdate) RemoveWonGameIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveWonGameIDs(ids...)
-	return _u
-}
-
-// RemoveWonGames removes "won_games" edges to Game entities.
-func (_u *UserUpdate) RemoveWonGames(v ...*Game) *UserUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveWonGameIDs(ids...)
-}
-
-// ClearCurrentTurnGames clears all "current_turn_games" edges to the Game entity.
-func (_u *UserUpdate) ClearCurrentTurnGames() *UserUpdate {
-	_u.mutation.ClearCurrentTurnGames()
-	return _u
-}
-
-// RemoveCurrentTurnGameIDs removes the "current_turn_games" edge to Game entities by IDs.
-func (_u *UserUpdate) RemoveCurrentTurnGameIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveCurrentTurnGameIDs(ids...)
-	return _u
-}
-
-// RemoveCurrentTurnGames removes "current_turn_games" edges to Game entities.
-func (_u *UserUpdate) RemoveCurrentTurnGames(v ...*Game) *UserUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveCurrentTurnGameIDs(ids...)
-}
-
-// ClearGamePlayer clears all "game_player" edges to the GamePlayer entity.
-func (_u *UserUpdate) ClearGamePlayer() *UserUpdate {
-	_u.mutation.ClearGamePlayer()
-	return _u
-}
-
-// RemoveGamePlayerIDs removes the "game_player" edge to GamePlayer entities by IDs.
-func (_u *UserUpdate) RemoveGamePlayerIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveGamePlayerIDs(ids...)
-	return _u
-}
-
-// RemoveGamePlayer removes "game_player" edges to GamePlayer entities.
-func (_u *UserUpdate) RemoveGamePlayer(v ...*GamePlayer) *UserUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveGamePlayerIDs(ids...)
 }
 
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
@@ -412,28 +303,28 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.HashedPassword(); ok {
 		_spec.SetField(user.FieldHashedPassword, field.TypeString, value)
 	}
-	if _u.mutation.GamesCleared() {
+	if _u.mutation.GamePlayersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GamesTable,
-			Columns: user.GamesPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.GamePlayersTable,
+			Columns: []string{user.GamePlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGamesIDs(); len(nodes) > 0 && !_u.mutation.GamesCleared() {
+	if nodes := _u.mutation.RemovedGamePlayersIDs(); len(nodes) > 0 && !_u.mutation.GamePlayersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GamesTable,
-			Columns: user.GamesPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.GamePlayersTable,
+			Columns: []string{user.GamePlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -441,15 +332,15 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GamesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.GamePlayersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GamesTable,
-			Columns: user.GamesPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.GamePlayersTable,
+			Columns: []string{user.GamePlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -592,141 +483,6 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.WonGamesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.WonGamesTable,
-			Columns: []string{user.WonGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedWonGamesIDs(); len(nodes) > 0 && !_u.mutation.WonGamesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.WonGamesTable,
-			Columns: []string{user.WonGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.WonGamesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.WonGamesTable,
-			Columns: []string{user.WonGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.CurrentTurnGamesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CurrentTurnGamesTable,
-			Columns: []string{user.CurrentTurnGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedCurrentTurnGamesIDs(); len(nodes) > 0 && !_u.mutation.CurrentTurnGamesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CurrentTurnGamesTable,
-			Columns: []string{user.CurrentTurnGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.CurrentTurnGamesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CurrentTurnGamesTable,
-			Columns: []string{user.CurrentTurnGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.GamePlayerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.GamePlayerTable,
-			Columns: []string{user.GamePlayerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedGamePlayerIDs(); len(nodes) > 0 && !_u.mutation.GamePlayerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.GamePlayerTable,
-			Columns: []string{user.GamePlayerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.GamePlayerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.GamePlayerTable,
-			Columns: []string{user.GamePlayerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if _u.mutation.FriendshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -820,19 +576,19 @@ func (_u *UserUpdateOne) SetNillableHashedPassword(v *string) *UserUpdateOne {
 	return _u
 }
 
-// AddGameIDs adds the "games" edge to the Game entity by IDs.
-func (_u *UserUpdateOne) AddGameIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddGameIDs(ids...)
+// AddGamePlayerIDs adds the "game_players" edge to the GamePlayer entity by IDs.
+func (_u *UserUpdateOne) AddGamePlayerIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddGamePlayerIDs(ids...)
 	return _u
 }
 
-// AddGames adds the "games" edges to the Game entity.
-func (_u *UserUpdateOne) AddGames(v ...*Game) *UserUpdateOne {
+// AddGamePlayers adds the "game_players" edges to the GamePlayer entity.
+func (_u *UserUpdateOne) AddGamePlayers(v ...*GamePlayer) *UserUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddGameIDs(ids...)
+	return _u.AddGamePlayerIDs(ids...)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
@@ -880,51 +636,6 @@ func (_u *UserUpdateOne) AddReceivedFriendRequests(v ...*FriendRequest) *UserUpd
 	return _u.AddReceivedFriendRequestIDs(ids...)
 }
 
-// AddWonGameIDs adds the "won_games" edge to the Game entity by IDs.
-func (_u *UserUpdateOne) AddWonGameIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddWonGameIDs(ids...)
-	return _u
-}
-
-// AddWonGames adds the "won_games" edges to the Game entity.
-func (_u *UserUpdateOne) AddWonGames(v ...*Game) *UserUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddWonGameIDs(ids...)
-}
-
-// AddCurrentTurnGameIDs adds the "current_turn_games" edge to the Game entity by IDs.
-func (_u *UserUpdateOne) AddCurrentTurnGameIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddCurrentTurnGameIDs(ids...)
-	return _u
-}
-
-// AddCurrentTurnGames adds the "current_turn_games" edges to the Game entity.
-func (_u *UserUpdateOne) AddCurrentTurnGames(v ...*Game) *UserUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddCurrentTurnGameIDs(ids...)
-}
-
-// AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
-func (_u *UserUpdateOne) AddGamePlayerIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddGamePlayerIDs(ids...)
-	return _u
-}
-
-// AddGamePlayer adds the "game_player" edges to the GamePlayer entity.
-func (_u *UserUpdateOne) AddGamePlayer(v ...*GamePlayer) *UserUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddGamePlayerIDs(ids...)
-}
-
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
 func (_u *UserUpdateOne) AddFriendshipIDs(ids ...int) *UserUpdateOne {
 	_u.mutation.AddFriendshipIDs(ids...)
@@ -945,25 +656,25 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
 }
 
-// ClearGames clears all "games" edges to the Game entity.
-func (_u *UserUpdateOne) ClearGames() *UserUpdateOne {
-	_u.mutation.ClearGames()
+// ClearGamePlayers clears all "game_players" edges to the GamePlayer entity.
+func (_u *UserUpdateOne) ClearGamePlayers() *UserUpdateOne {
+	_u.mutation.ClearGamePlayers()
 	return _u
 }
 
-// RemoveGameIDs removes the "games" edge to Game entities by IDs.
-func (_u *UserUpdateOne) RemoveGameIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveGameIDs(ids...)
+// RemoveGamePlayerIDs removes the "game_players" edge to GamePlayer entities by IDs.
+func (_u *UserUpdateOne) RemoveGamePlayerIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveGamePlayerIDs(ids...)
 	return _u
 }
 
-// RemoveGames removes "games" edges to Game entities.
-func (_u *UserUpdateOne) RemoveGames(v ...*Game) *UserUpdateOne {
+// RemoveGamePlayers removes "game_players" edges to GamePlayer entities.
+func (_u *UserUpdateOne) RemoveGamePlayers(v ...*GamePlayer) *UserUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveGameIDs(ids...)
+	return _u.RemoveGamePlayerIDs(ids...)
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
@@ -1027,69 +738,6 @@ func (_u *UserUpdateOne) RemoveReceivedFriendRequests(v ...*FriendRequest) *User
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveReceivedFriendRequestIDs(ids...)
-}
-
-// ClearWonGames clears all "won_games" edges to the Game entity.
-func (_u *UserUpdateOne) ClearWonGames() *UserUpdateOne {
-	_u.mutation.ClearWonGames()
-	return _u
-}
-
-// RemoveWonGameIDs removes the "won_games" edge to Game entities by IDs.
-func (_u *UserUpdateOne) RemoveWonGameIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveWonGameIDs(ids...)
-	return _u
-}
-
-// RemoveWonGames removes "won_games" edges to Game entities.
-func (_u *UserUpdateOne) RemoveWonGames(v ...*Game) *UserUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveWonGameIDs(ids...)
-}
-
-// ClearCurrentTurnGames clears all "current_turn_games" edges to the Game entity.
-func (_u *UserUpdateOne) ClearCurrentTurnGames() *UserUpdateOne {
-	_u.mutation.ClearCurrentTurnGames()
-	return _u
-}
-
-// RemoveCurrentTurnGameIDs removes the "current_turn_games" edge to Game entities by IDs.
-func (_u *UserUpdateOne) RemoveCurrentTurnGameIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveCurrentTurnGameIDs(ids...)
-	return _u
-}
-
-// RemoveCurrentTurnGames removes "current_turn_games" edges to Game entities.
-func (_u *UserUpdateOne) RemoveCurrentTurnGames(v ...*Game) *UserUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveCurrentTurnGameIDs(ids...)
-}
-
-// ClearGamePlayer clears all "game_player" edges to the GamePlayer entity.
-func (_u *UserUpdateOne) ClearGamePlayer() *UserUpdateOne {
-	_u.mutation.ClearGamePlayer()
-	return _u
-}
-
-// RemoveGamePlayerIDs removes the "game_player" edge to GamePlayer entities by IDs.
-func (_u *UserUpdateOne) RemoveGamePlayerIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveGamePlayerIDs(ids...)
-	return _u
-}
-
-// RemoveGamePlayer removes "game_player" edges to GamePlayer entities.
-func (_u *UserUpdateOne) RemoveGamePlayer(v ...*GamePlayer) *UserUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveGamePlayerIDs(ids...)
 }
 
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
@@ -1203,28 +851,28 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	if value, ok := _u.mutation.HashedPassword(); ok {
 		_spec.SetField(user.FieldHashedPassword, field.TypeString, value)
 	}
-	if _u.mutation.GamesCleared() {
+	if _u.mutation.GamePlayersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GamesTable,
-			Columns: user.GamesPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.GamePlayersTable,
+			Columns: []string{user.GamePlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGamesIDs(); len(nodes) > 0 && !_u.mutation.GamesCleared() {
+	if nodes := _u.mutation.RemovedGamePlayersIDs(); len(nodes) > 0 && !_u.mutation.GamePlayersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GamesTable,
-			Columns: user.GamesPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.GamePlayersTable,
+			Columns: []string{user.GamePlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1232,15 +880,15 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GamesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.GamePlayersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GamesTable,
-			Columns: user.GamesPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.GamePlayersTable,
+			Columns: []string{user.GamePlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1376,141 +1024,6 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.WonGamesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.WonGamesTable,
-			Columns: []string{user.WonGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedWonGamesIDs(); len(nodes) > 0 && !_u.mutation.WonGamesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.WonGamesTable,
-			Columns: []string{user.WonGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.WonGamesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.WonGamesTable,
-			Columns: []string{user.WonGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.CurrentTurnGamesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CurrentTurnGamesTable,
-			Columns: []string{user.CurrentTurnGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedCurrentTurnGamesIDs(); len(nodes) > 0 && !_u.mutation.CurrentTurnGamesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CurrentTurnGamesTable,
-			Columns: []string{user.CurrentTurnGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.CurrentTurnGamesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CurrentTurnGamesTable,
-			Columns: []string{user.CurrentTurnGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.GamePlayerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.GamePlayerTable,
-			Columns: []string{user.GamePlayerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedGamePlayerIDs(); len(nodes) > 0 && !_u.mutation.GamePlayerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.GamePlayerTable,
-			Columns: []string{user.GamePlayerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.GamePlayerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.GamePlayerTable,
-			Columns: []string{user.GamePlayerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -15,15 +15,28 @@ export default function UserProfileGamesSection({user}: Props) {
         id
         type
         status
-        winner {
+        winnerPlayer {
           id
+          kind
+          user {
+            id
+          }
         }
-        currentTurn {
+        currentTurnPlayer {
           id
+          kind
+          user {
+            id
+          }
         }
-        user {
+        players {
           id
-          email
+          kind
+          marker
+          user {
+            id
+            email
+          }
         }
       }
     }
@@ -38,10 +51,10 @@ export default function UserProfileGamesSection({user}: Props) {
       ) : (
         <div sx={styles.list}>
           {games.map(game => {
-            const opponents = (game.user ?? []).filter(participant => participant.id !== userID);
+            const opponents = (game.players ?? []).filter(player => player.user?.id !== userID);
             const opponentLabel = opponents.length === 0
               ? "Solo"
-              : opponents.map(opponent => opponent.email).join(", ");
+              : opponents.map(opponent => opponent.kind === "AI" ? "AI" : opponent.user?.email ?? "Unknown").join(", ");
 
             return (
               <div key={game.id} sx={styles.listRow}>
@@ -50,8 +63,8 @@ export default function UserProfileGamesSection({user}: Props) {
                   <span>{game.type}</span>
                   <span>{game.status}</span>
                   <span>Opponent: {opponentLabel}</span>
-                  {game.winner?.id === userID ? <span>Result: Won</span> : null}
-                  {game.currentTurn?.id === userID ? <span>Current turn</span> : null}
+                  {game.winnerPlayer?.user?.id === userID ? <span>Result: Won</span> : null}
+                  {game.currentTurnPlayer?.user?.id === userID ? <span>Current turn</span> : null}
                 </div>
               </div>
             );

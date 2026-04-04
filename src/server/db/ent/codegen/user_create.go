@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"puzzlr.gg/src/server/db/ent/codegen/friendrequest"
 	"puzzlr.gg/src/server/db/ent/codegen/friendship"
-	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
@@ -35,19 +34,19 @@ func (_c *UserCreate) SetHashedPassword(v string) *UserCreate {
 	return _c
 }
 
-// AddGameIDs adds the "games" edge to the Game entity by IDs.
-func (_c *UserCreate) AddGameIDs(ids ...int) *UserCreate {
-	_c.mutation.AddGameIDs(ids...)
+// AddGamePlayerIDs adds the "game_players" edge to the GamePlayer entity by IDs.
+func (_c *UserCreate) AddGamePlayerIDs(ids ...int) *UserCreate {
+	_c.mutation.AddGamePlayerIDs(ids...)
 	return _c
 }
 
-// AddGames adds the "games" edges to the Game entity.
-func (_c *UserCreate) AddGames(v ...*Game) *UserCreate {
+// AddGamePlayers adds the "game_players" edges to the GamePlayer entity.
+func (_c *UserCreate) AddGamePlayers(v ...*GamePlayer) *UserCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddGameIDs(ids...)
+	return _c.AddGamePlayerIDs(ids...)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
@@ -93,51 +92,6 @@ func (_c *UserCreate) AddReceivedFriendRequests(v ...*FriendRequest) *UserCreate
 		ids[i] = v[i].ID
 	}
 	return _c.AddReceivedFriendRequestIDs(ids...)
-}
-
-// AddWonGameIDs adds the "won_games" edge to the Game entity by IDs.
-func (_c *UserCreate) AddWonGameIDs(ids ...int) *UserCreate {
-	_c.mutation.AddWonGameIDs(ids...)
-	return _c
-}
-
-// AddWonGames adds the "won_games" edges to the Game entity.
-func (_c *UserCreate) AddWonGames(v ...*Game) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddWonGameIDs(ids...)
-}
-
-// AddCurrentTurnGameIDs adds the "current_turn_games" edge to the Game entity by IDs.
-func (_c *UserCreate) AddCurrentTurnGameIDs(ids ...int) *UserCreate {
-	_c.mutation.AddCurrentTurnGameIDs(ids...)
-	return _c
-}
-
-// AddCurrentTurnGames adds the "current_turn_games" edges to the Game entity.
-func (_c *UserCreate) AddCurrentTurnGames(v ...*Game) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddCurrentTurnGameIDs(ids...)
-}
-
-// AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
-func (_c *UserCreate) AddGamePlayerIDs(ids ...int) *UserCreate {
-	_c.mutation.AddGamePlayerIDs(ids...)
-	return _c
-}
-
-// AddGamePlayer adds the "game_player" edges to the GamePlayer entity.
-func (_c *UserCreate) AddGamePlayer(v ...*GamePlayer) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddGamePlayerIDs(ids...)
 }
 
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
@@ -239,15 +193,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldHashedPassword, field.TypeString, value)
 		_node.HashedPassword = value
 	}
-	if nodes := _c.mutation.GamesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.GamePlayersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GamesTable,
-			Columns: user.GamesPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.GamePlayersTable,
+			Columns: []string{user.GamePlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -296,54 +250,6 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(friendrequest.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.WonGamesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.WonGamesTable,
-			Columns: []string{user.WonGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.CurrentTurnGamesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CurrentTurnGamesTable,
-			Columns: []string{user.CurrentTurnGamesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.GamePlayerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.GamePlayerTable,
-			Columns: []string{user.GamePlayerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

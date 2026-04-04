@@ -7,9 +7,36 @@ import (
 	"entgo.io/ent/dialect/sql"
 	ent "puzzlr.gg/src/server/db/ent/codegen"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/hook"
 	"puzzlr.gg/src/server/db/ent/codegen/predicate"
 )
+
+func ValidateGamePlayerIdentity(next ent.Mutator) ent.Mutator {
+	return hook.GamePlayerFunc(func(ctx context.Context, m *ent.GamePlayerMutation) (ent.Value, error) {
+		kind, ok := m.Kind()
+		if !ok {
+			return nil, fmt.Errorf("missing kind on create")
+		}
+
+		_, hasUser := m.UserID()
+
+		switch kind {
+		case gameplayer.KindHUMAN:
+			if !hasUser {
+				return nil, fmt.Errorf("human game player requires user_id")
+			}
+		case gameplayer.KindAI:
+			if hasUser {
+				return nil, fmt.Errorf("ai game player cannot have user_id")
+			}
+		default:
+			return nil, fmt.Errorf("unsupported game player kind %s", kind)
+		}
+
+		return next.Mutate(ctx, m)
+	})
+}
 
 func RejectPlayerMutationUnlessPending(next ent.Mutator) ent.Mutator {
 	return hook.GamePlayerFunc(func(ctx context.Context, m *ent.GamePlayerMutation) (ent.Value, error) {

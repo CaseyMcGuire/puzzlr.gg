@@ -19,9 +19,11 @@ type GamePlayer struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID *int `json:"user_id,omitempty"`
 	// GameID holds the value of the "game_id" field.
 	GameID int `json:"game_id,omitempty"`
+	// Kind holds the value of the "kind" field.
+	Kind gameplayer.Kind `json:"kind,omitempty"`
 	// Marker holds the value of the "marker" field.
 	Marker string `json:"marker,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -40,7 +42,7 @@ type GamePlayerEdges struct {
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
+	totalCount [1]map[string]int
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -72,7 +74,7 @@ func (*GamePlayer) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gameplayer.FieldID, gameplayer.FieldUserID, gameplayer.FieldGameID:
 			values[i] = new(sql.NullInt64)
-		case gameplayer.FieldMarker:
+		case gameplayer.FieldKind, gameplayer.FieldMarker:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -99,13 +101,20 @@ func (_m *GamePlayer) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = new(int)
+				*_m.UserID = int(value.Int64)
 			}
 		case gameplayer.FieldGameID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field game_id", values[i])
 			} else if value.Valid {
 				_m.GameID = int(value.Int64)
+			}
+		case gameplayer.FieldKind:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field kind", values[i])
+			} else if value.Valid {
+				_m.Kind = gameplayer.Kind(value.String)
 			}
 		case gameplayer.FieldMarker:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -159,11 +168,16 @@ func (_m *GamePlayer) String() string {
 	var builder strings.Builder
 	builder.WriteString("GamePlayer(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	if v := _m.UserID; v != nil {
+		builder.WriteString("user_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("game_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GameID))
+	builder.WriteString(", ")
+	builder.WriteString("kind=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Kind))
 	builder.WriteString(", ")
 	builder.WriteString("marker=")
 	builder.WriteString(_m.Marker)

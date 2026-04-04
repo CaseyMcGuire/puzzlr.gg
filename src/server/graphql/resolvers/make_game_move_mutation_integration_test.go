@@ -41,12 +41,12 @@ func TestMakeGameMoveResolverSuccess(t *testing.T) {
 		t.Fatalf("expected status IN_PROGRESS, got %s", updatedGame.Status)
 	}
 
-	currentTurnUser, err := updatedGame.QueryCurrentTurn().Only(ctx)
+	currentTurnPlayer, err := updatedGame.QueryCurrentTurnPlayer().Only(ctx)
 	if err != nil {
 		t.Fatalf("querying current turn failed: %v", err)
 	}
-	if currentTurnUser.ID != opponent.ID {
-		t.Fatalf("expected current turn to be opponent (%d), got %d", opponent.ID, currentTurnUser.ID)
+	if currentTurnPlayer.UserID == nil || *currentTurnPlayer.UserID != opponent.ID {
+		t.Fatalf("expected current turn to be opponent (%d), got %#v", opponent.ID, currentTurnPlayer.UserID)
 	}
 }
 
@@ -157,20 +157,51 @@ func TestMakeGameMoveResolverSetsWinnerAndEndsGame(t *testing.T) {
 		t.Fatalf("expected status WON, got %s", latestGame.Status)
 	}
 
-	winner, err := latestGame.QueryWinner().Only(ctx)
+	winnerPlayer, err := latestGame.QueryWinnerPlayer().Only(ctx)
 	if err != nil {
 		t.Fatalf("querying winner failed: %v", err)
 	}
-	if winner.ID != actor.ID {
-		t.Fatalf("expected winner %d, got %d", actor.ID, winner.ID)
+	if winnerPlayer.UserID == nil || *winnerPlayer.UserID != actor.ID {
+		t.Fatalf("expected winner %d, got %#v", actor.ID, winnerPlayer.UserID)
 	}
 
-	_, err = latestGame.QueryCurrentTurn().Only(ctx)
+	_, err = latestGame.QueryCurrentTurnPlayer().Only(ctx)
 	if err == nil {
 		t.Fatal("expected no current turn after game end, got nil error")
 	}
 	if !ent.IsNotFound(err) {
 		t.Fatalf("expected not found for current turn, got: %v", err)
+	}
+}
+
+func TestMakeGameMoveResolverAutoPlaysAIResponse(t *testing.T) {
+	ctx := context.Background()
+	resolver := newTestResolver()
+
+	actor := mustCreateUser(t, ctx)
+	createdGame := mustCreateTicTacToeAIGame(t, ctx, resolver, actor.ID)
+
+	updatedGame, err := resolver.Mutation().MakeGameMove(
+		reqctx.WithUserID(ctx, actor.ID),
+		makeMoveInput(createdGame.ID, 0, 0),
+	)
+	if err != nil {
+		t.Fatalf("makeGameMove returned an error: %v", err)
+	}
+
+	if got := updatedGame.Board[0][0]; got != services.TictactoeX {
+		t.Fatalf("expected X at [0][0], got %q", got)
+	}
+	if got := updatedGame.Board[1][1]; got != services.TictactoeO {
+		t.Fatalf("expected O at [1][1], got %q", got)
+	}
+
+	currentTurnPlayer, err := updatedGame.QueryCurrentTurnPlayer().Only(ctx)
+	if err != nil {
+		t.Fatalf("querying current turn failed: %v", err)
+	}
+	if currentTurnPlayer.UserID == nil || *currentTurnPlayer.UserID != actor.ID {
+		t.Fatalf("expected current turn to return to actor (%d), got %#v", actor.ID, currentTurnPlayer.UserID)
 	}
 }
 
@@ -193,7 +224,29 @@ func mustCreateTicTacToeGame(t *testing.T, ctx context.Context, resolver *resolv
 		reqctx.WithUserID(ctx, actorID),
 		&models.CreateGameInput{
 			TicTacToeInput: &models.CreateTicTacToeInput{
-				OpponentID: opponentID,
+				HumanOpponent: &models.HumanOpponentInput{
+					OpponentID: opponentID,
+				},
+			},
+		},
+	)
+	if err != nil {
+		t.Fatalf("createGame returned an error: %v", err)
+	}
+	if createdGame == nil {
+		t.Fatal("createGame returned nil game")
+	}
+	return createdGame
+}
+
+func mustCreateTicTacToeAIGame(t *testing.T, ctx context.Context, resolver *resolvers.Resolver, actorID int) *ent.Game {
+	t.Helper()
+
+	createdGame, err := resolver.Mutation().CreateGame(
+		reqctx.WithUserID(ctx, actorID),
+		&models.CreateGameInput{
+			TicTacToeInput: &models.CreateTicTacToeInput{
+				AiOpponent: &models.AIOpponentInput{},
 			},
 		},
 	)

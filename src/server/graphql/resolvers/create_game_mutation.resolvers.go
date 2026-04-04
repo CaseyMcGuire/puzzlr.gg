@@ -22,7 +22,13 @@ func (r *mutationResolver) CreateGame(ctx context.Context, input *models.CreateG
 		if err != nil {
 			return nil, err
 		}
-		return r.GameService.CreateTicTacToeGame(ctx, userID, input.TicTacToeInput.OpponentID)
+
+		opponent, err := buildTicTacToeOpponentSpec(input.TicTacToeInput)
+		if err != nil {
+			return nil, err
+		}
+
+		return r.GameService.CreateTicTacToeGame(ctx, userID, opponent)
 	}
 	return nil, fmt.Errorf("unsupported game type")
 }

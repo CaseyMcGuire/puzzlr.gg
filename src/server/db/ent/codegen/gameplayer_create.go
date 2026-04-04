@@ -27,9 +27,23 @@ func (_c *GamePlayerCreate) SetUserID(v int) *GamePlayerCreate {
 	return _c
 }
 
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_c *GamePlayerCreate) SetNillableUserID(v *int) *GamePlayerCreate {
+	if v != nil {
+		_c.SetUserID(*v)
+	}
+	return _c
+}
+
 // SetGameID sets the "game_id" field.
 func (_c *GamePlayerCreate) SetGameID(v int) *GamePlayerCreate {
 	_c.mutation.SetGameID(v)
+	return _c
+}
+
+// SetKind sets the "kind" field.
+func (_c *GamePlayerCreate) SetKind(v gameplayer.Kind) *GamePlayerCreate {
+	_c.mutation.SetKind(v)
 	return _c
 }
 
@@ -83,11 +97,16 @@ func (_c *GamePlayerCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *GamePlayerCreate) check() error {
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`codegen: missing required field "GamePlayer.user_id"`)}
-	}
 	if _, ok := _c.mutation.GameID(); !ok {
 		return &ValidationError{Name: "game_id", err: errors.New(`codegen: missing required field "GamePlayer.game_id"`)}
+	}
+	if _, ok := _c.mutation.Kind(); !ok {
+		return &ValidationError{Name: "kind", err: errors.New(`codegen: missing required field "GamePlayer.kind"`)}
+	}
+	if v, ok := _c.mutation.Kind(); ok {
+		if err := gameplayer.KindValidator(v); err != nil {
+			return &ValidationError{Name: "kind", err: fmt.Errorf(`codegen: validator failed for field "GamePlayer.kind": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.Marker(); !ok {
 		return &ValidationError{Name: "marker", err: errors.New(`codegen: missing required field "GamePlayer.marker"`)}
@@ -96,9 +115,6 @@ func (_c *GamePlayerCreate) check() error {
 		if err := gameplayer.MarkerValidator(v); err != nil {
 			return &ValidationError{Name: "marker", err: fmt.Errorf(`codegen: validator failed for field "GamePlayer.marker": %w`, err)}
 		}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`codegen: missing required edge "GamePlayer.user"`)}
 	}
 	if len(_c.mutation.GameIDs()) == 0 {
 		return &ValidationError{Name: "game", err: errors.New(`codegen: missing required edge "GamePlayer.game"`)}
@@ -129,6 +145,10 @@ func (_c *GamePlayerCreate) createSpec() (*GamePlayer, *sqlgraph.CreateSpec) {
 		_node = &GamePlayer{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(gameplayer.Table, sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt))
 	)
+	if value, ok := _c.mutation.Kind(); ok {
+		_spec.SetField(gameplayer.FieldKind, field.TypeEnum, value)
+		_node.Kind = value
+	}
 	if value, ok := _c.mutation.Marker(); ok {
 		_spec.SetField(gameplayer.FieldMarker, field.TypeString, value)
 		_node.Marker = value
@@ -147,7 +167,7 @@ func (_c *GamePlayerCreate) createSpec() (*GamePlayer, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.UserID = nodes[0]
+		_node.UserID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.GameIDs(); len(nodes) > 0 {

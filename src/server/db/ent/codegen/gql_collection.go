@@ -7,6 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
@@ -32,40 +33,48 @@ func (_q *GameQuery) collectField(ctx context.Context, oneNode bool, opCtx *grap
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 
-		case "user":
+		case "players":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = (&UserClient{config: _q.config}).Query()
+				query = (&GamePlayerClient{config: _q.config}).Query()
 			)
-			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, gameplayerImplementors)...); err != nil {
 				return err
 			}
-			_q.WithNamedUser(alias, func(wq *UserQuery) {
+			_q.WithNamedPlayers(alias, func(wq *GamePlayerQuery) {
 				*wq = *query
 			})
 
-		case "winner":
+		case "winnerPlayer":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = (&UserClient{config: _q.config}).Query()
+				query = (&GamePlayerClient{config: _q.config}).Query()
 			)
-			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, gameplayerImplementors)...); err != nil {
 				return err
 			}
-			_q.withWinner = query
+			_q.withWinnerPlayer = query
+			if _, ok := fieldSeen[game.FieldWinnerPlayerID]; !ok {
+				selectedFields = append(selectedFields, game.FieldWinnerPlayerID)
+				fieldSeen[game.FieldWinnerPlayerID] = struct{}{}
+			}
 
-		case "currentTurn":
+		case "currentTurnPlayer":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = (&UserClient{config: _q.config}).Query()
+				query = (&GamePlayerClient{config: _q.config}).Query()
 			)
-			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, gameplayerImplementors)...); err != nil {
 				return err
 			}
-			_q.withCurrentTurn = query
+			_q.withCurrentTurnPlayer = query
+			if _, ok := fieldSeen[game.FieldCurrentTurnPlayerID]; !ok {
+				selectedFields = append(selectedFields, game.FieldCurrentTurnPlayerID)
+				fieldSeen[game.FieldCurrentTurnPlayerID] = struct{}{}
+			}
 		case "createTime":
 			if _, ok := fieldSeen[game.FieldCreateTime]; !ok {
 				selectedFields = append(selectedFields, game.FieldCreateTime)
@@ -133,6 +142,93 @@ func newGamePaginateArgs(rv map[string]any) *gamePaginateArgs {
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (_q *GamePlayerQuery) CollectFields(ctx context.Context, satisfies ...string) (*GamePlayerQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return _q, nil
+	}
+	if err := _q.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return _q, nil
+}
+
+func (_q *GamePlayerQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(gameplayer.Columns))
+		selectedFields = []string{gameplayer.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+
+		case "user":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&UserClient{config: _q.config}).Query()
+			)
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, userImplementors)...); err != nil {
+				return err
+			}
+			_q.withUser = query
+			if _, ok := fieldSeen[gameplayer.FieldUserID]; !ok {
+				selectedFields = append(selectedFields, gameplayer.FieldUserID)
+				fieldSeen[gameplayer.FieldUserID] = struct{}{}
+			}
+		case "kind":
+			if _, ok := fieldSeen[gameplayer.FieldKind]; !ok {
+				selectedFields = append(selectedFields, gameplayer.FieldKind)
+				fieldSeen[gameplayer.FieldKind] = struct{}{}
+			}
+		case "marker":
+			if _, ok := fieldSeen[gameplayer.FieldMarker]; !ok {
+				selectedFields = append(selectedFields, gameplayer.FieldMarker)
+				fieldSeen[gameplayer.FieldMarker] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		_q.Select(selectedFields...)
+	}
+	return nil
+}
+
+type gameplayerPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []GamePlayerPaginateOption
+}
+
+func newGamePlayerPaginateArgs(rv map[string]any) *gameplayerPaginateArgs {
+	args := &gameplayerPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*GamePlayerWhereInput); ok {
+		args.opts = append(args.opts, WithGamePlayerFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (_q *UserQuery) CollectFields(ctx context.Context, satisfies ...string) (*UserQuery, error) {
 	fc := graphql.GetFieldContext(ctx)
 	if fc == nil {
@@ -153,19 +249,6 @@ func (_q *UserQuery) collectField(ctx context.Context, oneNode bool, opCtx *grap
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
-
-		case "games":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = (&GameClient{config: _q.config}).Query()
-			)
-			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, gameImplementors)...); err != nil {
-				return err
-			}
-			_q.WithNamedGames(alias, func(wq *GameQuery) {
-				*wq = *query
-			})
 
 		case "friends":
 			var (

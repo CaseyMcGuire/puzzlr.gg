@@ -30,8 +30,9 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("games", Game.Type).
-			Through("game_player", GamePlayer.Type),
+		edge.From("game_players", GamePlayer.Type).
+			Ref("user").
+			Annotations(entgql.Skip()),
 		edge.To("friends", User.Type).
 			Through("friendships", Friendship.Type),
 		edge.From("sent_friend_requests", FriendRequest.Type).
@@ -39,10 +40,6 @@ func (User) Edges() []ent.Edge {
 			Annotations(entgql.Skip()),
 		edge.From("received_friend_requests", FriendRequest.Type).
 			Ref("recipient").
-			Annotations(entgql.Skip()),
-		edge.To("won_games", Game.Type).
-			Annotations(entgql.Skip()),
-		edge.To("current_turn_games", Game.Type).
 			Annotations(entgql.Skip()),
 	}
 }

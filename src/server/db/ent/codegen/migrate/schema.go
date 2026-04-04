@@ -91,8 +91,8 @@ var (
 		{Name: "board", Type: field.TypeJSON},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "WON", "DRAW"}, Default: "PENDING"},
-		{Name: "user_won_games", Type: field.TypeInt, Nullable: true},
-		{Name: "user_current_turn_games", Type: field.TypeInt, Nullable: true},
+		{Name: "winner_player_id", Type: field.TypeInt, Nullable: true},
+		{Name: "current_turn_player_id", Type: field.TypeInt, Nullable: true},
 	}
 	// GamesTable holds the schema information for the "games" table.
 	GamesTable = &schema.Table{
@@ -101,15 +101,15 @@ var (
 		PrimaryKey: []*schema.Column{GamesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "games_users_won_games",
+				Symbol:     "games_game_players_winner_player",
 				Columns:    []*schema.Column{GamesColumns[7]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{GamePlayersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "games_users_current_turn_games",
+				Symbol:     "games_game_players_current_turn_player",
 				Columns:    []*schema.Column{GamesColumns[8]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{GamePlayersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -117,8 +117,9 @@ var (
 	// GamePlayersColumns holds the columns for the "game_players" table.
 	GamePlayersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"HUMAN", "AI"}},
 		{Name: "marker", Type: field.TypeString},
-		{Name: "user_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt, Nullable: true},
 		{Name: "game_id", Type: field.TypeInt},
 	}
 	// GamePlayersTable holds the schema information for the "game_players" table.
@@ -129,13 +130,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_players_users_user",
-				Columns:    []*schema.Column{GamePlayersColumns[2]},
+				Columns:    []*schema.Column{GamePlayersColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "game_players_games_game",
-				Columns:    []*schema.Column{GamePlayersColumns[3]},
+				Columns:    []*schema.Column{GamePlayersColumns[4]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -144,12 +145,12 @@ var (
 			{
 				Name:    "gameplayer_user_id_game_id",
 				Unique:  true,
-				Columns: []*schema.Column{GamePlayersColumns[2], GamePlayersColumns[3]},
+				Columns: []*schema.Column{GamePlayersColumns[3], GamePlayersColumns[4]},
 			},
 			{
 				Name:    "gameplayer_game_id",
 				Unique:  false,
-				Columns: []*schema.Column{GamePlayersColumns[3]},
+				Columns: []*schema.Column{GamePlayersColumns[4]},
 			},
 		},
 	}
@@ -193,8 +194,8 @@ func init() {
 	FriendshipsTable.Annotation = &entsql.Annotation{
 		Check: "user_id <> friend_id",
 	}
-	GamesTable.ForeignKeys[0].RefTable = UsersTable
-	GamesTable.ForeignKeys[1].RefTable = UsersTable
+	GamesTable.ForeignKeys[0].RefTable = GamePlayersTable
+	GamesTable.ForeignKeys[1].RefTable = GamePlayersTable
 	GamePlayersTable.ForeignKeys[0].RefTable = UsersTable
 	GamePlayersTable.ForeignKeys[1].RefTable = GamesTable
 }

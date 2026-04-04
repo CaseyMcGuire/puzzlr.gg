@@ -88,6 +88,16 @@ func UserIDNotIn(vs ...int) predicate.GamePlayer {
 	return predicate.GamePlayer(sql.FieldNotIn(FieldUserID, vs...))
 }
 
+// UserIDIsNil applies the IsNil predicate on the "user_id" field.
+func UserIDIsNil() predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldIsNull(FieldUserID))
+}
+
+// UserIDNotNil applies the NotNil predicate on the "user_id" field.
+func UserIDNotNil() predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldNotNull(FieldUserID))
+}
+
 // GameIDEQ applies the EQ predicate on the "game_id" field.
 func GameIDEQ(v int) predicate.GamePlayer {
 	return predicate.GamePlayer(sql.FieldEQ(FieldGameID, v))
@@ -106,6 +116,26 @@ func GameIDIn(vs ...int) predicate.GamePlayer {
 // GameIDNotIn applies the NotIn predicate on the "game_id" field.
 func GameIDNotIn(vs ...int) predicate.GamePlayer {
 	return predicate.GamePlayer(sql.FieldNotIn(FieldGameID, vs...))
+}
+
+// KindEQ applies the EQ predicate on the "kind" field.
+func KindEQ(v Kind) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldEQ(FieldKind, v))
+}
+
+// KindNEQ applies the NEQ predicate on the "kind" field.
+func KindNEQ(v Kind) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldNEQ(FieldKind, v))
+}
+
+// KindIn applies the In predicate on the "kind" field.
+func KindIn(vs ...Kind) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldIn(FieldKind, vs...))
+}
+
+// KindNotIn applies the NotIn predicate on the "kind" field.
+func KindNotIn(vs ...Kind) predicate.GamePlayer {
+	return predicate.GamePlayer(sql.FieldNotIn(FieldKind, vs...))
 }
 
 // MarkerEQ applies the EQ predicate on the "marker" field.

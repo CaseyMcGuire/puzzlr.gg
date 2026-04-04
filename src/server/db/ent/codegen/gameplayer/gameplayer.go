@@ -3,6 +3,10 @@
 package gameplayer
 
 import (
+	"fmt"
+	"io"
+	"strconv"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -17,6 +21,8 @@ const (
 	FieldUserID = "user_id"
 	// FieldGameID holds the string denoting the game_id field in the database.
 	FieldGameID = "game_id"
+	// FieldKind holds the string denoting the kind field in the database.
+	FieldKind = "kind"
 	// FieldMarker holds the string denoting the marker field in the database.
 	FieldMarker = "marker"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -46,6 +52,7 @@ var Columns = []string{
 	FieldID,
 	FieldUserID,
 	FieldGameID,
+	FieldKind,
 	FieldMarker,
 }
 
@@ -65,10 +72,33 @@ func ValidColumn(column string) bool {
 //
 //	import _ "puzzlr.gg/src/server/db/ent/codegen/runtime"
 var (
-	Hooks [2]ent.Hook
+	Hooks [3]ent.Hook
 	// MarkerValidator is a validator for the "marker" field. It is called by the builders before save.
 	MarkerValidator func(string) error
 )
+
+// Kind defines the type for the "kind" enum field.
+type Kind string
+
+// Kind values.
+const (
+	KindHUMAN Kind = "HUMAN"
+	KindAI    Kind = "AI"
+)
+
+func (k Kind) String() string {
+	return string(k)
+}
+
+// KindValidator is a validator for the "kind" field enum values. It is called by the builders before save.
+func KindValidator(k Kind) error {
+	switch k {
+	case KindHUMAN, KindAI:
+		return nil
+	default:
+		return fmt.Errorf("gameplayer: invalid enum value for kind field: %q", k)
+	}
+}
 
 // OrderOption defines the ordering options for the GamePlayer queries.
 type OrderOption func(*sql.Selector)
@@ -86,6 +116,11 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByGameID orders the results by the game_id field.
 func ByGameID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGameID, opts...).ToFunc()
+}
+
+// ByKind orders the results by the kind field.
+func ByKind(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldKind, opts...).ToFunc()
 }
 
 // ByMarker orders the results by the marker field.
@@ -119,4 +154,22 @@ func newGameStep() *sqlgraph.Step {
 		sqlgraph.To(GameInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, GameTable, GameColumn),
 	)
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e Kind) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *Kind) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = Kind(str)
+	if err := KindValidator(*e); err != nil {
+		return fmt.Errorf("%s is not a valid Kind", str)
+	}
+	return nil
 }

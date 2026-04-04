@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ff50c6e42ce63e4bff821ac40df4521d>>
+ * @generated SignedSource<<07fcafe4e530fd3270afe6a60b6bcef7>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -67,9 +67,25 @@ v5 = [
   (v2/*: any*/),
   (v3/*: any*/)
 ],
-v6 = [
-  (v2/*: any*/)
-];
+v6 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "User",
+  "kind": "LinkedField",
+  "name": "user",
+  "plural": false,
+  "selections": [
+    (v2/*: any*/)
+  ],
+  "storageKey": null
+},
+v7 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "kind",
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
@@ -148,11 +164,15 @@ return {
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "User",
+                "concreteType": "GamePlayer",
                 "kind": "LinkedField",
-                "name": "winner",
+                "name": "winnerPlayer",
                 "plural": false,
-                "selections": (v6/*: any*/),
+                "selections": [
+                  (v6/*: any*/),
+                  (v2/*: any*/),
+                  (v7/*: any*/)
+                ],
                 "storageKey": null
               },
               (v2/*: any*/),
@@ -173,21 +193,45 @@ return {
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "User",
+                "concreteType": "GamePlayer",
                 "kind": "LinkedField",
-                "name": "currentTurn",
+                "name": "currentTurnPlayer",
                 "plural": false,
-                "selections": (v6/*: any*/),
+                "selections": [
+                  (v2/*: any*/),
+                  (v7/*: any*/),
+                  (v6/*: any*/)
+                ],
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "User",
+                "concreteType": "GamePlayer",
                 "kind": "LinkedField",
-                "name": "user",
+                "name": "players",
                 "plural": true,
-                "selections": (v5/*: any*/),
+                "selections": [
+                  (v2/*: any*/),
+                  (v7/*: any*/),
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "marker",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "User",
+                    "kind": "LinkedField",
+                    "name": "user",
+                    "plural": false,
+                    "selections": (v5/*: any*/),
+                    "storageKey": null
+                  }
+                ],
                 "storageKey": null
               }
             ],
@@ -199,12 +243,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "171b6a59a9035a66a5e226670fe25875",
+    "cacheID": "bcf84e524c87761b8f772b245351396f",
     "id": null,
     "metadata": {},
     "name": "UserProfilePageContentsQuery",
     "operationKind": "query",
-    "text": "query UserProfilePageContentsQuery(\n  $id: ID!\n) {\n  user(id: $id) {\n    id\n    email\n    viewerFriendshipStatus\n    ...UserProfileFriendsSection_user\n    ...UserProfileStats_user\n    ...UserProfileGamesSection_user\n  }\n}\n\nfragment UserProfileFriendsSection_user on User {\n  friends {\n    id\n    email\n  }\n}\n\nfragment UserProfileGamesSection_user on User {\n  id\n  games {\n    id\n    type\n    status\n    winner {\n      id\n    }\n    currentTurn {\n      id\n    }\n    user {\n      id\n      email\n    }\n  }\n}\n\nfragment UserProfileStats_user on User {\n  id\n  friends {\n    id\n  }\n  games {\n    winner {\n      id\n    }\n    id\n  }\n}\n"
+    "text": "query UserProfilePageContentsQuery(\n  $id: ID!\n) {\n  user(id: $id) {\n    id\n    email\n    viewerFriendshipStatus\n    ...UserProfileFriendsSection_user\n    ...UserProfileStats_user\n    ...UserProfileGamesSection_user\n  }\n}\n\nfragment UserProfileFriendsSection_user on User {\n  friends {\n    id\n    email\n  }\n}\n\nfragment UserProfileGamesSection_user on User {\n  id\n  games {\n    id\n    type\n    status\n    winnerPlayer {\n      id\n      kind\n      user {\n        id\n      }\n    }\n    currentTurnPlayer {\n      id\n      kind\n      user {\n        id\n      }\n    }\n    players {\n      id\n      kind\n      marker\n      user {\n        id\n        email\n      }\n    }\n  }\n}\n\nfragment UserProfileStats_user on User {\n  id\n  friends {\n    id\n  }\n  games {\n    winnerPlayer {\n      user {\n        id\n      }\n      id\n    }\n    id\n  }\n}\n"
   }
 };
 })();

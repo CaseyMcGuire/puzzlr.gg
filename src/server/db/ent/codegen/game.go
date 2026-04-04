@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
-	"puzzlr.gg/src/server/db/ent/codegen/user"
+	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
 )
 
 // Game is the model entity for the Game schema.
@@ -29,74 +29,64 @@ type Game struct {
 	Board [][]string `json:"board,omitempty"`
 	// Metadata holds the value of the "metadata" field.
 	Metadata json.RawMessage `json:"metadata,omitempty"`
+	// WinnerPlayerID holds the value of the "winner_player_id" field.
+	WinnerPlayerID *int `json:"winner_player_id,omitempty"`
+	// CurrentTurnPlayerID holds the value of the "current_turn_player_id" field.
+	CurrentTurnPlayerID *int `json:"current_turn_player_id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status game.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GameQuery when eager-loading is set.
-	Edges                   GameEdges `json:"edges"`
-	user_won_games          *int
-	user_current_turn_games *int
-	selectValues            sql.SelectValues
+	Edges        GameEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // GameEdges holds the relations/edges for other nodes in the graph.
 type GameEdges struct {
-	// User holds the value of the user edge.
-	User []*User `json:"user,omitempty"`
-	// Winner holds the value of the winner edge.
-	Winner *User `json:"winner,omitempty"`
-	// CurrentTurn holds the value of the current_turn edge.
-	CurrentTurn *User `json:"current_turn,omitempty"`
-	// GamePlayer holds the value of the game_player edge.
-	GamePlayer []*GamePlayer `json:"game_player,omitempty"`
+	// Players holds the value of the players edge.
+	Players []*GamePlayer `json:"players,omitempty"`
+	// WinnerPlayer holds the value of the winner_player edge.
+	WinnerPlayer *GamePlayer `json:"winner_player,omitempty"`
+	// CurrentTurnPlayer holds the value of the current_turn_player edge.
+	CurrentTurnPlayer *GamePlayer `json:"current_turn_player,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 	// totalCount holds the count of the edges above.
 	totalCount [3]map[string]int
 
-	namedUser       map[string][]*User
-	namedGamePlayer map[string][]*GamePlayer
+	namedPlayers map[string][]*GamePlayer
 }
 
-// UserOrErr returns the User value or an error if the edge
+// PlayersOrErr returns the Players value or an error if the edge
 // was not loaded in eager-loading.
-func (e GameEdges) UserOrErr() ([]*User, error) {
+func (e GameEdges) PlayersOrErr() ([]*GamePlayer, error) {
 	if e.loadedTypes[0] {
-		return e.User, nil
+		return e.Players, nil
 	}
-	return nil, &NotLoadedError{edge: "user"}
+	return nil, &NotLoadedError{edge: "players"}
 }
 
-// WinnerOrErr returns the Winner value or an error if the edge
+// WinnerPlayerOrErr returns the WinnerPlayer value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e GameEdges) WinnerOrErr() (*User, error) {
-	if e.Winner != nil {
-		return e.Winner, nil
+func (e GameEdges) WinnerPlayerOrErr() (*GamePlayer, error) {
+	if e.WinnerPlayer != nil {
+		return e.WinnerPlayer, nil
 	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: user.Label}
+		return nil, &NotFoundError{label: gameplayer.Label}
 	}
-	return nil, &NotLoadedError{edge: "winner"}
+	return nil, &NotLoadedError{edge: "winner_player"}
 }
 
-// CurrentTurnOrErr returns the CurrentTurn value or an error if the edge
+// CurrentTurnPlayerOrErr returns the CurrentTurnPlayer value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e GameEdges) CurrentTurnOrErr() (*User, error) {
-	if e.CurrentTurn != nil {
-		return e.CurrentTurn, nil
+func (e GameEdges) CurrentTurnPlayerOrErr() (*GamePlayer, error) {
+	if e.CurrentTurnPlayer != nil {
+		return e.CurrentTurnPlayer, nil
 	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: user.Label}
+		return nil, &NotFoundError{label: gameplayer.Label}
 	}
-	return nil, &NotLoadedError{edge: "current_turn"}
-}
-
-// GamePlayerOrErr returns the GamePlayer value or an error if the edge
-// was not loaded in eager-loading.
-func (e GameEdges) GamePlayerOrErr() ([]*GamePlayer, error) {
-	if e.loadedTypes[3] {
-		return e.GamePlayer, nil
-	}
-	return nil, &NotLoadedError{edge: "game_player"}
+	return nil, &NotLoadedError{edge: "current_turn_player"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -106,16 +96,12 @@ func (*Game) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case game.FieldBoard, game.FieldMetadata:
 			values[i] = new([]byte)
-		case game.FieldID:
+		case game.FieldID, game.FieldWinnerPlayerID, game.FieldCurrentTurnPlayerID:
 			values[i] = new(sql.NullInt64)
 		case game.FieldType, game.FieldStatus:
 			values[i] = new(sql.NullString)
 		case game.FieldCreateTime, game.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
-		case game.ForeignKeys[0]: // user_won_games
-			values[i] = new(sql.NullInt64)
-		case game.ForeignKeys[1]: // user_current_turn_games
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -171,25 +157,25 @@ func (_m *Game) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field metadata: %w", err)
 				}
 			}
+		case game.FieldWinnerPlayerID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field winner_player_id", values[i])
+			} else if value.Valid {
+				_m.WinnerPlayerID = new(int)
+				*_m.WinnerPlayerID = int(value.Int64)
+			}
+		case game.FieldCurrentTurnPlayerID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field current_turn_player_id", values[i])
+			} else if value.Valid {
+				_m.CurrentTurnPlayerID = new(int)
+				*_m.CurrentTurnPlayerID = int(value.Int64)
+			}
 		case game.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = game.Status(value.String)
-			}
-		case game.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_won_games", value)
-			} else if value.Valid {
-				_m.user_won_games = new(int)
-				*_m.user_won_games = int(value.Int64)
-			}
-		case game.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_current_turn_games", value)
-			} else if value.Valid {
-				_m.user_current_turn_games = new(int)
-				*_m.user_current_turn_games = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -204,24 +190,19 @@ func (_m *Game) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the Game entity.
-func (_m *Game) QueryUser() *UserQuery {
-	return NewGameClient(_m.config).QueryUser(_m)
+// QueryPlayers queries the "players" edge of the Game entity.
+func (_m *Game) QueryPlayers() *GamePlayerQuery {
+	return NewGameClient(_m.config).QueryPlayers(_m)
 }
 
-// QueryWinner queries the "winner" edge of the Game entity.
-func (_m *Game) QueryWinner() *UserQuery {
-	return NewGameClient(_m.config).QueryWinner(_m)
+// QueryWinnerPlayer queries the "winner_player" edge of the Game entity.
+func (_m *Game) QueryWinnerPlayer() *GamePlayerQuery {
+	return NewGameClient(_m.config).QueryWinnerPlayer(_m)
 }
 
-// QueryCurrentTurn queries the "current_turn" edge of the Game entity.
-func (_m *Game) QueryCurrentTurn() *UserQuery {
-	return NewGameClient(_m.config).QueryCurrentTurn(_m)
-}
-
-// QueryGamePlayer queries the "game_player" edge of the Game entity.
-func (_m *Game) QueryGamePlayer() *GamePlayerQuery {
-	return NewGameClient(_m.config).QueryGamePlayer(_m)
+// QueryCurrentTurnPlayer queries the "current_turn_player" edge of the Game entity.
+func (_m *Game) QueryCurrentTurnPlayer() *GamePlayerQuery {
+	return NewGameClient(_m.config).QueryCurrentTurnPlayer(_m)
 }
 
 // Update returns a builder for updating this Game.
@@ -262,57 +243,43 @@ func (_m *Game) String() string {
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
+	if v := _m.WinnerPlayerID; v != nil {
+		builder.WriteString("winner_player_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.CurrentTurnPlayerID; v != nil {
+		builder.WriteString("current_turn_player_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// NamedUser returns the User named value or an error if the edge was not
+// NamedPlayers returns the Players named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (_m *Game) NamedUser(name string) ([]*User, error) {
-	if _m.Edges.namedUser == nil {
+func (_m *Game) NamedPlayers(name string) ([]*GamePlayer, error) {
+	if _m.Edges.namedPlayers == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := _m.Edges.namedUser[name]
+	nodes, ok := _m.Edges.namedPlayers[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (_m *Game) appendNamedUser(name string, edges ...*User) {
-	if _m.Edges.namedUser == nil {
-		_m.Edges.namedUser = make(map[string][]*User)
+func (_m *Game) appendNamedPlayers(name string, edges ...*GamePlayer) {
+	if _m.Edges.namedPlayers == nil {
+		_m.Edges.namedPlayers = make(map[string][]*GamePlayer)
 	}
 	if len(edges) == 0 {
-		_m.Edges.namedUser[name] = []*User{}
+		_m.Edges.namedPlayers[name] = []*GamePlayer{}
 	} else {
-		_m.Edges.namedUser[name] = append(_m.Edges.namedUser[name], edges...)
-	}
-}
-
-// NamedGamePlayer returns the GamePlayer named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (_m *Game) NamedGamePlayer(name string) ([]*GamePlayer, error) {
-	if _m.Edges.namedGamePlayer == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := _m.Edges.namedGamePlayer[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (_m *Game) appendNamedGamePlayer(name string, edges ...*GamePlayer) {
-	if _m.Edges.namedGamePlayer == nil {
-		_m.Edges.namedGamePlayer = make(map[string][]*GamePlayer)
-	}
-	if len(edges) == 0 {
-		_m.Edges.namedGamePlayer[name] = []*GamePlayer{}
-	} else {
-		_m.Edges.namedGamePlayer[name] = append(_m.Edges.namedGamePlayer[name], edges...)
+		_m.Edges.namedPlayers[name] = append(_m.Edges.namedPlayers[name], edges...)
 	}
 }
 

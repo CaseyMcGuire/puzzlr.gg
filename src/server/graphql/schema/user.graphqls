@@ -8,5 +8,6 @@ enum ViewerFriendshipStatus {
 }
 
 extend type User {
+  games: [Game!]! @goField(forceResolver: true)
   viewerFriendshipStatus: ViewerFriendshipStatus! @goField(forceResolver: true)
 }

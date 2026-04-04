@@ -7,6 +7,15 @@ input CreateGameInput @oneOf {
     ticTacToeInput: CreateTicTacToeInput!
 }
 
-input CreateTicTacToeInput {
+input CreateTicTacToeInput @oneOf {
+    humanOpponent: HumanOpponentInput!
+    aiOpponent: AIOpponentInput!
+}
+
+input HumanOpponentInput {
     opponentId: Int!
+}
+
+input AIOpponentInput {
+    difficulty: String
 }

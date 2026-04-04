@@ -44,15 +44,15 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Game struct {
-		Board       func(childComplexity int) int
-		CreateTime  func(childComplexity int) int
-		CurrentTurn func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Status      func(childComplexity int) int
-		Type        func(childComplexity int) int
-		UpdateTime  func(childComplexity int) int
-		User        func(childComplexity int) int
-		Winner      func(childComplexity int) int
+		Board             func(childComplexity int) int
+		CreateTime        func(childComplexity int) int
+		CurrentTurnPlayer func(childComplexity int) int
+		ID                func(childComplexity int) int
+		Players           func(childComplexity int) int
+		Status            func(childComplexity int) int
+		Type              func(childComplexity int) int
+		UpdateTime        func(childComplexity int) int
+		WinnerPlayer      func(childComplexity int) int
 	}
 
 	GameBoard struct {
@@ -61,6 +61,13 @@ type ComplexityRoot struct {
 
 	GameBoardRow struct {
 		Elements func(childComplexity int) int
+	}
+
+	GamePlayer struct {
+		ID     func(childComplexity int) int
+		Kind   func(childComplexity int) int
+		Marker func(childComplexity int) int
+		User   func(childComplexity int) int
 	}
 
 	Link struct {
@@ -160,12 +167,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Game.CreateTime(childComplexity), true
 
-	case "Game.currentTurn":
-		if e.complexity.Game.CurrentTurn == nil {
+	case "Game.currentTurnPlayer":
+		if e.complexity.Game.CurrentTurnPlayer == nil {
 			break
 		}
 
-		return e.complexity.Game.CurrentTurn(childComplexity), true
+		return e.complexity.Game.CurrentTurnPlayer(childComplexity), true
 
 	case "Game.id":
 		if e.complexity.Game.ID == nil {
@@ -173,6 +180,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Game.ID(childComplexity), true
+
+	case "Game.players":
+		if e.complexity.Game.Players == nil {
+			break
+		}
+
+		return e.complexity.Game.Players(childComplexity), true
 
 	case "Game.status":
 		if e.complexity.Game.Status == nil {
@@ -195,19 +209,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Game.UpdateTime(childComplexity), true
 
-	case "Game.user":
-		if e.complexity.Game.User == nil {
+	case "Game.winnerPlayer":
+		if e.complexity.Game.WinnerPlayer == nil {
 			break
 		}
 
-		return e.complexity.Game.User(childComplexity), true
-
-	case "Game.winner":
-		if e.complexity.Game.Winner == nil {
-			break
-		}
-
-		return e.complexity.Game.Winner(childComplexity), true
+		return e.complexity.Game.WinnerPlayer(childComplexity), true
 
 	case "GameBoard.rows":
 		if e.complexity.GameBoard.Rows == nil {
@@ -222,6 +229,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.GameBoardRow.Elements(childComplexity), true
+
+	case "GamePlayer.id":
+		if e.complexity.GamePlayer.ID == nil {
+			break
+		}
+
+		return e.complexity.GamePlayer.ID(childComplexity), true
+
+	case "GamePlayer.kind":
+		if e.complexity.GamePlayer.Kind == nil {
+			break
+		}
+
+		return e.complexity.GamePlayer.Kind(childComplexity), true
+
+	case "GamePlayer.marker":
+		if e.complexity.GamePlayer.Marker == nil {
+			break
+		}
+
+		return e.complexity.GamePlayer.Marker(childComplexity), true
+
+	case "GamePlayer.user":
+		if e.complexity.GamePlayer.User == nil {
+			break
+		}
+
+		return e.complexity.GamePlayer.User(childComplexity), true
 
 	case "Link.external":
 		if e.complexity.Link.External == nil {
@@ -476,10 +511,13 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAIOpponentInput,
 		ec.unmarshalInputCreateGameInput,
 		ec.unmarshalInputCreateTicTacToeInput,
 		ec.unmarshalInputGameMoveInput,
+		ec.unmarshalInputGamePlayerWhereInput,
 		ec.unmarshalInputGameWhereInput,
+		ec.unmarshalInputHumanOpponentInput,
 		ec.unmarshalInputMakeGameMoveInput,
 		ec.unmarshalInputRespondToFriendRequestInput,
 		ec.unmarshalInputSendFriendRequestInput,
@@ -596,9 +634,70 @@ type Game implements Node {
   type: GameType!
   board: GameBoard!
   status: GameStatus!
-  user: [User!]
-  winner: User
-  currentTurn: User
+  players: [GamePlayer!]
+  winnerPlayer: GamePlayer
+  currentTurnPlayer: GamePlayer
+}
+type GamePlayer implements Node {
+  id: ID!
+  kind: GamePlayerKind!
+  marker: String!
+  user: User
+}
+"""
+GamePlayerKind is enum for the field kind
+"""
+enum GamePlayerKind @goModel(model: "puzzlr.gg/src/server/db/ent/codegen/gameplayer.Kind") {
+  HUMAN
+  AI
+}
+"""
+GamePlayerWhereInput is used for filtering GamePlayer objects.
+Input was generated by ent.
+"""
+input GamePlayerWhereInput {
+  not: GamePlayerWhereInput
+  and: [GamePlayerWhereInput!]
+  or: [GamePlayerWhereInput!]
+  """
+  id field predicates
+  """
+  id: ID
+  idNEQ: ID
+  idIn: [ID!]
+  idNotIn: [ID!]
+  idGT: ID
+  idGTE: ID
+  idLT: ID
+  idLTE: ID
+  """
+  kind field predicates
+  """
+  kind: GamePlayerKind
+  kindNEQ: GamePlayerKind
+  kindIn: [GamePlayerKind!]
+  kindNotIn: [GamePlayerKind!]
+  """
+  marker field predicates
+  """
+  marker: String
+  markerNEQ: String
+  markerIn: [String!]
+  markerNotIn: [String!]
+  markerGT: String
+  markerGTE: String
+  markerLT: String
+  markerLTE: String
+  markerContains: String
+  markerHasPrefix: String
+  markerHasSuffix: String
+  markerEqualFold: String
+  markerContainsFold: String
+  """
+  user edge predicates
+  """
+  hasUser: Boolean
+  hasUserWith: [UserWhereInput!]
 }
 """
 GameStatus is enum for the field status
@@ -671,20 +770,20 @@ input GameWhereInput {
   statusIn: [GameStatus!]
   statusNotIn: [GameStatus!]
   """
-  user edge predicates
+  players edge predicates
   """
-  hasUser: Boolean
-  hasUserWith: [UserWhereInput!]
+  hasPlayers: Boolean
+  hasPlayersWith: [GamePlayerWhereInput!]
   """
-  winner edge predicates
+  winner_player edge predicates
   """
-  hasWinner: Boolean
-  hasWinnerWith: [UserWhereInput!]
+  hasWinnerPlayer: Boolean
+  hasWinnerPlayerWith: [GamePlayerWhereInput!]
   """
-  current_turn edge predicates
+  current_turn_player edge predicates
   """
-  hasCurrentTurn: Boolean
-  hasCurrentTurnWith: [UserWhereInput!]
+  hasCurrentTurnPlayer: Boolean
+  hasCurrentTurnPlayerWith: [GamePlayerWhereInput!]
 }
 """
 An object with an ID.
@@ -755,7 +854,6 @@ type Query {
 type User implements Node {
   id: ID!
   email: String!
-  games: [Game!]
   friends: [User!]
 }
 """
@@ -794,11 +892,6 @@ input UserWhereInput {
   emailEqualFold: String
   emailContainsFold: String
   """
-  games edge predicates
-  """
-  hasGames: Boolean
-  hasGamesWith: [GameWhereInput!]
-  """
   friends edge predicates
   """
   hasFriends: Boolean
@@ -814,9 +907,19 @@ input CreateGameInput @oneOf {
     ticTacToeInput: CreateTicTacToeInput!
 }
 
-input CreateTicTacToeInput {
+input CreateTicTacToeInput @oneOf {
+    humanOpponent: HumanOpponentInput!
+    aiOpponent: AIOpponentInput!
+}
+
+input HumanOpponentInput {
     opponentId: Int!
-}`, BuiltIn: false},
+}
+
+input AIOpponentInput {
+    difficulty: String
+}
+`, BuiltIn: false},
 	{Name: "../schema/mutations/make_game_move_mutation.graphqls", Input: `
 extend type Mutation {
     makeGameMove(input: MakeGameMoveInput!): Game
@@ -922,7 +1025,9 @@ type GameBoardRow {
 }
 
 extend type User {
+  games: [Game!]! @goField(forceResolver: true)
   viewerFriendshipStatus: ViewerFriendshipStatus! @goField(forceResolver: true)
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

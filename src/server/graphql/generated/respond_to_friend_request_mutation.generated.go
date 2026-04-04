@@ -85,10 +85,10 @@ func (ec *executionContext) fieldContext_RespondToFriendRequestSuccess_sender(_ 
 				return ec.fieldContext_User_id(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
-			case "games":
-				return ec.fieldContext_User_games(ctx, field)
 			case "friends":
 				return ec.fieldContext_User_friends(ctx, field)
+			case "games":
+				return ec.fieldContext_User_games(ctx, field)
 			case "viewerFriendshipStatus":
 				return ec.fieldContext_User_viewerFriendshipStatus(ctx, field)
 			}

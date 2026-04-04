@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"puzzlr.gg/src/server/db/ent/codegen/game"
 	"puzzlr.gg/src/server/db/ent/codegen/gameplayer"
-	"puzzlr.gg/src/server/db/ent/codegen/user"
 )
 
 // GameCreate is the builder for creating a Game entity.
@@ -69,6 +68,34 @@ func (_c *GameCreate) SetMetadata(v json.RawMessage) *GameCreate {
 	return _c
 }
 
+// SetWinnerPlayerID sets the "winner_player_id" field.
+func (_c *GameCreate) SetWinnerPlayerID(v int) *GameCreate {
+	_c.mutation.SetWinnerPlayerID(v)
+	return _c
+}
+
+// SetNillableWinnerPlayerID sets the "winner_player_id" field if the given value is not nil.
+func (_c *GameCreate) SetNillableWinnerPlayerID(v *int) *GameCreate {
+	if v != nil {
+		_c.SetWinnerPlayerID(*v)
+	}
+	return _c
+}
+
+// SetCurrentTurnPlayerID sets the "current_turn_player_id" field.
+func (_c *GameCreate) SetCurrentTurnPlayerID(v int) *GameCreate {
+	_c.mutation.SetCurrentTurnPlayerID(v)
+	return _c
+}
+
+// SetNillableCurrentTurnPlayerID sets the "current_turn_player_id" field if the given value is not nil.
+func (_c *GameCreate) SetNillableCurrentTurnPlayerID(v *int) *GameCreate {
+	if v != nil {
+		_c.SetCurrentTurnPlayerID(*v)
+	}
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *GameCreate) SetStatus(v game.Status) *GameCreate {
 	_c.mutation.SetStatus(v)
@@ -83,72 +110,29 @@ func (_c *GameCreate) SetNillableStatus(v *game.Status) *GameCreate {
 	return _c
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *GameCreate) AddUserIDs(ids ...int) *GameCreate {
-	_c.mutation.AddUserIDs(ids...)
+// AddPlayerIDs adds the "players" edge to the GamePlayer entity by IDs.
+func (_c *GameCreate) AddPlayerIDs(ids ...int) *GameCreate {
+	_c.mutation.AddPlayerIDs(ids...)
 	return _c
 }
 
-// AddUser adds the "user" edges to the User entity.
-func (_c *GameCreate) AddUser(v ...*User) *GameCreate {
+// AddPlayers adds the "players" edges to the GamePlayer entity.
+func (_c *GameCreate) AddPlayers(v ...*GamePlayer) *GameCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddUserIDs(ids...)
+	return _c.AddPlayerIDs(ids...)
 }
 
-// SetWinnerID sets the "winner" edge to the User entity by ID.
-func (_c *GameCreate) SetWinnerID(id int) *GameCreate {
-	_c.mutation.SetWinnerID(id)
-	return _c
+// SetWinnerPlayer sets the "winner_player" edge to the GamePlayer entity.
+func (_c *GameCreate) SetWinnerPlayer(v *GamePlayer) *GameCreate {
+	return _c.SetWinnerPlayerID(v.ID)
 }
 
-// SetNillableWinnerID sets the "winner" edge to the User entity by ID if the given value is not nil.
-func (_c *GameCreate) SetNillableWinnerID(id *int) *GameCreate {
-	if id != nil {
-		_c = _c.SetWinnerID(*id)
-	}
-	return _c
-}
-
-// SetWinner sets the "winner" edge to the User entity.
-func (_c *GameCreate) SetWinner(v *User) *GameCreate {
-	return _c.SetWinnerID(v.ID)
-}
-
-// SetCurrentTurnID sets the "current_turn" edge to the User entity by ID.
-func (_c *GameCreate) SetCurrentTurnID(id int) *GameCreate {
-	_c.mutation.SetCurrentTurnID(id)
-	return _c
-}
-
-// SetNillableCurrentTurnID sets the "current_turn" edge to the User entity by ID if the given value is not nil.
-func (_c *GameCreate) SetNillableCurrentTurnID(id *int) *GameCreate {
-	if id != nil {
-		_c = _c.SetCurrentTurnID(*id)
-	}
-	return _c
-}
-
-// SetCurrentTurn sets the "current_turn" edge to the User entity.
-func (_c *GameCreate) SetCurrentTurn(v *User) *GameCreate {
-	return _c.SetCurrentTurnID(v.ID)
-}
-
-// AddGamePlayerIDs adds the "game_player" edge to the GamePlayer entity by IDs.
-func (_c *GameCreate) AddGamePlayerIDs(ids ...int) *GameCreate {
-	_c.mutation.AddGamePlayerIDs(ids...)
-	return _c
-}
-
-// AddGamePlayer adds the "game_player" edges to the GamePlayer entity.
-func (_c *GameCreate) AddGamePlayer(v ...*GamePlayer) *GameCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddGamePlayerIDs(ids...)
+// SetCurrentTurnPlayer sets the "current_turn_player" edge to the GamePlayer entity.
+func (_c *GameCreate) SetCurrentTurnPlayer(v *GamePlayer) *GameCreate {
+	return _c.SetCurrentTurnPlayerID(v.ID)
 }
 
 // Mutation returns the GameMutation object of the builder.
@@ -286,62 +270,12 @@ func (_c *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 		_spec.SetField(game.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   game.UserTable,
-			Columns: game.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.WinnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   game.WinnerTable,
-			Columns: []string{game.WinnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_won_games = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.CurrentTurnIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   game.CurrentTurnTable,
-			Columns: []string{game.CurrentTurnColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_current_turn_games = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.GamePlayerIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PlayersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   game.GamePlayerTable,
-			Columns: []string{game.GamePlayerColumn},
+			Table:   game.PlayersTable,
+			Columns: []string{game.PlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
@@ -350,6 +284,40 @@ func (_c *GameCreate) createSpec() (*Game, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.WinnerPlayerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   game.WinnerPlayerTable,
+			Columns: []string{game.WinnerPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.WinnerPlayerID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CurrentTurnPlayerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   game.CurrentTurnPlayerTable,
+			Columns: []string{game.CurrentTurnPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gameplayer.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.CurrentTurnPlayerID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
